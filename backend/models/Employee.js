@@ -1,46 +1,37 @@
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 const Employee = sequelize.define('Employee', {
-  last_name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
   first_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  middle_name: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  position: {
+  last_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  department_id: {
-    type: DataTypes.INTEGER,
+  middle_name: {
+    type: DataTypes.STRING
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
     allowNull: false
   },
   phone: {
     type: DataTypes.STRING,
-    allowNull: true
+    unique: true,
+    allowNull: false
   },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    unique: true
-  },
-  device_id: {
+  department_id: {
     type: DataTypes.INTEGER,
-    allowNull: true
-  },
-  photo: {
-    type: DataTypes.STRING,
-    allowNull: true
+    allowNull: false,
+    references: {
+      model: 'Departments', // название таблицы в БД
+      key: 'id'
+    }
   }
-}, {
-  timestamps: true,
 });
 
 module.exports = Employee;
