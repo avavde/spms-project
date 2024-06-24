@@ -11,11 +11,6 @@ const SystemSettings = React.lazy(() => import('./views/admin/SystemSettings'))
 
 
 
-
-
-
-
-
 const routes = [
   { path: '/', exact: true, name: 'Главная' },
   { path: '/dashboard', name: 'Инфопанель', element: Dashboard },
