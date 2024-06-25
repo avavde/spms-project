@@ -1,0 +1,166 @@
+Структура бэкенда: 
+
+├── Dockerfile
+├── Dockerfile.postgres
+├── config
+│   ├── db.js
+│   └── jwt.js
+├── controllers
+│   ├── authController.js
+│   ├── departmentController.js
+│   ├── departmentZoneController.js
+│   ├── deviceController.js
+│   ├── deviceZoneController.js
+│   ├── employeeController.js
+│   ├── employeeZoneController.js
+│   ├── gnssPositionController.js
+│   ├── movementController.js
+│   ├── userActionController.js
+│   ├── userController.js
+│   └── zoneController.js
+├── dbscheme.sh
+├── docker-compose.yml
+├── init-bd.sql
+├── init-db.sh
+├── middleware
+│   └── authMiddleware.js
+├── models
+│   ├── Department.js
+│   ├── DepartmentZone.js
+│   ├── Device.js
+│   ├── DeviceZonePosition.js
+│   ├── Employee.js
+│   ├── EmployeeZone.js
+│   ├── GNSSPosition.js
+│   ├── Movement.js
+│   ├── User.js
+│   ├── UserAction.js
+│   └── Zone.js
+├── mqttClient.js
+├── package-lock.json
+├── package.json
+├── routes
+│   ├── authRoutes.js
+│   ├── departmentRoutes.js
+│   ├── departmentZoneRoutes.js
+│   ├── deviceRoutes.js
+│   ├── deviceZoneRoutes.js
+│   ├── employeeRoutes.js
+│   ├── employeeZoneRoutes.js
+│   ├── gnssPositionRoutes.js
+│   ├── movementRoutes.js
+│   ├── userActionRoutes.js
+│   ├── userRoutes.js
+│   └── zoneRoutes.js
+├── server.js
+├── utils
+│   └── validateRequest.js
+└── websocketServer.js
+
+а вот структура фронтенда: 
+
+steamroller@alexs-mbp backend % tree ../frontend/src 
+../frontend/src
+├── App.js
+├── App.test.js
+├── _nav.js
+├── assets
+│   ├── brand
+│   │   ├── logo.js
+│   │   ├── plan.jpg
+│   │   ├── sygnet.js
+│   │   └── usub-logo-li.png
+│   └── images
+│       └── avatars
+│           └── 8.jpg
+├── components
+│   ├── AppBreadcrumb.js
+│   ├── AppContent.js
+│   ├── AppFooter.js
+│   ├── AppHeader.js
+│   ├── AppSidebar.js
+│   ├── AppSidebarNav.js
+│   ├── DocsCallout.js
+│   ├── DocsExample.js
+│   ├── DocsLink.js
+│   ├── custom
+│   │   └── CustomWidgetStatsC.js
+│   ├── dashboard
+│   │   ├── ActiveBeacons.js
+│   │   ├── ActiveBeaconsModal.js
+│   │   ├── ActiveEmployees.js
+│   │   ├── ActiveEmployeesModal.js
+│   │   ├── Dashboard.js
+│   │   ├── EmployeeActivityChart.js
+│   │   ├── EmployeesInDangerZones.js
+│   │   ├── EmployeesInDangerZonesModal.js
+│   │   ├── EventsToday.js
+│   │   ├── EventsTodayModal.js
+│   │   ├── LatestEvents.js
+│   │   ├── LowBatteryBeacons.js
+│   │   ├── LowBatteryBeaconsModal.js
+│   │   ├── SystemPerformance.js
+│   │   ├── ZoneEmployeesModal.js
+│   │   └── ZoneReport.js
+│   ├── header
+│   │   ├── AppHeaderDropdown.js
+│   │   └── index.js
+│   ├── index.js
+│   └── reports
+│       ├── BeaconReport.js
+│       ├── EmployeeReport.js
+│       ├── EventReport.js
+│       └── ZoneReport.js
+├── data
+│   ├── reportsData.js
+│   └── zonesData.js
+├── index.js
+├── layout
+│   └── DefaultLayout.js
+├── reportWebVitals.js
+├── routes.js
+├── scss
+│   ├── _custom.scss
+│   ├── _theme.scss
+│   ├── _variables.scss
+│   ├── examples.scss
+│   ├── style.scss
+│   └── vendors
+│       └── simplebar.scss
+├── setupTests.js
+├── store.js
+└── views
+    ├── admin
+    │   ├── AdminZoneEditor.js
+    │   ├── Employees.js
+    │   ├── GeneralSettings.js
+    │   ├── PlansAndZones.js
+    │   ├── SystemSettings.js
+    │   ├── Users.js
+    │   └── components
+    │       ├── EmployeeForm.js
+    │       ├── EmployeeList.js
+    │       ├── EmployeeManagement.js
+    │       ├── UserForm.js
+    │       ├── UserList.js
+    │       └── UserManagement.js
+    ├── dashboard
+    │   ├── Dashboard.js
+    │   └── MainChart.js
+    ├── monitoring
+    │   ├── LocationMap.js
+    │   ├── Monitoring.js
+    │   └── Realtime.js
+    ├── pages
+    │   ├── login
+    │   │   └── Login.js
+    │   ├── page404
+    │   │   └── Page404.js
+    │   ├── page500
+    │   │   └── Page500.js
+    │   └── register
+    │       └── Register.js
+    └── reports
+        └── Reports.js
+
+25 directories, 77 files

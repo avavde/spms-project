@@ -12,9 +12,12 @@ const movementRoutes = require('./routes/movementRoutes');
 const userActionRoutes = require('./routes/userActionRoutes');
 const zoneRoutes = require('./routes/zoneRoutes');
 const deviceZoneRoutes = require('./routes/deviceZoneRoutes');
+const gnssPositionRoutes = require('./routes/gnssPositionRoutes');
+const deviceStatusRoutes = require('./routes/deviceStatusRoutes'); // Новый маршрут
+const deviceEventRoutes = require('./routes/deviceEventRoutes'); // Новый маршрут
+const deviceSelfTestRoutes = require('./routes/deviceSelfTestRoutes'); // Новый маршрут
 const mqttClient = require('./mqttClient');
 const websocketServer = require('./websocketServer');
-const gnssPositionRoutes = require('./routes/gnssPositionRoutes'); 
 
 const app = express();
 const server = require('http').createServer(app);
@@ -33,7 +36,10 @@ app.use('/api/movements', movementRoutes);
 app.use('/api/user-actions', userActionRoutes);
 app.use('/api/zones', zoneRoutes);
 app.use('/api/device-zones', deviceZoneRoutes);
-app.use('/api/gnss_positions', gnssPositionRoutes); 
+app.use('/api/gnss_positions', gnssPositionRoutes);
+app.use('/api/device-statuses', deviceStatusRoutes); // Новый маршрут
+app.use('/api/device-events', deviceEventRoutes); // Новый маршрут
+app.use('/api/device-self-tests', deviceSelfTestRoutes); // Новый маршрут
 
 sequelize.sync().then(() => {
   server.listen(PORT, () => {

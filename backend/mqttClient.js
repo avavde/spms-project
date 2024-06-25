@@ -4,9 +4,10 @@ require('dotenv').config();
 const { broadcast } = require('./websocketServer');
 const DeviceZonePosition = require('./models/DeviceZonePosition');
 const Device = require('./models/Device');
-const Movement = require('./models/Movement');
-const EmployeeZone = require('./models/EmployeeZone');
 const GNSSPosition = require('./models/GNSSPosition');
+const DeviceStatus = require('./models/DeviceStatus');
+const DeviceEvent = require('./models/DeviceEvent');
+const DeviceSelfTest = require('./models/DeviceSelfTest');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -35,7 +36,6 @@ client.on('message', async (topic, message) => {
   try {
     const messageString = message.toString();
 
-    // Проверка, является ли сообщение NMEA
     if (messageString.startsWith('$')) {
       handleNMEAMessage(topic, messageString);
       return;
@@ -50,7 +50,7 @@ client.on('message', async (topic, message) => {
       return;
     }
 
-    const deviceId = topic.split('/')[1]; // Извлечение идентификатора устройства из подтемы
+    const deviceId = topic.split('/')[1];
     console.log('Parsed payload:', payload);
 
     if (topic.includes('/up/dev_info')) {
@@ -84,6 +84,7 @@ async function handleDeviceInfoMessage(deviceId, payload) {
         imei: imei || '',
         mac_uwb: mac_uwb || '',
         ip: ip || '',
+        deviceType: 'badge',
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -99,6 +100,20 @@ async function handleStatusMessage(deviceId, payload) {
   if (payload.message) {
     const { ts, battery, sos, gps, beacons } = payload.message;
     console.log(`Device ${deviceId} status: battery=${battery}, sos=${sos}, gps=${gps}, beacons=${beacons}`);
+    try {
+      await DeviceStatus.upsert({
+        deviceId: deviceId,
+        timestamp: new Date(ts * 1000),
+        battery: battery,
+        sos: sos,
+        gps: gps,
+        beacons: beacons,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      console.error('Database error:', error);
+    }
   } else {
     console.error('Invalid payload for Device status:', payload);
   }
@@ -108,10 +123,8 @@ async function handleGNSSPositionMessage(deviceId, payload) {
   if (payload.message && payload.message.coordinates) {
     const { ts, coordinates, sat_quantity, HDOP, VDOP } = payload.message;
     try {
-      // Проверка на существование устройства
       const deviceExists = await Device.findByPk(deviceId);
       if (!deviceExists) {
-        // Вставка устройства в таблицу Devices, если оно не существует
         await Device.upsert({
           id: deviceId,
           createdAt: new Date(),
@@ -119,7 +132,6 @@ async function handleGNSSPositionMessage(deviceId, payload) {
         });
       }
 
-      // Вставка данных GNSSPosition
       await GNSSPosition.upsert({
         deviceId: deviceId,
         timestamp: new Date(ts * 1000),
@@ -150,12 +162,18 @@ async function handleZonePositionMessage(deviceId, payload) {
         if (zone) {
           try {
             await DeviceZonePosition.upsert({
-              deviceId: deviceId,
+              deviceId: bMac,
               zoneId: zone.id,
               timestamp: new Date(ts * 1000),
               rssi: rssi,
               temperature: T,
               pressure: P,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+            await Device.upsert({
+              id: bMac,
+              deviceType: 'beacon',
               createdAt: new Date(),
               updatedAt: new Date()
             });
@@ -176,6 +194,18 @@ async function handleEventMessage(deviceId, payload) {
   if (payload.message) {
     const { ts, event, sync } = payload.message;
     console.log(`Device ${deviceId} event: ts=${ts}, event=${event}, sync=${sync}`);
+    try {
+      await DeviceEvent.upsert({
+        deviceId: deviceId,
+        timestamp: new Date(ts * 1000),
+        event: event,
+        sync: sync,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      console.error('Database error:', error);
+    }
   } else {
     console.error('Invalid payload for Event:', payload);
   }
@@ -184,13 +214,23 @@ async function handleEventMessage(deviceId, payload) {
 async function handleSelfTestMessage(deviceId, payload) {
   if (payload.message === 'OK') {
     console.log(`Device ${deviceId} self-test passed`);
+    try {
+      await DeviceSelfTest.upsert({
+        deviceId: deviceId,
+        result: 'OK',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      console.error('Database error:', error);
+    }
   } else {
     console.error('Invalid payload for Self Test:', payload);
   }
 }
 
 async function handleNMEAMessage(topic, message) {
-  const deviceId = topic.split('/')[1]; // Извлечение идентификатора устройства из подтемы
+  const deviceId = topic.split('/')[1];
   console.log(`NMEA message received from device ${deviceId}: ${message}`);
   // Здесь можно добавить логику обработки NMEA сообщений, если это необходимо
 }
