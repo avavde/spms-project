@@ -1,14 +1,22 @@
+// models/DeviceZonePosition.js
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 const DeviceZonePosition = sequelize.define('DeviceZonePosition', {
   deviceId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    type: DataTypes.STRING,
+    references: {
+      model: 'Devices',
+      key: 'id'
+    },
   },
   zoneId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    references: {
+      model: 'Zones',
+      key: 'id'
+    },
   },
   timestamp: {
     type: DataTypes.DATE,
@@ -27,12 +35,7 @@ const DeviceZonePosition = sequelize.define('DeviceZonePosition', {
     allowNull: false,
   },
 }, {
-  indexes: [
-    {
-      unique: true,
-      fields: ['deviceId', 'zoneId']
-    }
-  ]
+  timestamps: true,
 });
 
 module.exports = DeviceZonePosition;
