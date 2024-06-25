@@ -2,6 +2,11 @@ const mqtt = require('mqtt');
 const { Pool } = require('pg');
 require('dotenv').config();
 const { broadcast } = require('./websocketServer');
+const DeviceZonePosition = require('./models/DeviceZonePosition');
+const Device = require('./models/Device');
+const Movement = require('./models/Movement');
+const EmployeeZone = require('./models/EmployeeZone');
+const GNSSPosition = require('./models/GNSSPosition');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -27,27 +32,18 @@ client.on('connect', () => {
 });
 
 client.on('message', async (topic, message) => {
-  console.log('Message received on topic:', topic);
   try {
-    if (topic.startsWith('BADGE/')) {
-      const data = JSON.parse(message.toString());
-      console.log('Received data:', data);
-
-      // Обработка данных и сохранение в базу данных
-      await handleMqttMessage(topic, data);
-
-      // Отправка данных на WebSocket
-      broadcast(data);
-    }
+    const payload = JSON.parse(message.toString());
+    console.log(payload);
+    await handleMqttMessage(topic, payload);
   } catch (error) {
-    console.error('Error handling message:', error);
+    console.error('Error handling MQTT message:', error);
   }
 });
 
 async function handleMqttMessage(topic, data) {
   console.log('Handling MQTT message for topic:', topic, 'with data:', data);
 
-  // Определение типа данных на основе топика
   let deviceId;
   const client = await pool.connect();
   try {
@@ -105,33 +101,52 @@ async function handleMqttMessage(topic, data) {
 
     if (topic.includes('/zone_position')) {
       const { b0 } = data.message;
-      const zonePositionQuery = `
-        INSERT INTO device_zone_positions (device_id, beacon_mac, timestamp, rssi, temperature, pressure)
-        VALUES ($1, $2, to_timestamp($3), $4, $5, $6)
-      `;
-      const zonePositionValues = [deviceId, b0.bMac, b0.ts, b0.rssi, b0.T, b0.P];
-      await client.query(zonePositionQuery, zonePositionValues);
-      console.log('Zone position data saved');
+      if (b0 && b0.bMac && b0.ts) {
+        const zonePositionQuery = `
+          INSERT INTO device_zone_positions (device_id, beacon_mac, timestamp, rssi, temperature, pressure)
+          VALUES ($1, $2, to_timestamp($3), $4, $5, $6)
+          ON CONFLICT (device_id, beacon_mac, timestamp) DO UPDATE
+          SET rssi = EXCLUDED.rssi,
+              temperature = EXCLUDED.temperature,
+              pressure = EXCLUDED.pressure
+        `;
+        const zonePositionValues = [deviceId, b0.bMac, b0.ts, b0.rssi, b0.T, b0.P];
+        await client.query(zonePositionQuery, zonePositionValues);
+        console.log('Zone position data saved');
+      } else {
+        console.error('Invalid payload for DeviceZonePosition:', data);
+      }
     }
 
     if (topic.includes('/gnss_position')) {
       const { ts, coordinates, sat_quantity, HDOP, VDOP } = data.message;
-      const gnssPositionQuery = `
-        INSERT INTO device_gnss_positions (device_id, timestamp, latitude, longitude, height, sat_quantity, hdop, vdop)
-        VALUES ($1, to_timestamp($2), $3, $4, $5, $6, $7, $8)
-      `;
-      const gnssPositionValues = [
-        deviceId,
-        ts,
-        coordinates.latitude,
-        coordinates.longitude,
-        coordinates.height,
-        sat_quantity,
-        HDOP,
-        VDOP,
-      ];
-      await client.query(gnssPositionQuery, gnssPositionValues);
-      console.log('GNSS position data saved');
+      if (coordinates && coordinates.latitude && coordinates.longitude && ts && sat_quantity !== undefined && HDOP !== undefined && VDOP !== undefined) {
+        const gnssPositionQuery = `
+          INSERT INTO device_gnss_positions (device_id, timestamp, latitude, longitude, height, sat_quantity, hdop, vdop)
+          VALUES ($1, to_timestamp($2), $3, $4, $5, $6, $7, $8)
+          ON CONFLICT (device_id, timestamp) DO UPDATE
+          SET latitude = EXCLUDED.latitude,
+              longitude = EXCLUDED.longitude,
+              height = EXCLUDED.height,
+              sat_quantity = EXCLUDED.sat_quantity,
+              hdop = EXCLUDED.hdop,
+              vdop = EXCLUDED.vdop
+        `;
+        const gnssPositionValues = [
+          deviceId,
+          ts,
+          coordinates.latitude,
+          coordinates.longitude,
+          coordinates.height,
+          sat_quantity,
+          HDOP,
+          VDOP,
+        ];
+        await client.query(gnssPositionQuery, gnssPositionValues);
+        console.log('GNSS position data saved');
+      } else {
+        console.error('Invalid payload for GNSSPosition:', data);
+      }
     }
 
     await client.query('COMMIT');
