@@ -1,0 +1,3 @@
+ALTER TABLE "Devices" 
+ALTER COLUMN "id" TYPE VARCHAR;
+

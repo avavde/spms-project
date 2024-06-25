@@ -1,31 +1,46 @@
-// models/Device.js
-
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const Device = sequelize.define('Device', {
+class Device extends Model {}
+
+Device.init({
   id: {
     type: DataTypes.STRING,
     primaryKey: true,
   },
   fw_version: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   nfc_uid: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   imei: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   mac_uwb: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   ip: {
     type: DataTypes.STRING,
+    allowNull: true,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
 }, {
-  timestamps: true,
+  sequelize,
+  modelName: 'Device',
 });
 
 module.exports = Device;

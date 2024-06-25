@@ -1,26 +1,8 @@
-CREATE TABLE IF NOT EXISTS device_gnss_positions (
-    id SERIAL PRIMARY KEY,
-    device_id INTEGER REFERENCES devices(id),
-    timestamp TIMESTAMP,
-    latitude FLOAT,
-    longitude FLOAT,
-    height FLOAT,
-    sat_quantity INTEGER,
-    hdop FLOAT,
-    vdop FLOAT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Изменение типа данных для столбца id в таблице devices
+ALTER TABLE devices ALTER COLUMN id TYPE character varying(255);
 
-CREATE TABLE IF NOT EXISTS device_zone_positions (
-    id SERIAL PRIMARY KEY,
-    device_id INTEGER REFERENCES devices(id),
-    beacon_mac VARCHAR(50),
-    timestamp TIMESTAMP,
-    rssi INTEGER,
-    temperature FLOAT,
-    pressure FLOAT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Исправление связанных таблиц
+ALTER TABLE device_zone_positions ALTER COLUMN device_id TYPE character varying(255);
+ALTER TABLE gnss_positions ALTER COLUMN device_id TYPE character varying(255);
+ALTER TABLE movements ALTER COLUMN device_id TYPE character varying(255);
 
