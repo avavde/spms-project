@@ -44,6 +44,12 @@ DeviceStatus.init({
   modelName: 'DeviceStatus',
   tableName: 'device_statuses',
   timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['device_id', 'timestamp']
+    }
+  ]
 });
 
 module.exports = DeviceStatus;

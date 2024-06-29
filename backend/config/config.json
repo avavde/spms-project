@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "spmsuser",
+    "password": "spmspass",
+    "database": "spms",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "spmsuser",
+    "password": "spmspass",
+    "database": "spms",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "spmsuser",
+    "password": "spmspass",
+    "database": "spms",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
+

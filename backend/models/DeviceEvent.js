@@ -1,10 +1,11 @@
+// models/DeviceEvent.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 class DeviceEvent extends Model {}
 
 DeviceEvent.init({
-  deviceId: {
+  device_id: {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
@@ -36,6 +37,13 @@ DeviceEvent.init({
   modelName: 'DeviceEvent',
   tableName: 'device_events',
   timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['device_id', 'timestamp']
+    }
+  ]
 });
 
 module.exports = DeviceEvent;
+

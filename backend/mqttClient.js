@@ -1,3 +1,4 @@
+// mqttClient.js
 const mqtt = require('mqtt');
 const { Pool } = require('pg');
 require('dotenv').config();
@@ -122,6 +123,8 @@ async function handleStatusMessage(deviceId, payload) {
         beacons: beacons,
         createdat: new Date(),
         updatedat: new Date()
+      }, {
+        conflictFields: ['device_id', 'timestamp']
       });
       console.log('Device status saved successfully');
     } catch (error) {
@@ -156,6 +159,8 @@ async function handleGNSSPositionMessage(deviceId, payload) {
         vdop: VDOP,
         createdat: new Date(),
         updatedat: new Date()
+      }, {
+        conflictFields: ['device_id', 'timestamp']
       });
       console.log('GNSS position saved successfully');
     } catch (error) {
@@ -184,6 +189,8 @@ async function handleZonePositionMessage(deviceId, payload) {
               pressure: P,
               createdat: new Date(),
               updatedat: new Date()
+            }, {
+              conflictFields: ['device_id', 'zone_id', 'timestamp']
             });
             await Device.upsert({
               id: bMac,
@@ -223,6 +230,8 @@ async function handleEventMessage(deviceId, payload) {
         sync: sync,
         createdat: new Date(),
         updatedat: new Date()
+      }, {
+        conflictFields: ['device_id', 'timestamp']
       });
       console.log('Event saved successfully');
     } catch (error) {
@@ -248,6 +257,8 @@ async function handleSelfTestMessage(deviceId, payload) {
         result: 'OK',
         createdat: new Date(),
         updatedat: new Date()
+      }, {
+        conflictFields: ['device_id']
       });
       console.log('Self-test saved successfully');
     } catch (error) {

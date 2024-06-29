@@ -4,7 +4,7 @@ const sequelize = require('../config/db');
 class GNSSPosition extends Model {}
 
 GNSSPosition.init({
-  deviceId: {
+  device_id: {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
@@ -25,7 +25,7 @@ GNSSPosition.init({
     type: DataTypes.FLOAT,
     allowNull: true,
   },
-  satQuantity: {
+  sat_quantity: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },

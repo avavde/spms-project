@@ -4,12 +4,12 @@ const sequelize = require('../config/db');
 class DeviceZonePosition extends Model {}
 
 DeviceZonePosition.init({
-  deviceId: {
+  device_id: {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
   },
-  zoneid: {
+  zone_id: {
     type: DataTypes.STRING,
     allowNull: false,
   },
