@@ -1,24 +1,33 @@
-// models/DeviceSelfTest.js
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const DeviceSelfTest = sequelize.define('DeviceSelfTest', {
-  deviceId: {
+class DeviceSelfTest extends Model {}
+
+DeviceSelfTest.init({
+  device_id: {
     type: DataTypes.STRING,
-    primaryKey: true
+    allowNull: false,
+    primaryKey: true,
   },
   result: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
-  createdAt: {
+  createdat: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
-  updatedAt: {
+  updatedat: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
-  }
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceSelfTest',
+  tableName: 'device_self_tests',
+  timestamps: false,
 });
 
 module.exports = DeviceSelfTest;

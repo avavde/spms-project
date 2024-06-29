@@ -6,6 +6,7 @@ class Device extends Model {}
 Device.init({
   id: {
     type: DataTypes.STRING,
+    allowNull: false,
     primaryKey: true,
   },
   fw_version: {
@@ -28,12 +29,16 @@ Device.init({
     type: DataTypes.STRING,
     allowNull: true,
   },
-  createdAt: {
+  devicetype: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  createdat: {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
-  updatedAt: {
+  updatedat: {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
@@ -41,6 +46,8 @@ Device.init({
 }, {
   sequelize,
   modelName: 'Device',
+  tableName: 'devices',
+  timestamps: false,
 });
 
 module.exports = Device;

@@ -1,9 +1,16 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Department = require('./Department');
 const Zone = require('./Zone');
 
-const DepartmentZone = sequelize.define('DepartmentZone', {
+class DepartmentZone extends Model {}
+
+DepartmentZone.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   department_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -20,6 +27,11 @@ const DepartmentZone = sequelize.define('DepartmentZone', {
       key: 'id'
     }
   }
+}, {
+  sequelize,
+  modelName: 'DepartmentZone',
+  tableName: 'department_zones',
+  timestamps: false,
 });
 
 DepartmentZone.belongsTo(Department, { foreignKey: 'department_id' });

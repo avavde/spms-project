@@ -37,9 +37,9 @@ app.use('/api/user-actions', userActionRoutes);
 app.use('/api/zones', zoneRoutes);
 app.use('/api/device-zones', deviceZoneRoutes);
 app.use('/api/gnss_positions', gnssPositionRoutes);
-app.use('/api/device-statuses', deviceStatusRoutes); // Новый маршрут
-app.use('/api/device-events', deviceEventRoutes); // Новый маршрут
-app.use('/api/device-self-tests', deviceSelfTestRoutes); // Новый маршрут
+app.use('/api/device-statuses', deviceStatusRoutes); 
+app.use('/api/device-events', deviceEventRoutes); 
+app.use('/api/device-self-tests', deviceSelfTestRoutes); 
 
 sequelize.sync().then(() => {
   server.listen(PORT, () => {

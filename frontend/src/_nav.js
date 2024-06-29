@@ -1,6 +1,6 @@
 import React from 'react';
 import CIcon from '@coreui/icons-react';
-import { cilSpeedometer, cilMap, cilNotes, cilUser, cilSettings, cilPeople, cilLayers } from '@coreui/icons';
+import { cilSpeedometer, cilMap, cilNotes, cilUser, cilSettings, cilPeople, cilLayers, cilList, cilChartLine, cilWarning } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
 
 const _nav = [
@@ -59,6 +59,34 @@ const _nav = [
     name: 'Настройки системы',
     to: '/system-settings',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'МОДУЛИ',
+  },
+  {
+    component: CNavItem,
+    name: 'Диспетчеризация и контроль',
+    to: '/dispatch-control',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Мониторинг оборудования',
+    to: '/equipment-monitoring',
+    icon: <CIcon icon={cilChartLine} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Организация эвакуации',
+    to: '/evacuation-organization',
+    icon: <CIcon icon={cilWarning} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Интеграция с ERP',
+    to: '/reports-erp-integration',
+    icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
   },
 ];
 

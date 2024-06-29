@@ -1,5 +1,6 @@
 import React from 'react';
-import { CCard, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react';
+import { CCard, CContainer, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react';
+import DeviceList from 'src/components/DeviceList';
 
 const GeneralSettings = () => {
   return (
@@ -11,7 +12,9 @@ const GeneralSettings = () => {
           </CCardHeader>
           <CCardBody>
             {/* Добавьте функционал для общих настроек */}
-            Настройки системы.
+            <CContainer>
+      <DeviceList />
+    </CContainer>
           </CCardBody>
         </CCard>
       </CCol>

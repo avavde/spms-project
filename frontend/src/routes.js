@@ -8,8 +8,10 @@ const Employees = React.lazy(() => import('./views/admin/Employees'))
 const PlansAndZones = React.lazy(() => import('./views/admin/PlansAndZones'))
 const GeneralSettings = React.lazy(() => import('./views/admin/GeneralSettings'))
 const SystemSettings = React.lazy(() => import('./views/admin/SystemSettings'))
-
-
+const DispatchControl = React.lazy(() => import('./views/dispatch/DispatchControl'))
+const EquipmentMonitoring = React.lazy(() => import('./views/equipment/EquipmentMonitoring'))
+const EvacuationOrganization = React.lazy(() => import('./views/safety/EvacuationOrganization'))
+const ReportsERPIntegration = React.lazy(() => import('./views/reports/ReportsERPIntegration'))
 
 const routes = [
   { path: '/', exact: true, name: 'Главная' },
@@ -21,6 +23,10 @@ const routes = [
   { path: '/plans-and-zones', name: 'Планы и зоны', element: PlansAndZones },
   { path: '/general-settings', name: 'Общие настройки', element: GeneralSettings },
   { path: '/system-settings', name: 'Системные настройки', element: SystemSettings },
+  { path: '/dispatch-control', name: 'Диспетчеризация и контроль', element: DispatchControl },
+  { path: '/equipment-monitoring', name: 'Мониторинг оборудования', element: EquipmentMonitoring },
+  { path: '/evacuation-organization', name: 'Организация эвакуации', element: EvacuationOrganization },
+  { path: '/reports-erp-integration', name: 'Интеграция с ERP', element: ReportsERPIntegration },
 ]
 
 export default routes

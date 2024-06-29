@@ -1,32 +1,41 @@
-// models/DeviceEvent.js
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const DeviceEvent = sequelize.define('DeviceEvent', {
+class DeviceEvent extends Model {}
+
+DeviceEvent.init({
   deviceId: {
     type: DataTypes.STRING,
-    primaryKey: true
+    allowNull: false,
+    primaryKey: true,
   },
   timestamp: {
     type: DataTypes.DATE,
-    allowNull: false
+    allowNull: false,
   },
   event: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   sync: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
   },
-  createdAt: {
+  createdat: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
-  updatedAt: {
+  updatedat: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
-  }
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceEvent',
+  tableName: 'device_events',
+  timestamps: false,
 });
 
 module.exports = DeviceEvent;

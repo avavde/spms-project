@@ -8,7 +8,7 @@ const AppFooter = () => {
         <a href="https://iotsystems.kz/spms.html" target="_blank" rel="noopener noreferrer">
           УСУП
         </a>
-        <span className="ms-1">&copy; 2024 ООО «АйоТ Системз».</span>
+        <span className="ms-1">&copy; 2024 ООО «Цифровая промавтоматика».</span>
       </div>
       <div className="ms-auto">
         <span className="me-1">Ознакомиться с </span>

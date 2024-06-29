@@ -1,40 +1,49 @@
-// models/DeviceStatus.js
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const DeviceStatus = sequelize.define('DeviceStatus', {
-  deviceId: {
+class DeviceStatus extends Model {}
+
+DeviceStatus.init({
+  device_id: {
     type: DataTypes.STRING,
-    primaryKey: true
+    allowNull: false,
+    primaryKey: true,
   },
   timestamp: {
     type: DataTypes.DATE,
-    allowNull: false
+    allowNull: false,
   },
   battery: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   sos: {
     type: DataTypes.BOOLEAN,
-    allowNull: false
+    allowNull: false,
   },
   gps: {
     type: DataTypes.BOOLEAN,
-    allowNull: false
+    allowNull: false,
   },
   beacons: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
-  createdAt: {
+  createdat: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
-  updatedAt: {
+  updatedat: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
-  }
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceStatus',
+  tableName: 'device_statuses',
+  timestamps: false,
 });
 
 module.exports = DeviceStatus;

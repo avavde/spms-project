@@ -1,41 +1,49 @@
-// models/DeviceZonePosition.js
-
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const DeviceZonePosition = sequelize.define('DeviceZonePosition', {
+class DeviceZonePosition extends Model {}
+
+DeviceZonePosition.init({
   deviceId: {
     type: DataTypes.STRING,
-    references: {
-      model: 'Devices',
-      key: 'id'
-    },
+    allowNull: false,
+    primaryKey: true,
   },
-  zoneId: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: 'Zones',
-      key: 'id'
-    },
+  zoneid: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   timestamp: {
     type: DataTypes.DATE,
     allowNull: false,
   },
   rssi: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   temperature: {
     type: DataTypes.FLOAT,
-    allowNull: false,
+    allowNull: true,
   },
   pressure: {
     type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  createdat: {
+    type: DataTypes.DATE,
     allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
 }, {
-  timestamps: true,
+  sequelize,
+  modelName: 'DeviceZonePosition',
+  tableName: 'device_zone_positions',
+  timestamps: false,
 });
 
 module.exports = DeviceZonePosition;

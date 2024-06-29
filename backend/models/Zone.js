@@ -1,22 +1,23 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const Zone = sequelize.define('Zone', {
+class Zone extends Model {}
+
+Zone.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.STRING
-  },
-  department_id: {
-    type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: 'Departments',
-      key: 'id'
-    }
-  }
+  },
+}, {
+  sequelize,
+  modelName: 'Zone',
+  tableName: 'zones',
+  timestamps: false,
 });
 
 module.exports = Zone;

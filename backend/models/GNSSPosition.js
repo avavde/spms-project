@@ -1,13 +1,13 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const GNSSPosition = sequelize.define('GNSSPosition', {
+class GNSSPosition extends Model {}
+
+GNSSPosition.init({
   deviceId: {
     type: DataTypes.STRING,
-    references: {
-      model: 'Devices',
-      key: 'id'
-    },
+    allowNull: false,
+    primaryKey: true,
   },
   timestamp: {
     type: DataTypes.DATE,
@@ -23,22 +23,35 @@ const GNSSPosition = sequelize.define('GNSSPosition', {
   },
   height: {
     type: DataTypes.FLOAT,
-    allowNull: false,
+    allowNull: true,
   },
   satQuantity: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   hdop: {
     type: DataTypes.FLOAT,
-    allowNull: false,
+    allowNull: true,
   },
   vdop: {
     type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  createdat: {
+    type: DataTypes.DATE,
     allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
 }, {
-  timestamps: true,
+  sequelize,
+  modelName: 'GNSSPosition',
+  tableName: 'gnss_positions',
+  timestamps: false,
 });
 
 module.exports = GNSSPosition;

@@ -1,36 +1,32 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const User = require('./User');
+const Zone = require('./Zone');
 
-class UserAction extends Model {}
+class Beacon extends Model {}
 
-UserAction.init({
+Beacon.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  user_id: {
+  zone_id: {
     type: DataTypes.INTEGER,
+    allowNull: false,
     references: {
-      model: User,
+      model: Zone,
       key: 'id'
-    },
-    allowNull: false,
+    }
   },
-  action: {
+  beacon_mac: {
     type: DataTypes.STRING,
-    allowNull: false,
-  },
-  timestamp: {
-    type: DataTypes.DATE,
     allowNull: false,
   },
 }, {
   sequelize,
-  modelName: 'UserAction',
-  tableName: 'user_actions',
+  modelName: 'Beacon',
+  tableName: 'beacons',
   timestamps: false,
 });
 
-module.exports = UserAction;
+module.exports = Beacon;

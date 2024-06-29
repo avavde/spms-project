@@ -77,17 +77,23 @@ async function handleDeviceInfoMessage(deviceId, payload) {
   if (payload.message) {
     const { fw_version, nfc_uid, imei, mac_uwb, ip } = payload.message;
     try {
-      await Device.upsert({
+      const [device, created] = await Device.upsert({
         id: deviceId,
         fw_version: fw_version || '',
         nfc_uid: nfc_uid || '',
         imei: imei || '',
         mac_uwb: mac_uwb || '',
         ip: ip || '',
-        deviceType: 'badge',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        devicetype: 'badge',
+        createdat: new Date(),
+        updatedat: new Date()
       });
+      console.log('Device info saved successfully', device);
+      if (created) {
+        console.log('New device created');
+      } else {
+        console.log('Existing device updated');
+      }
     } catch (error) {
       console.error('Database error:', error);
     }
@@ -101,16 +107,23 @@ async function handleStatusMessage(deviceId, payload) {
     const { ts, battery, sos, gps, beacons } = payload.message;
     console.log(`Device ${deviceId} status: battery=${battery}, sos=${sos}, gps=${gps}, beacons=${beacons}`);
     try {
+      await Device.upsert({
+        id: deviceId,
+        devicetype: 'badge',
+        createdat: new Date(),
+        updatedat: new Date()
+      });
       await DeviceStatus.upsert({
-        deviceId: deviceId,
+        device_id: deviceId,
         timestamp: new Date(ts * 1000),
         battery: battery,
         sos: sos,
         gps: gps,
         beacons: beacons,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdat: new Date(),
+        updatedat: new Date()
       });
+      console.log('Device status saved successfully');
     } catch (error) {
       console.error('Database error:', error);
     }
@@ -127,23 +140,24 @@ async function handleGNSSPositionMessage(deviceId, payload) {
       if (!deviceExists) {
         await Device.upsert({
           id: deviceId,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdat: new Date(),
+          updatedat: new Date()
         });
       }
 
       await GNSSPosition.upsert({
-        deviceId: deviceId,
+        device_id: deviceId,
         timestamp: new Date(ts * 1000),
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
         height: coordinates.height,
-        satQuantity: sat_quantity,
+        sat_quantity: sat_quantity,
         hdop: HDOP,
         vdop: VDOP,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdat: new Date(),
+        updatedat: new Date()
       });
+      console.log('GNSS position saved successfully');
     } catch (error) {
       console.error('Database error:', error);
     }
@@ -162,21 +176,22 @@ async function handleZonePositionMessage(deviceId, payload) {
         if (zone) {
           try {
             await DeviceZonePosition.upsert({
-              deviceId: bMac,
-              zoneId: zone.id,
+              device_id: bMac,
+              zone_id: zone.id,
               timestamp: new Date(ts * 1000),
               rssi: rssi,
               temperature: T,
               pressure: P,
-              createdAt: new Date(),
-              updatedAt: new Date()
+              createdat: new Date(),
+              updatedat: new Date()
             });
             await Device.upsert({
               id: bMac,
-              deviceType: 'beacon',
-              createdAt: new Date(),
-              updatedAt: new Date()
+              devicetype: 'beacon',
+              createdat: new Date(),
+              updatedat: new Date()
             });
+            console.log('Zone position saved successfully');
           } catch (error) {
             console.error('Database error:', error);
           }
@@ -195,14 +210,21 @@ async function handleEventMessage(deviceId, payload) {
     const { ts, event, sync } = payload.message;
     console.log(`Device ${deviceId} event: ts=${ts}, event=${event}, sync=${sync}`);
     try {
+      await Device.upsert({
+        id: deviceId,
+        devicetype: 'badge',
+        createdat: new Date(),
+        updatedat: new Date()
+      });
       await DeviceEvent.upsert({
-        deviceId: deviceId,
+        device_id: deviceId,
         timestamp: new Date(ts * 1000),
         event: event,
         sync: sync,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdat: new Date(),
+        updatedat: new Date()
       });
+      console.log('Event saved successfully');
     } catch (error) {
       console.error('Database error:', error);
     }
@@ -215,12 +237,19 @@ async function handleSelfTestMessage(deviceId, payload) {
   if (payload.message === 'OK') {
     console.log(`Device ${deviceId} self-test passed`);
     try {
-      await DeviceSelfTest.upsert({
-        deviceId: deviceId,
-        result: 'OK',
-        createdAt: new Date(),
-        updatedAt: new Date()
+      await Device.upsert({
+        id: deviceId,
+        devicetype: 'badge',
+        createdat: new Date(),
+        updatedat: new Date()
       });
+      await DeviceSelfTest.upsert({
+        device_id: deviceId,
+        result: 'OK',
+        createdat: new Date(),
+        updatedat: new Date()
+      });
+      console.log('Self-test saved successfully');
     } catch (error) {
       console.error('Database error:', error);
     }
