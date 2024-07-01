@@ -1,69 +1,127 @@
 const Employee = require('../models/Employee');
-const Department = require('../models/Department');
+const Beacon = require('../models/Beacon');
 
-// Получить всех сотрудников
 exports.getAllEmployees = async (req, res) => {
   try {
-    const employees = await Employee.findAll({ include: Department });
+    const employees = await Employee.findAll();
     res.json(employees);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Ошибка при получении сотрудников:', error.message, error.stack);
+    res.status(500).json({ error: 'Ошибка при получении сотрудников' });
   }
 };
 
-// Получить сотрудника по ID
 exports.getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findByPk(req.params.id, { include: Department });
-    if (employee) {
-      res.json(employee);
-    } else {
-      res.status(404).json({ error: 'Employee not found' });
+    const employee = await Employee.findByPk(req.params.id);
+    if (!employee) {
+      return res.status(404).json({ error: 'Сотрудник не найден' });
     }
+    res.json(employee);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Ошибка при получении сотрудника:', error.message, error.stack);
+    res.status(500).json({ error: 'Ошибка при получении сотрудника' });
   }
 };
 
-// Создать нового сотрудника
 exports.createEmployee = async (req, res) => {
   try {
-    const employee = await Employee.create(req.body);
-    res.status(201).json(employee);
+    const { first_name, last_name, middle_name, email, phone, department_id, position, beaconid } = req.body;
+
+    // Логирование входящих данных
+    console.log('Received data for new employee:', req.body);
+
+    // Проверка обязательных полей
+    if (!first_name || !last_name || !email || !phone) {
+      return res.status(400).json({ error: 'Пожалуйста, заполните все обязательные поля' });
+    }
+
+    // Если department_id пустой, установите его в null
+    const deptId = department_id === '' ? null : department_id;
+
+    const newEmployee = await Employee.create({
+      first_name,
+      last_name,
+      middle_name,
+      email,
+      phone,
+      department_id: deptId,
+      position,
+      beaconid,
+    });
+    res.status(201).json(newEmployee);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка при создании сотрудника:', error.message, error.stack);
+    res.status(500).json({ error: 'Ошибка при создании сотрудника' });
   }
 };
 
-// Обновить сотрудника
 exports.updateEmployee = async (req, res) => {
   try {
-    const [updated] = await Employee.update(req.body, {
-      where: { id: req.params.id }
-    });
-    if (updated) {
-      const updatedEmployee = await Employee.findByPk(req.params.id, { include: Department });
-      res.json(updatedEmployee);
-    } else {
-      res.status(404).json({ error: 'Employee not found' });
+    const { first_name, last_name, middle_name, email, phone, department_id, position, beaconid } = req.body;
+
+    // Логирование входящих данных
+    console.log('Received data for updating employee:', req.body);
+
+    // Если department_id пустой, установите его в null
+    const deptId = department_id === '' ? null : department_id;
+
+    const employee = await Employee.findByPk(req.params.id);
+    if (!employee) {
+      return res.status(404).json({ error: 'Сотрудник не найден' });
     }
+    await employee.update({
+      first_name,
+      last_name,
+      middle_name,
+      email,
+      phone,
+      department_id: deptId,
+      position,
+      beaconid,
+    });
+    res.json(employee);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка при обновлении сотрудника:', error.message, error.stack);
+    res.status(500).json({ error: 'Ошибка при обновлении сотрудника' });
   }
 };
 
-// Удалить сотрудника
 exports.deleteEmployee = async (req, res) => {
   try {
-    const deleted = await Employee.destroy({
-      where: { id: req.params.id }
-    });
-    if (deleted) {
-      res.status(204).json();
-    } else {
-      res.status(404).json({ error: 'Employee not found' });
+    const employee = await Employee.findByPk(req.params.id);
+    if (!employee) {
+      return res.status(404).json({ error: 'Сотрудник не найден' });
     }
+    await employee.destroy();
+    res.status(204).send();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Ошибка при удалении сотрудника:', error.message, error.stack);
+    res.status(500).json({ error: 'Ошибка при удалении сотрудника' });
+  }
+};
+
+exports.assignBeacon = async (req, res) => {
+  const { id } = req.params;
+  const { beaconid } = req.body;
+
+  try {
+    const employee = await Employee.findByPk(id);
+    if (!employee) {
+      return res.status(404).json({ error: 'Сотрудник не найден' });
+    }
+
+    const beacon = await Beacon.findByPk(beaconid);
+    if (!beacon) {
+      return res.status(404).json({ error: 'Метка не найдена' });
+    }
+
+    employee.beaconid = beaconid;
+    await employee.save();
+
+    res.json(employee);
+  } catch (error) {
+    console.error('Ошибка при назначении метки:', error.message, error.stack);
+    res.status(500).json({ error: 'Ошибка при назначении метки' });
   }
 };

@@ -22,10 +22,15 @@ const deleteEmployee = (id) => {
   return axios.delete(`${API_URL}/employees/${id}`);
 };
 
+const assignBeacon = (employeeId, beaconid) => {
+  return axios.put(`${API_URL}/employees/${employeeId}/assign-beacon`, { beaconid });
+};
+
 export default {
   getAllEmployees,
   getEmployeeById,
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  assignBeacon,
 };

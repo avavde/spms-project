@@ -1,5 +1,3 @@
-// src/views/admin/components/EmployeeForm.js
-
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -23,7 +21,7 @@ const EmployeeForm = ({ show, onClose, onSave, employee, departments, devices })
     position: '',
     department: '',
     phone: '',
-    deviceId: '',
+    beaconid: '', 
   });
 
   useEffect(() => {
@@ -37,7 +35,7 @@ const EmployeeForm = ({ show, onClose, onSave, employee, departments, devices })
         position: '',
         department: '',
         phone: '',
-        deviceId: '',
+        beaconid: '', 
       });
     }
   }, [employee]);
@@ -91,8 +89,8 @@ const EmployeeForm = ({ show, onClose, onSave, employee, departments, devices })
             <CFormInput id="phone" name="phone" value={formData.phone} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <CFormLabel htmlFor="deviceId">Идентификатор устройства</CFormLabel>
-            <CFormSelect id="deviceId" name="deviceId" value={formData.deviceId} onChange={handleChange}>
+            <CFormLabel htmlFor="beaconid">Идентификатор устройства</CFormLabel>
+            <CFormSelect id="beaconid" name="beaconid" value={formData.beaconid} onChange={handleChange}>
               {devices.map((device, index) => (
                 <option key={index} value={device.id}>{device.name}</option>
               ))}

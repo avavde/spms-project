@@ -1,4 +1,3 @@
-// mqttClient.js
 const mqtt = require('mqtt');
 const { Pool } = require('pg');
 require('dotenv').config();
@@ -176,6 +175,25 @@ async function handleZonePositionMessage(deviceId, payload) {
     for (const key in payload.message) {
       if (payload.message.hasOwnProperty(key)) {
         const { ts, bMac, rssi, T, P } = payload.message[key];
+
+        // Проверяем наличие устройства с devicetype = 'beacon'
+        const beaconExists = await Device.findByPk(bMac);
+
+        if (!beaconExists) {
+          // Создаем новое устройство с devicetype = 'beacon'
+          try {
+            await Device.create({
+              id: bMac,
+              devicetype: 'beacon',
+              createdat: new Date(),
+              updatedat: new Date()
+            });
+            console.log('New beacon device created successfully');
+          } catch (error) {
+            console.error('Database error while creating beacon:', error);
+          }
+        }
+
         const zone = await getZoneByBeaconMac(bMac);
 
         if (zone) {
@@ -191,12 +209,6 @@ async function handleZonePositionMessage(deviceId, payload) {
               updatedat: new Date()
             }, {
               conflictFields: ['device_id', 'zone_id', 'timestamp']
-            });
-            await Device.upsert({
-              id: bMac,
-              devicetype: 'beacon',
-              createdat: new Date(),
-              updatedat: new Date()
             });
             console.log('Zone position saved successfully');
           } catch (error) {

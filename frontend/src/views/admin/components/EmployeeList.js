@@ -1,5 +1,3 @@
-// src/views/admin/components/EmployeeList.js
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton } from '@coreui/react';
@@ -22,13 +20,13 @@ const EmployeeList = ({ employees, onEdit, onDelete }) => {
       <CTableBody>
         {employees.map((employee) => (
           <CTableRow key={employee.id}>
-            <CTableDataCell>{employee.lastName}</CTableDataCell>
-            <CTableDataCell>{employee.firstName}</CTableDataCell>
-            <CTableDataCell>{employee.middleName}</CTableDataCell>
+            <CTableDataCell>{employee.last_name}</CTableDataCell> {/* Изменено */}
+            <CTableDataCell>{employee.first_name}</CTableDataCell> {/* Изменено */}
+            <CTableDataCell>{employee.middle_name}</CTableDataCell> {/* Изменено */}
             <CTableDataCell>{employee.position}</CTableDataCell>
-            <CTableDataCell>{employee.department}</CTableDataCell>
+            <CTableDataCell>{employee.department_id}</CTableDataCell> {/* Изменено */}
             <CTableDataCell>{employee.phone}</CTableDataCell>
-            <CTableDataCell>{employee.deviceId}</CTableDataCell>
+            <CTableDataCell>{employee.beaconid}</CTableDataCell> {/* Изменено */}
             <CTableDataCell>
               <CButton color="primary" size="sm" onClick={() => onEdit(employee)}>Редактировать</CButton>
               {' '}

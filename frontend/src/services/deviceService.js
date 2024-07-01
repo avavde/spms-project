@@ -18,6 +18,10 @@ const updateDevice = (id, deviceData) => {
   return axios.put(`${API_URL}/devices/${id}`, deviceData);
 };
 
+const getAvailableBeacons = () => {
+  return axios.get(`${API_URL}/devices/available/beacons`);
+};
+
 const deleteDevice = (id) => {
   return axios.delete(`${API_URL}/devices/${id}`);
 };
@@ -27,5 +31,9 @@ export default {
   getDeviceById,
   createDevice,
   updateDevice,
-  deleteDevice
+  deleteDevice,
+  getAvailableBeacons
 };
+
+
+

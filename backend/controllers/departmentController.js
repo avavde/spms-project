@@ -1,68 +1,67 @@
 const Department = require('../models/Department');
 
-// Получить все отделы
+// Получение всех отделов
 exports.getAllDepartments = async (req, res) => {
   try {
     const departments = await Department.findAll();
     res.json(departments);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Ошибка при получении отделов:', error);
+    res.status(500).json({ error: 'Ошибка при получении отделов' });
   }
 };
 
-// Получить отдел по ID
+// Получение отдела по ID
 exports.getDepartmentById = async (req, res) => {
   try {
     const department = await Department.findByPk(req.params.id);
-    if (department) {
-      res.json(department);
-    } else {
-      res.status(404).json({ error: 'Department not found' });
+    if (!department) {
+      return res.status(404).json({ error: 'Отдел не найден' });
     }
+    res.json(department);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Ошибка при получении отдела:', error);
+    res.status(500).json({ error: 'Ошибка при получении отдела' });
   }
 };
 
-// Создать новый отдел
+// Создание нового отдела
 exports.createDepartment = async (req, res) => {
   try {
-    const department = await Department.create(req.body);
-    res.status(201).json(department);
+    const newDepartment = await Department.create(req.body);
+    res.status(201).json(newDepartment);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка при создании отдела:', error);
+    res.status(500).json({ error: 'Ошибка при создании отдела' });
   }
 };
 
-// Обновить отдел
+// Обновление отдела
 exports.updateDepartment = async (req, res) => {
   try {
-    const [updated] = await Department.update(req.body, {
-      where: { id: req.params.id }
-    });
-    if (updated) {
-      const updatedDepartment = await Department.findByPk(req.params.id);
-      res.json(updatedDepartment);
-    } else {
-      res.status(404).json({ error: 'Department not found' });
+    const department = await Department.findByPk(req.params.id);
+    if (!department) {
+      return res.status(404).json({ error: 'Отдел не найден' });
     }
+    await department.update(req.body);
+    res.json(department);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка при обновлении отдела:', error);
+    res.status(500).json({ error: 'Ошибка при обновлении отдела' });
   }
 };
 
-// Удалить отдел
+// Удаление отдела
 exports.deleteDepartment = async (req, res) => {
   try {
-    const deleted = await Department.destroy({
-      where: { id: req.params.id }
-    });
-    if (deleted) {
-      res.status(204).json();
-    } else {
-      res.status(404).json({ error: 'Department not found' });
+    const department = await Department.findByPk(req.params.id);
+    if (!department) {
+      return res.status(404).json({ error: 'Отдел не найден' });
     }
+    await department.destroy();
+    res.status(204).send();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Ошибка при удалении отдела:', error);
+    res.status(500).json({ error: 'Ошибка при удалении отдела' });
   }
 };
