@@ -7,19 +7,20 @@ DeviceZonePosition.init({
   device_id: {
     type: DataTypes.STRING,
     allowNull: false,
-    primaryKey: true,
+    primaryKey: true
   },
   zone_id: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.INTEGER,
+    allowNull: true,  // Разрешить NULL
   },
   timestamp: {
     type: DataTypes.DATE,
     allowNull: false,
+    primaryKey: true
   },
   rssi: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    type: DataTypes.FLOAT,
+    allowNull: true,
   },
   temperature: {
     type: DataTypes.FLOAT,
@@ -32,18 +33,18 @@ DeviceZonePosition.init({
   createdat: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW,
+    defaultValue: DataTypes.NOW
   },
   updatedat: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
+    defaultValue: DataTypes.NOW
+  }
 }, {
   sequelize,
   modelName: 'DeviceZonePosition',
-  tableName: 'device_zone_positions',
   timestamps: false,
+  tableName: 'device_zone_positions'
 });
 
 module.exports = DeviceZonePosition;

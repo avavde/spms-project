@@ -1,7 +1,11 @@
-const express = require('express');
-const beaconController = require('../controllers/beaconController');
-const router = express.Router();
+// routes/beaconRoutes.js
 
-router.get('/available', beaconController.getAvailableBeacons);
+const express = require('express');
+const router = express.Router();
+const beaconController = require('../controllers/beaconController');
+
+router.get('/available/beacons', beaconController.getAvailableBeacons);
+router.put('/:beacon_mac', beaconController.updateBeaconCoordinates);
+router.delete('/:beacon_mac', beaconController.deleteBeacon);
 
 module.exports = router;

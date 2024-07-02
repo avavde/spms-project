@@ -22,6 +22,10 @@ const getAvailableBeacons = () => {
   return axios.get(`${API_URL}/devices/available/beacons`);
 };
 
+const getAvailableBadges = () => {
+  return axios.get(`${API_URL}/devices/available/badges`);
+};
+
 const deleteDevice = (id) => {
   return axios.delete(`${API_URL}/devices/${id}`);
 };
@@ -32,7 +36,8 @@ export default {
   createDevice,
   updateDevice,
   deleteDevice,
-  getAvailableBeacons
+  getAvailableBeacons,
+  getAvailableBadges,
 };
 
 

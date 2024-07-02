@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const sequelize = require('../config/db'); // Путь к вашему файлу конфигурации базы данных
 
 class Department extends Model {}
 
@@ -16,7 +16,7 @@ Department.init({
   description: {
     type: DataTypes.STRING,
     allowNull: true,
-  }
+  },
 }, {
   sequelize,
   modelName: 'Department',

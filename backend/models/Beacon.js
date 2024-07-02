@@ -12,7 +12,7 @@ Beacon.init({
   },
   zone_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true, // Изменено на true
     references: {
       model: Zone,
       key: 'id'
@@ -21,6 +21,14 @@ Beacon.init({
   beacon_mac: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  map_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
   },
 }, {
   sequelize,

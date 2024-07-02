@@ -1,69 +1,59 @@
 const Zone = require('../models/Zone');
-const Department = require('../models/Department');
 
-// Получить все зоны
 exports.getAllZones = async (req, res) => {
   try {
-    const zones = await Zone.findAll({ include: Department });
+    const zones = await Zone.findAll();
     res.json(zones);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Ошибка при получении зон' });
   }
 };
 
-// Получить зону по ID
 exports.getZoneById = async (req, res) => {
   try {
-    const zone = await Zone.findByPk(req.params.id, { include: Department });
-    if (zone) {
-      res.json(zone);
-    } else {
-      res.status(404).json({ error: 'Zone not found' });
+    const zone = await Zone.findByPk(req.params.id);
+    if (!zone) {
+      return res.status(404).json({ error: 'Зона не найдена' });
     }
+    res.json(zone);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Ошибка при получении зоны' });
   }
 };
 
-// Создать новую зону
 exports.createZone = async (req, res) => {
   try {
-    const zone = await Zone.create(req.body);
-    res.status(201).json(zone);
+    const { name, coordinates, beacons, type } = req.body;
+    const newZone = await Zone.create({ name, coordinates, beacons, type });
+    res.status(201).json(newZone);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Ошибка при создании зоны' });
   }
 };
 
-// Обновить зону
 exports.updateZone = async (req, res) => {
   try {
-    const [updated] = await Zone.update(req.body, {
-      where: { id: req.params.id }
-    });
-    if (updated) {
-      const updatedZone = await Zone.findByPk(req.params.id, { include: Department });
-      res.json(updatedZone);
-    } else {
-      res.status(404).json({ error: 'Zone not found' });
+    const { name, coordinates, beacons, type } = req.body;
+    const zone = await Zone.findByPk(req.params.id);
+    if (!zone) {
+      return res.status(404).json({ error: 'Зона не найдена' });
     }
+    await zone.update({ name, coordinates, beacons, type });
+    res.json(zone);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Ошибка при обновлении зоны' });
   }
 };
 
-// Удалить зону
 exports.deleteZone = async (req, res) => {
   try {
-    const deleted = await Zone.destroy({
-      where: { id: req.params.id }
-    });
-    if (deleted) {
-      res.status(204).json();
-    } else {
-      res.status(404).json({ error: 'Zone not found' });
+    const zone = await Zone.findByPk(req.params.id);
+    if (!zone) {
+      return res.status(404).json({ error: 'Зона не найдена' });
     }
+    await zone.destroy();
+    res.status(204).send();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Ошибка при удалении зоны' });
   }
 };

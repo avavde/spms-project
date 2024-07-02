@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, ImageOverlay, Polygon, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { zones } from '../../data/zonesData';
 import ZoneEmployeesModal from '../../components/dashboard/ZoneEmployeesModal';
 import 'leaflet/dist/leaflet.css';
-import plan from 'src/assets/brand/plan.jpg';  // Импортируем изображение плана помещения
+import plan from 'src/assets/brand/plan.jpg';
+import { getAllZones } from 'src/services/zonesService';
 
-const imageBounds = [[0, 0], [1000, 1000]]; // Пример координат для изображения
+const imageBounds = [[0, 0], [1000, 1000]];
 
 const LocationMap = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
+  const [zones, setZones] = useState([]);
+
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const zonesData = await getAllZones();
+        setZones(zonesData);
+      } catch (error) {
+        console.error('Ошибка при получении зон:', error);
+      }
+    };
+
+    fetchZones();
+  }, []);
 
   const handleOpenModal = (zone) => {
     setSelectedZone(zone);
@@ -22,16 +36,31 @@ const LocationMap = () => {
     setSelectedZone(null);
   };
 
+  const getColorByZoneType = (type) => {
+    switch (type) {
+      case 'regular':
+        return 'blue';
+      case 'control':
+        return 'green';
+      case 'warning':
+        return 'orange';
+      case 'danger':
+        return 'red';
+      default:
+        return 'black';
+    }
+  };
+
   return (
     <>
       <MapContainer
-        center={[500, 500]} // Центр изображения
-        zoom={2} // Настроим масштаб
+        center={[500, 500]}
+        zoom={2}
         style={{ height: '600px', width: '100%' }}
-        crs={L.CRS.Simple} // Используем простую систему координат
+        crs={L.CRS.Simple}
       >
         <ImageOverlay
-          url={plan}  // Используем изображение плана помещения
+          url={plan}
           bounds={imageBounds}
           opacity={1}
         />
@@ -39,7 +68,7 @@ const LocationMap = () => {
           <Polygon
             key={zone.id}
             positions={zone.coordinates}
-            color="blue"
+            color={getColorByZoneType(zone.type)}
             fillOpacity={0.5}
             eventHandlers={{
               click: () => {
@@ -48,7 +77,7 @@ const LocationMap = () => {
             }}
           >
             <Popup>
-              {zone.name}: {zone.employeeCount} сотрудников
+              {zone.name}: {zone.employeeCount || 0} сотрудников
             </Popup>
           </Polygon>
         ))}

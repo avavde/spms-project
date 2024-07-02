@@ -61,9 +61,18 @@ exports.deleteDevice = async (req, res) => {
 
 exports.getAvailableBeacons = async (req, res) => {
   try {
+    const beacons = await Device.findAll({ where: { devicetype: 'beacon' } });
+    res.json(beacons);
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при получении доступных маяков' });
+  }
+};
+
+exports.getAvailableBadges = async (req, res) => {
+  try {
     const beacons = await Device.findAll({ where: { devicetype: 'badge' } });
     res.json(beacons);
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка при получении доступных меток' });
+    res.status(500).json({ error: 'Ошибка при получении доступных меток.' });
   }
 };

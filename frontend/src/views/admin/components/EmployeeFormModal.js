@@ -52,7 +52,7 @@ const EmployeeFormModal = ({ show, onClose, employee, onSave }) => {
 
   const fetchBeacons = async () => {
     try {
-      const response = await deviceService.getAvailableBeacons();
+      const response = await deviceService.getAvailableBadges();
       setBeacons(response.data);
     } catch (error) {
       console.error('Ошибка при получении меток:', error);
