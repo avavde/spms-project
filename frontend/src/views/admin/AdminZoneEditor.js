@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { getAllZones, createZone, updateZone, deleteZone } from 'src/services/zonesService';
-import { getAvailableBeacons, updateBeaconCoordinates } from 'src/services/beaconService';
+import { getAvailableBeacons, updateBeaconCoordinates, deleteBeacon } from 'src/services/beaconService';
 import MapComponent from './components/MapComponent';
 import ZoneFormModal from './components/ZoneFormModal';
 import BeaconFormModal from './components/BeaconFormModal';
@@ -97,20 +96,34 @@ const AdminZoneEditor = () => {
     setBeaconModalVisible(true);
   };
 
-  const handleEditBeacon = async (coords, beaconMac) => {
+  const handleEditBeacon = async (coords, beacon_mac) => {
     try {
-      await updateBeaconCoordinates(beaconMac, coords);
+      const formattedCoords = [coords.lat, coords.lng];
+      console.log(`Updating beacon coordinates for beacon_mac: ${beacon_mac} with coordinates: ${JSON.stringify(formattedCoords)}`);
+      await updateBeaconCoordinates(beacon_mac, formattedCoords);
       fetchBeacons(); // обновляем список маяков после изменения координат
     } catch (error) {
       console.error('Ошибка при обновлении координат маяка:', error);
     }
   };
 
-  const handleSaveBeacon = async (beaconId) => {
+  const handleDeleteBeacon = async (beacon_mac) => {
+    try {
+      console.log(`Deleting beacon with beacon_mac: ${beacon_mac}`);
+      await deleteBeacon(beacon_mac);
+      fetchBeacons(); // обновляем список маяков после удаления
+    } catch (error) {
+      console.error('Ошибка при удалении маяка:', error);
+    }
+  };
+
+  const handleSaveBeacon = async (beacon_mac) => {
     if (currentBeaconCoords) {
       const { lat, lng } = currentBeaconCoords;
+      const formattedCoords = [lat, lng];
       try {
-        await updateBeaconCoordinates(beaconId, [lat, lng]); // Corrected format
+        console.log(`Updating beacon coordinates for beacon_mac: ${beacon_mac} with coordinates: ${JSON.stringify(formattedCoords)}`);
+        await updateBeaconCoordinates(beacon_mac, formattedCoords); // Corrected format
         fetchBeacons(); // обновляем список маяков после изменения координат
       } catch (error) {
         console.error('Ошибка при обновлении координат маяка:', error);
@@ -133,6 +146,7 @@ const AdminZoneEditor = () => {
             onDeleteZone={handleDeleteZone}
             onCreateBeacon={handleCreateBeacon}
             onEditBeacon={handleEditBeacon} // Передача функции редактирования маяка
+            onDeleteBeacon={handleDeleteBeacon} // Передача функции удаления маяка
           />
         </CCardBody>
       </CCard>

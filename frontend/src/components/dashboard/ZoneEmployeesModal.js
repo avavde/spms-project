@@ -10,11 +10,14 @@ const ZoneEmployeesModal = ({ visible, onClose, zone }) => {
       </CModalHeader>
       <CModalBody>
         {zone && zone.employees ? (
-          <ul>
-            {zone.employees.map((employee) => (
-              <li key={employee.id}>{employee.name}</li>
-            ))}
-          </ul>
+          <>
+            <p>Количество сотрудников: {zone.employees.length}</p>
+            <ul>
+              {zone.employees.map((employee, index) => (
+                <li key={index}>{employee}</li>
+              ))}
+            </ul>
+          </>
         ) : (
           <p>Нет данных о сотрудниках в этой зоне.</p>
         )}
@@ -31,10 +34,7 @@ ZoneEmployeesModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   zone: PropTypes.shape({
     name: PropTypes.string,
-    employees: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-    })),
+    employees: PropTypes.arrayOf(PropTypes.string),
   }),
 };
 

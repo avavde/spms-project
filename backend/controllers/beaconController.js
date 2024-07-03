@@ -1,5 +1,3 @@
-// controllers/beaconController.js
-
 const Beacon = require('../models/Beacon');
 const Device = require('../models/Device');
 
@@ -54,7 +52,7 @@ exports.updateBeaconCoordinates = async (req, res) => {
 };
 
 exports.deleteBeacon = async (req, res) => {
-  console.log('Received request to delete beacon');
+  console.log('Received request to delete beacon coordinates');
   try {
     const { beacon_mac } = req.params;
 
@@ -67,12 +65,12 @@ exports.deleteBeacon = async (req, res) => {
     }
 
     console.log(`Beacon found: ${JSON.stringify(beacon)}`);
-    await beacon.destroy();
-    console.log(`Beacon deleted successfully for beacon_mac: ${beacon_mac}`);
+    await beacon.update({ map_coordinates: null });
+    console.log(`Beacon coordinates deleted successfully for beacon_mac: ${beacon_mac}`);
     res.status(204).send();
   } catch (error) {
-    console.error('Error during beacon deletion:', error.message);
+    console.error('Error during beacon coordinates deletion:', error.message);
     console.error('Error stack trace:', error.stack);
-    res.status(500).json({ error: 'Ошибка при удалении маяка', details: error.message });
+    res.status(500).json({ error: 'Ошибка при удалении координат маяка', details: error.message });
   }
 };

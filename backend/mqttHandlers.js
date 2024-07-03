@@ -5,6 +5,11 @@ const GNSSPosition = require('./models/GNSSPosition');
 const DeviceStatus = require('./models/DeviceStatus');
 const DeviceEvent = require('./models/DeviceEvent');
 const DeviceSelfTest = require('./models/DeviceSelfTest');
+const { broadcast } = require('./websocketServer');
+const Zone = require('./models/Zone');
+const Employee = require('./models/Employee');
+const { Op, Sequelize } = require('sequelize');
+
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -110,48 +115,51 @@ async function handleZonePositionMessage(deviceId, payload) {
   if (payload.message) {
     for (const key in payload.message) {
       if (payload.message.hasOwnProperty(key)) {
-        const { ts, bMac, rssi, T, P } = payload.message[key];
+        const { ts, bInst, rssi, T, P } = payload.message[key];
 
-        if (!bMac) {
-          console.error('bMac is null or undefined:', bMac);
+        if (!bInst) {
+          console.error('bInst is null or undefined:', bInst);
           continue;
         }
 
-        // Проверяем наличие устройства с devicetype = 'beacon'
+        if (rssi <= -90) {
+          continue;
+        }
+
         let beaconDevice;
         try {
-          beaconDevice = await Device.findByPk(bMac);
+          beaconDevice = await Device.findByPk(bInst);
           if (!beaconDevice) {
             beaconDevice = await Device.create({
-              id: bMac,
+              id: bInst,
               devicetype: 'beacon',
               createdat: new Date(),
               updatedat: new Date()
             });
-            console.log('New beacon device created successfully:', bMac);
+            console.log('New beacon device created successfully:', bInst);
           }
         } catch (error) {
           console.error('Database error while creating beacon:', error);
-          continue; // Перейти к следующему маяку
+          continue;
         }
 
-        // Создаем запись в таблице beacons, если она отсутствует
+        let beacon;
         try {
-          await Beacon.findOrCreate({
-            where: { beacon_mac: bMac },
+          beacon = await Beacon.findOrCreate({
+            where: { beacon_mac: bInst },
             defaults: {
-              zone_id: null,  // Убедитесь, что zone_id может быть NULL
+              zone_id: null,
               map_coordinates: null,
               gps_coordinates: null
             }
           });
-          console.log('Beacon record created or found successfully:', bMac);
+          beacon = beacon[0];
+          console.log('Beacon record created or found successfully:', bInst);
         } catch (error) {
           console.error('Database error while creating beacon record:', error);
-          continue; // Перейти к следующему маяку
+          continue;
         }
 
-        // Проверяем наличие устройства с device_id
         try {
           await Device.upsert({
             id: deviceId,
@@ -162,13 +170,31 @@ async function handleZonePositionMessage(deviceId, payload) {
           console.log('Device upserted successfully:', deviceId);
         } catch (error) {
           console.error('Database error while creating device:', error);
-          continue; // Перейти к следующему маяку
+          continue;
+        }
+
+        let zoneId = beacon.zone_id;
+
+        if (!zoneId) {
+          // Попытка найти зону по маяку
+          try {
+            const zone = await Zone.findOne({
+              where: Sequelize.literal(`"beacons" @> ARRAY['${bInst}']::text[]`)
+            });
+            if (zone) {
+              zoneId = zone.id;
+              await beacon.update({ zone_id: zoneId });
+            }
+          } catch (error) {
+            console.error('Database error while finding zone:', error);
+            continue;
+          }
         }
 
         try {
-          await DeviceZonePosition.upsert({
+          const zonePosition = await DeviceZonePosition.upsert({
             device_id: deviceId,
-            zone_id: null,  // Убедитесь, что zone_id может быть NULL
+            zone_id: zoneId,
             timestamp: new Date(ts * 1000),
             rssi: rssi,
             temperature: T,
@@ -178,7 +204,24 @@ async function handleZonePositionMessage(deviceId, payload) {
           }, {
             conflictFields: ['device_id', 'zone_id', 'timestamp']
           });
+
           console.log('Zone position saved successfully');
+
+          // Найти сотрудника по метке
+          let employee = await Employee.findOne({ where: { beaconid: deviceId } });
+
+          // Подготовка данных для отправки через WebSocket
+          const updatedData = {
+            device_id: deviceId,
+            beacon_id: bInst,
+            zone_id: zoneId,
+            rssi: rssi,
+            timestamp: new Date(ts * 1000),
+            employee: employee ? `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.` : `Guest ID: ${deviceId}`
+          };
+
+          // Отправка данных через WebSocket
+          broadcast(updatedData);
         } catch (error) {
           console.error('Database error:', error);
         }
@@ -188,8 +231,6 @@ async function handleZonePositionMessage(deviceId, payload) {
     console.error('Invalid payload for DeviceZonePosition:', payload);
   }
 }
-
-
 
 async function handleEventMessage(deviceId, payload) {
   if (payload.message) {

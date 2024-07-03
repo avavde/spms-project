@@ -31,9 +31,9 @@ export const updateBeaconCoordinates = async (beacon_mac, coordinates) => {
   }
 };
 
-export const deleteBeacon = async (beaconId) => {
+export const deleteBeacon = async (beacon_mac) => {
   try {
-    await axios.delete(`${API_URL}/beacons/${beaconId}`);
+    await axios.delete(`${API_URL}/beacons/${beacon_mac}`);
   } catch (error) {
     throw new Error('Ошибка при удалении маяка');
   }

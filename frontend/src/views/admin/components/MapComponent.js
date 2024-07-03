@@ -1,19 +1,16 @@
-// components/MapComponent.js
-
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
-import plan from 'src/assets/brand/plan.jpg';
 import 'leaflet-draw';
-import beaconImage from 'src/assets/images/ble-beacon.png';
+import plan from 'src/assets/brand/plan.jpeg';
+import beaconIconUrl from 'src/assets/images/ble-beacon.png'; // Импорт иконки маяка
 
 const imageBounds = [[0, 0], [1000, 1000]];
-
 L.drawLocal.draw.handlers.marker.tooltip.start = 'Кликните на карту, чтобы добавить маяк.';
 
-const MapComponent = ({ zones, availableBeacons, onCreateZone, onEditZone, onDeleteZone, onCreateBeacon, onEditBeacon }) => {
+const MapComponent = ({ zones, availableBeacons, onCreateZone, onEditZone, onDeleteZone, onCreateBeacon, onEditBeacon, onDeleteBeacon }) => {
   useEffect(() => {
     const mapInstance = L.map('map', {
       crs: L.CRS.Simple,
@@ -64,23 +61,25 @@ const MapComponent = ({ zones, availableBeacons, onCreateZone, onEditZone, onDel
       layer.on('click', () => onEditZone(layer, zone));
     });
 
-    // Создание кастомного значка маяка с использованием изображения
-    const beaconIcon = L.icon({
-      iconUrl: beaconImage,
-      iconSize: [25, 41], // Размер значка (настройте по необходимости)
-      iconAnchor: [12, 41], // Точка привязки значка (настройте по необходимости)
-    });
-
     availableBeacons.forEach((beacon) => {
       if (beacon.map_coordinates) {
-        const marker = L.marker(beacon.map_coordinates, { icon: beaconIcon, draggable: true })
-          .on('dragend', (event) => onEditBeacon(event.target.getLatLng(), beacon.beacon_mac))
+        const icon = L.icon({
+          iconUrl: beaconIconUrl, // Используем импортированный путь
+          iconSize: [50, 50],
+        });
+
+        const marker = L.marker(beacon.map_coordinates, { icon, draggable: true })
+          .on('dragend', (event) => {
+            console.log(`Beacon ${beacon.beacon_mac} moved to ${JSON.stringify(event.target.getLatLng())}`);
+            onEditBeacon(event.target.getLatLng(), beacon.beacon_mac);
+          })
+          .on('click', () => {
+            if (window.confirm(`Удалить маяк ${beacon.beacon_mac}?`)) {
+              onDeleteBeacon(beacon.beacon_mac);
+            }
+          })
           .addTo(mapInstance)
           .bindPopup(beacon.beacon_mac || 'Неизвестный MAC');
-
-        marker.on('click', () => {
-          console.log(`Beacon ${beacon.id} clicked`);
-        });
       }
     });
 
@@ -88,7 +87,7 @@ const MapComponent = ({ zones, availableBeacons, onCreateZone, onEditZone, onDel
       mapInstance.off();
       mapInstance.remove();
     };
-  }, [zones, availableBeacons, onCreateZone, onEditZone, onDeleteZone, onCreateBeacon, onEditBeacon]);
+  }, [zones, availableBeacons, onCreateZone, onEditZone, onDeleteZone, onCreateBeacon, onEditBeacon, onDeleteBeacon]);
 
   const getColorByZoneType = (type) => {
     switch (type) {
@@ -125,7 +124,8 @@ MapComponent.propTypes = {
   onEditZone: PropTypes.func.isRequired,
   onDeleteZone: PropTypes.func.isRequired,
   onCreateBeacon: PropTypes.func.isRequired,
-  onEditBeacon: PropTypes.func.isRequired, // Новый пропс для редактирования маяка
+  onEditBeacon: PropTypes.func.isRequired,
+  onDeleteBeacon: PropTypes.func.isRequired,
 };
 
 export default MapComponent;
