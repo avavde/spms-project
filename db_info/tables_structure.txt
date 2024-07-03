@@ -1,0 +1,106 @@
+ table_schema |      table_name       |   column_name   |          data_type          | character_maximum_length 
+--------------+-----------------------+-----------------+-----------------------------+--------------------------
+ public       | SequelizeMeta         | name            | character varying           |                      255
+ public       | beacons               | id              | integer                     |                         
+ public       | beacons               | zone_id         | integer                     |                         
+ public       | beacons               | beacon_mac      | character varying           |                      255
+ public       | beacons               | map_coordinates | json                        |                         
+ public       | beacons               | gps_coordinates | json                        |                         
+ public       | department_zones      | id              | integer                     |                         
+ public       | department_zones      | department_id   | integer                     |                         
+ public       | department_zones      | zone_id         | integer                     |                         
+ public       | departments           | id              | integer                     |                         
+ public       | departments           | name            | character varying           |                      255
+ public       | departments           | description     | text                        |                         
+ public       | device_events         | id              | integer                     |                         
+ public       | device_events         | device_id       | character varying           |                      255
+ public       | device_events         | timestamp       | timestamp without time zone |                         
+ public       | device_events         | event           | character varying           |                      255
+ public       | device_events         | sync            | character varying           |                      255
+ public       | device_events         | createdat       | timestamp without time zone |                         
+ public       | device_events         | updatedat       | timestamp without time zone |                         
+ public       | device_self_tests     | id              | integer                     |                         
+ public       | device_self_tests     | device_id       | character varying           |                      255
+ public       | device_self_tests     | result          | text                        |                         
+ public       | device_self_tests     | createdat       | timestamp without time zone |                         
+ public       | device_self_tests     | updatedat       | timestamp without time zone |                         
+ public       | device_statuses       | id              | integer                     |                         
+ public       | device_statuses       | device_id       | character varying           |                      255
+ public       | device_statuses       | timestamp       | timestamp without time zone |                         
+ public       | device_statuses       | battery         | character varying           |                      255
+ public       | device_statuses       | sos             | boolean                     |                         
+ public       | device_statuses       | gps             | boolean                     |                         
+ public       | device_statuses       | beacons         | boolean                     |                         
+ public       | device_statuses       | createdat       | timestamp without time zone |                         
+ public       | device_statuses       | updatedat       | timestamp without time zone |                         
+ public       | device_zone_positions | id              | integer                     |                         
+ public       | device_zone_positions | device_id       | character varying           |                      255
+ public       | device_zone_positions | zone_id         | integer                     |                         
+ public       | device_zone_positions | timestamp       | timestamp without time zone |                         
+ public       | device_zone_positions | rssi            | double precision            |                         
+ public       | device_zone_positions | temperature     | double precision            |                         
+ public       | device_zone_positions | pressure        | double precision            |                         
+ public       | device_zone_positions | createdat       | timestamp without time zone |                         
+ public       | device_zone_positions | updatedat       | timestamp without time zone |                         
+ public       | devices               | id              | character varying           |                      255
+ public       | devices               | fw_version      | character varying           |                      255
+ public       | devices               | nfc_uid         | character varying           |                      255
+ public       | devices               | imei            | character varying           |                      255
+ public       | devices               | mac_uwb         | character varying           |                      255
+ public       | devices               | ip              | character varying           |                      255
+ public       | devices               | devicetype      | character varying           |                      255
+ public       | devices               | createdat       | timestamp without time zone |                         
+ public       | devices               | updatedat       | timestamp without time zone |                         
+ public       | employee_zones        | id              | integer                     |                         
+ public       | employee_zones        | employee_id     | integer                     |                         
+ public       | employee_zones        | zone_id         | integer                     |                         
+ public       | employees             | id              | integer                     |                         
+ public       | employees             | first_name      | character varying           |                      255
+ public       | employees             | last_name       | character varying           |                      255
+ public       | employees             | middle_name     | character varying           |                      255
+ public       | employees             | email           | character varying           |                      255
+ public       | employees             | phone           | character varying           |                      255
+ public       | employees             | department_id   | integer                     |                         
+ public       | employees             | position        | character varying           |                      255
+ public       | employees             | beaconid        | character varying           |                      255
+ public       | gnss_positions        | id              | integer                     |                         
+ public       | gnss_positions        | device_id       | character varying           |                      255
+ public       | gnss_positions        | timestamp       | timestamp without time zone |                         
+ public       | gnss_positions        | latitude        | double precision            |                         
+ public       | gnss_positions        | longitude       | double precision            |                         
+ public       | gnss_positions        | height          | double precision            |                         
+ public       | gnss_positions        | sat_quantity    | integer                     |                         
+ public       | gnss_positions        | hdop            | double precision            |                         
+ public       | gnss_positions        | vdop            | double precision            |                         
+ public       | gnss_positions        | createdat       | timestamp without time zone |                         
+ public       | gnss_positions        | updatedat       | timestamp without time zone |                         
+ public       | movements             | id              | integer                     |                         
+ public       | movements             | device_id       | character varying           |                      255
+ public       | movements             | from_zone_id    | integer                     |                         
+ public       | movements             | to_zone_id      | integer                     |                         
+ public       | movements             | timestamp       | timestamp without time zone |                         
+ public       | movements             | createdat       | timestamp without time zone |                         
+ public       | movements             | updatedat       | timestamp without time zone |                         
+ public       | user_actions          | id              | integer                     |                         
+ public       | user_actions          | user_id         | integer                     |                         
+ public       | user_actions          | action          | character varying           |                      255
+ public       | user_actions          | timestamp       | timestamp without time zone |                         
+ public       | users                 | id              | integer                     |                         
+ public       | users                 | username        | character varying           |                      255
+ public       | users                 | password        | character varying           |                      255
+ public       | users                 | first_name      | character varying           |                      255
+ public       | users                 | last_name       | character varying           |                      255
+ public       | users                 | middle_name     | character varying           |                      255
+ public       | users                 | email           | character varying           |                      255
+ public       | users                 | phone           | character varying           |                      255
+ public       | users                 | role            | character varying           |                      255
+ public       | users                 | created_at      | timestamp without time zone |                         
+ public       | users                 | updated_at      | timestamp without time zone |                         
+ public       | zones                 | id              | integer                     |                         
+ public       | zones                 | name            | character varying           |                      255
+ public       | zones                 | coordinates     | json                        |                         
+ public       | zones                 | beacons         | ARRAY                       |                         
+ public       | zones                 | department_id   | integer                     |                         
+ public       | zones                 | type            | character varying           |                       50
+(102 rows)
+

@@ -2,7 +2,13 @@ const mqtt = require('mqtt');
 const { Pool } = require('pg');
 require('dotenv').config();
 const { broadcast } = require('./websocketServer');
-const { handleDeviceInfoMessage, handleStatusMessage, handleGNSSPositionMessage, handleZonePositionMessage, handleEventMessage, handleSelfTestMessage } = require('./mqttHandlers');
+const { handleDeviceInfoMessage } = require('./handlers/deviceHandler');
+const { handleStatusMessage } = require('./handlers/statusHandler');
+const { handleGNSSPositionMessage } = require('./handlers/gnssHandler');
+const { handleZonePositionMessage } = require('./handlers/zoneHandler');
+const { handleEventMessage } = require('./handlers/eventHandler');
+const { handleSelfTestMessage } = require('./handlers/selfTestHandler');
+const { handleNMEAMessage } = require('./handlers/nmeaHandler');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -32,7 +38,7 @@ client.on('message', async (topic, message) => {
     const messageString = message.toString();
 
     if (messageString.startsWith('$')) {
-      handleNMEAMessage(topic, messageString);
+      await handleNMEAMessage(topic, messageString);
       return;
     }
 
@@ -67,11 +73,5 @@ client.on('message', async (topic, message) => {
     console.error('Error handling MQTT message:', error);
   }
 });
-
-async function handleNMEAMessage(topic, message) {
-  const deviceId = topic.split('/')[1];
-  console.log(`NMEA message received from device ${deviceId}: ${message}`);
-  // Здесь можно добавить логику обработки NMEA сообщений, если это необходимо
-}
 
 module.exports = client;
