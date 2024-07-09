@@ -38,7 +38,7 @@ const DepartmentFormModal = ({ show, onClose, department, onSave }) => {
         </CForm>
       </CModalBody>
       <CModalFooter>
-        <CButton color="secondary" onClick={onClose}>Отмена</CButton>
+        <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
         <CButton color="primary" onClick={handleSubmit}>Сохранить</CButton>
       </CModalFooter>
     </CModal>

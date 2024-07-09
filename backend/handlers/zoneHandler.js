@@ -3,8 +3,17 @@ const Beacon = require('../models/Beacon');
 const DeviceZonePosition = require('../models/DeviceZonePosition');
 const Zone = require('../models/Zone');
 const Employee = require('../models/Employee');
+const ZoneEvent = require('../models/ZoneEvent');
+const ZoneViolation = require('../models/ZoneViolation');
+const EmployeeZoneAssignment = require('../models/EmployeeZoneAssignment');
 const { broadcast } = require('../websocketServer');
 const { Op, Sequelize } = require('sequelize');
+
+// Время ожидания без сигнала от устройства для фиксации выхода из зоны (например, 5 минут)
+const EXIT_TIMEOUT = 1 * 60 * 1000;
+
+// Объект для хранения таймаутов по устройствам
+const exitTimeouts = {};
 
 async function handleZonePositionMessage(deviceId, payload) {
   if (!deviceId) {
@@ -93,7 +102,7 @@ async function handleZonePositionMessage(deviceId, payload) {
         }
 
         try {
-          const zonePosition = await DeviceZonePosition.upsert({
+          await DeviceZonePosition.upsert({
             device_id: deviceId,
             zone_id: zoneId,
             timestamp: new Date(ts * 1000),
@@ -111,6 +120,105 @@ async function handleZonePositionMessage(deviceId, payload) {
           // Найти сотрудника по метке
           let employee = await Employee.findOne({ where: { beaconid: deviceId } });
 
+          if (!employee) {
+            console.error('Employee not found for device:', deviceId);
+            continue;
+          }
+
+          // Проверка существующего события входа без соответствующего события выхода
+          const existingEnterEvent = await ZoneEvent.findOne({
+            where: {
+              employee_id: employee.id,
+              zone_id: zoneId,
+              event_type: 'enter',
+              duration: { [Op.is]: null }
+            }
+          });
+
+          if (!existingEnterEvent) {
+            // Сохранить событие входа в зону
+            if (zoneId) {
+              await ZoneEvent.create({
+                employee_id: employee.id,
+                zone_id: zoneId,
+                event_type: 'enter',
+                timestamp: new Date(ts * 1000)
+              });
+
+              // Проверка на нарушение зоны
+              const forbiddenZoneAssignment = await EmployeeZoneAssignment.findOne({
+                where: {
+                  employee_id: employee.id,
+                  zone_id: zoneId,
+                  assignment_type: 'forbidden'
+                }
+              });
+
+              if (forbiddenZoneAssignment) {
+                await ZoneViolation.create({
+                  employee_id: employee.id,
+                  zone_id: zoneId,
+                  timestamp: new Date(ts * 1000)
+                });
+
+                // Отправка уведомления по WebSocket
+                broadcast({
+                  type: 'zone_violation',
+                  data: {
+                    employeeId: employee.id,
+                    zoneId: zoneId,
+                    timestamp: new Date(ts * 1000),
+                    message: 'Сотрудник вошел в запрещенную зону'
+                  }
+                });
+              }
+            }
+          }
+
+          // Удаляем таймаут выхода, если есть
+          if (exitTimeouts[deviceId]) {
+            clearTimeout(exitTimeouts[deviceId]);
+            delete exitTimeouts[deviceId];
+          }
+
+          // Устанавливаем новый таймаут для фиксации выхода из зоны
+          exitTimeouts[deviceId] = setTimeout(async () => {
+            try {
+              const lastEvent = await ZoneEvent.findOne({
+                where: {
+                  employee_id: employee.id,
+                  zone_id: zoneId,
+                  event_type: 'enter'
+                },
+                order: [['timestamp', 'DESC']]
+              });
+
+              if (lastEvent && !lastEvent.duration) {
+                await ZoneEvent.create({
+                  employee_id: employee.id,
+                  zone_id: zoneId,
+                  event_type: 'exit',
+                  timestamp: new Date()
+                });
+
+                // Отправка уведомления о выходе из зоны
+                broadcast({
+                  type: 'zone_exit',
+                  data: {
+                    employeeId: employee.id,
+                    zoneId: zoneId,
+                    timestamp: new Date(),
+                    message: 'Сотрудник вышел из зоны'
+                  }
+                });
+
+                console.log(`Employee ${employee.id} exited zone ${zoneId} due to inactivity`);
+              }
+            } catch (error) {
+              console.error('Error creating exit event:', error);
+            }
+          }, EXIT_TIMEOUT);
+
           // Подготовка данных для отправки через WebSocket
           const updatedData = {
             device_id: deviceId,
@@ -118,7 +226,7 @@ async function handleZonePositionMessage(deviceId, payload) {
             zone_id: zoneId,
             rssi: rssi,
             timestamp: new Date(ts * 1000),
-            employee: employee ? `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.` : `Guest ID: ${deviceId}`
+            employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`
           };
 
           // Отправка данных через WebSocket

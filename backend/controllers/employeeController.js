@@ -32,7 +32,7 @@ exports.createEmployee = async (req, res) => {
     console.log('Received data for new employee:', req.body);
 
     // Проверка обязательных полей
-    if (!first_name || !last_name || !email || !phone) {
+    if (!first_name || !last_name || !phone) {
       return res.status(400).json({ error: 'Пожалуйста, заполните все обязательные поля' });
     }
 
@@ -43,7 +43,7 @@ exports.createEmployee = async (req, res) => {
       first_name,
       last_name,
       middle_name,
-      email,
+      email, // email остается необязательным
       phone,
       department_id: deptId,
       position,
@@ -68,24 +68,34 @@ exports.updateEmployee = async (req, res) => {
 
     const employee = await Employee.findByPk(req.params.id);
     if (!employee) {
+      console.log('Employee not found:', req.params.id); // Логируем, если сотрудник не найден
       return res.status(404).json({ error: 'Сотрудник не найден' });
     }
-    await employee.update({
+
+    console.log('Updating employee with id:', req.params.id); // Добавлено для отладки
+
+    // Обновление данных сотрудника
+    const updatedEmployee = await employee.update({
       first_name,
       last_name,
       middle_name,
-      email,
+      email, // email остается необязательным
       phone,
       department_id: deptId,
       position,
-      beaconid,
+      beaconid
+    }, {
+      fields: ['first_name', 'last_name', 'middle_name', 'email', 'phone', 'department_id', 'position', 'beaconid'] // Явное указание изменяемых полей
     });
-    res.json(employee);
+
+    console.log('Employee updated successfully:', updatedEmployee); // Логирование обновленного сотрудника
+    res.json(updatedEmployee);
   } catch (error) {
     console.error('Ошибка при обновлении сотрудника:', error.message, error.stack);
     res.status(500).json({ error: 'Ошибка при обновлении сотрудника' });
   }
 };
+
 
 exports.deleteEmployee = async (req, res) => {
   try {

@@ -14,6 +14,7 @@ import {
   CTableHeaderCell,
   CTableRow,
   CButton,
+  CFormInput
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilPencil, cilTrash, cilPlus } from '@coreui/icons';
@@ -23,15 +24,26 @@ import DepartmentFormModal from './DepartmentFormModal';
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [search, setSearch] = useState({
+    fullName: '',
+    department_id: '',
+    position: '',
+    beaconid: '',
+  });
 
   useEffect(() => {
     fetchEmployees();
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    filterEmployees();
+  }, [search, employees]);
 
   const fetchEmployees = async () => {
     try {
@@ -85,6 +97,45 @@ const EmployeeManagement = () => {
     setShowDepartmentModal(false);
   };
 
+  const handleSearchChange = (e) => {
+    const { name, value } = e.target;
+    setSearch((prevSearch) => ({
+      ...prevSearch,
+      [name]: value,
+    }));
+  };
+
+  const filterEmployees = () => {
+    let filtered = [...employees];
+    Object.keys(search).forEach(key => {
+      if (search[key]) {
+        if (key === 'fullName') {
+          const searchValue = search[key].toLowerCase();
+          filtered = filtered.filter(employee => 
+            employee.first_name.toLowerCase().includes(searchValue) ||
+            employee.last_name.toLowerCase().includes(searchValue) ||
+            (employee.middle_name && employee.middle_name.toLowerCase().includes(searchValue)) ||
+            `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`.toLowerCase().includes(searchValue)
+          );
+        } else {
+          filtered = filtered.filter(employee => 
+            String(employee[key]).toLowerCase().includes(search[key].toLowerCase())
+          );
+        }
+      }
+    });
+    setFilteredEmployees(filtered);
+  };
+
+  const handleSaveZones = async (employeeId, zones) => {
+    try {
+      // Logic to save zones for the employee
+      console.log(`Saving zones for employee ${employeeId}:`, zones);
+    } catch (error) {
+      console.error('Ошибка при сохранении назначений зон:', error);
+    }
+  };
+
   return (
     <CRow>
       <CCol>
@@ -102,27 +153,32 @@ const EmployeeManagement = () => {
             <CTable hover>
               <CTableHead>
                 <CTableRow>
-                  <CTableHeaderCell>ID</CTableHeaderCell>
-                  <CTableHeaderCell>Имя</CTableHeaderCell>
-                  <CTableHeaderCell>Фамилия</CTableHeaderCell>
-                  <CTableHeaderCell>Отчество</CTableHeaderCell>
-                  <CTableHeaderCell>Email</CTableHeaderCell>
-                  <CTableHeaderCell>Телефон</CTableHeaderCell>
+                  <CTableHeaderCell>Фамилия И.О.</CTableHeaderCell>
                   <CTableHeaderCell>Отдел</CTableHeaderCell>
                   <CTableHeaderCell>Должность</CTableHeaderCell>
-                  <CTableHeaderCell>Назначенная метка</CTableHeaderCell>
+                  <CTableHeaderCell>Бейдж</CTableHeaderCell>
                   <CTableHeaderCell>Действия</CTableHeaderCell>
+                </CTableRow>
+                <CTableRow>
+                  <CTableDataCell>
+                    <CFormInput size="sm" name="fullName" value={search.fullName} onChange={handleSearchChange} />
+                  </CTableDataCell>
+                  <CTableDataCell>
+                    <CFormInput size="sm" name="department_id" value={search.department_id} onChange={handleSearchChange} />
+                  </CTableDataCell>
+                  <CTableDataCell>
+                    <CFormInput size="sm" name="position" value={search.position} onChange={handleSearchChange} />
+                  </CTableDataCell>
+                  <CTableDataCell>
+                    <CFormInput size="sm" name="beaconid" value={search.beaconid} onChange={handleSearchChange} />
+                  </CTableDataCell>
+                  <CTableDataCell></CTableDataCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {employees.map((employee) => (
+                {filteredEmployees.map((employee) => (
                   <CTableRow key={employee.id}>
-                    <CTableDataCell>{employee.id}</CTableDataCell>
-                    <CTableDataCell>{employee.first_name}</CTableDataCell>
-                    <CTableDataCell>{employee.last_name}</CTableDataCell>
-                    <CTableDataCell>{employee.middle_name}</CTableDataCell>
-                    <CTableDataCell>{employee.email}</CTableDataCell>
-                    <CTableDataCell>{employee.phone}</CTableDataCell>
+                    <CTableDataCell>{`${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`}</CTableDataCell>
                     <CTableDataCell>{departments.find(dept => dept.id === employee.department_id)?.name}</CTableDataCell>
                     <CTableDataCell>{employee.position}</CTableDataCell>
                     <CTableDataCell>{employee.beaconid || 'Не назначена'}</CTableDataCell>
@@ -157,6 +213,7 @@ const EmployeeManagement = () => {
         onClose={() => setShowEmployeeModal(false)}
         employee={selectedEmployee}
         onSave={handleEmployeeSave}
+        onSaveZones={handleSaveZones}
       />
       <DepartmentFormModal
         show={showDepartmentModal}

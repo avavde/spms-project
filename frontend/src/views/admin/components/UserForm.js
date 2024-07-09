@@ -114,7 +114,7 @@ const UserForm = ({ show, onClose, onSave, user, roles }) => {
       </CModalBody>
       <CModalFooter>
         <CButton color="primary" onClick={handleSubmit}>Сохранить</CButton>
-        <CButton color="secondary" onClick={onClose}>Отмена</CButton>
+        <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
       </CModalFooter>
     </CModal>
   );

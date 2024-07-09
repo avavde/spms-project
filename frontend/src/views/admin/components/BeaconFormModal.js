@@ -37,7 +37,7 @@ const BeaconFormModal = ({ visible, availableBeacons, onSave, onClose }) => {
       </CModalBody>
       <CModalFooter>
         <CButton color="primary" onClick={handleSave}>Сохранить</CButton>
-        <CButton color="secondary" onClick={onClose}>Отмена</CButton>
+        <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
       </CModalFooter>
     </CModal>
   );

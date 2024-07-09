@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid'; // Импортируем uuidv4
 import { CButton, CCard, CCardBody, CCardHeader } from '@coreui/react';
 import UserList from './UserList';
 import UserForm from './UserForm';
@@ -28,9 +29,10 @@ const UserManagement = () => {
     if (user.id) {
       setUsers(users.map(u => (u.id === user.id ? user : u)));
     } else {
-      user.id = Date.now();
+      user.id = uuidv4();
       setUsers([...users, user]);
     }
+    setShowForm(false); // Закрыть форму после сохранения
   };
 
   return (
@@ -42,13 +44,15 @@ const UserManagement = () => {
       <CCardBody>
         <UserList users={users} onEdit={handleEditUser} onDelete={handleDeleteUser} />
       </CCardBody>
-      <UserForm
-        show={showForm}
-        onClose={() => setShowForm(false)}
-        onSave={handleSaveUser}
-        user={currentUser}
-        roles={roles}
-      />
+      {showForm && (
+        <UserForm
+          show={showForm}
+          onClose={() => setShowForm(false)}
+          onSave={handleSaveUser}
+          user={currentUser}
+          roles={roles}
+        />
+      )}
     </CCard>
   );
 };

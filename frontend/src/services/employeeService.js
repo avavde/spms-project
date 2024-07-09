@@ -11,10 +11,12 @@ const getEmployeeById = (id) => {
 };
 
 const createEmployee = (employeeData) => {
+  console.log('Creating employee with data:', employeeData); // Добавлено для отладки
   return axios.post(`${API_URL}/employees`, employeeData);
 };
 
 const updateEmployee = (id, employeeData) => {
+  console.log('Updating employee with id:', id, 'and data:', employeeData); // Добавлено для отладки
   return axios.put(`${API_URL}/employees/${id}`, employeeData);
 };
 

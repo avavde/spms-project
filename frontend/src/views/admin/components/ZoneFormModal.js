@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+
 import {
   CModal,
   CModalHeader,
@@ -78,11 +79,13 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
             ))}
           </div>
         </CForm>
+
       </CModalBody>
       <CModalFooter>
+
         <CButton color="primary" onClick={handleSave}>Сохранить</CButton>
         <CButton color="danger" onClick={() => onDelete(zone.id)}>Удалить</CButton>
-        <CButton color="secondary" onClick={onClose}>Отмена</CButton>
+        <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
       </CModalFooter>
     </CModal>
   );

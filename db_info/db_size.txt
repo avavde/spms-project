@@ -1,5 +1,5 @@
  pg_size_pretty 
 ----------------
- 12 MB
+ 13 MB
 (1 row)
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // Добавление CORS middleware
+const cors = require('cors');
 const sequelize = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -19,13 +19,15 @@ const deviceEventRoutes = require('./routes/deviceEventRoutes');
 const deviceSelfTestRoutes = require('./routes/deviceSelfTestRoutes');
 const mqttClient = require('./mqttClient');
 const websocketServer = require('./websocketServer');
-const beaconRoutes = require('./routes/beaconRoutes'); // Добавление маршрутов для меток
+const beaconRoutes = require('./routes/beaconRoutes');
+const employeeZoneAssignmentRoutes = require('./routes/employeeZoneAssignmentRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 const server = require('http').createServer(app);
 const PORT = process.env.PORT || 5000;
 
-app.use(cors()); // Включение CORS для всех маршрутов
+app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/api/auth', authRoutes);
@@ -35,6 +37,7 @@ app.use('/api/department-zones', departmentZoneRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/employee-zones', employeeZoneRoutes);
+app.use('/api/employee-zone-assignments', employeeZoneAssignmentRoutes);
 app.use('/api/movements', movementRoutes);
 app.use('/api/user-actions', userActionRoutes);
 app.use('/api/zones', zoneRoutes);
@@ -43,7 +46,8 @@ app.use('/api/gnss_positions', gnssPositionRoutes);
 app.use('/api/device-statuses', deviceStatusRoutes);
 app.use('/api/device-events', deviceEventRoutes);
 app.use('/api/device-self-tests', deviceSelfTestRoutes);
-app.use('/api/beacons', beaconRoutes); // Подключение маршрутов для меток
+app.use('/api/beacons', beaconRoutes);
+app.use('/api/reports', reportRoutes);
 
 sequelize.sync().then(() => {
   server.listen(PORT, () => {

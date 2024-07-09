@@ -1,17 +1,20 @@
-import React from 'react'
+// src/routes.js
 
-const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
-const Monitoring = React.lazy(() => import('./views/monitoring/Monitoring'))
-const Reports = React.lazy(() => import('./views/reports/Reports'))
-const Users = React.lazy(() => import('./views/admin/Users'))
-const Employees = React.lazy(() => import('./views/admin/Employees'))
-const PlansAndZones = React.lazy(() => import('./views/admin/PlansAndZones'))
-const GeneralSettings = React.lazy(() => import('./views/admin/GeneralSettings'))
-const SystemSettings = React.lazy(() => import('./views/admin/SystemSettings'))
-const DispatchControl = React.lazy(() => import('./views/dispatch/DispatchControl'))
-const EquipmentMonitoring = React.lazy(() => import('./views/equipment/EquipmentMonitoring'))
-const EvacuationOrganization = React.lazy(() => import('./views/safety/EvacuationOrganization'))
-const ReportsERPIntegration = React.lazy(() => import('./views/reports/ReportsERPIntegration'))
+import React from 'react';
+
+const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'));
+const Monitoring = React.lazy(() => import('./views/monitoring/Monitoring'));
+const Reports = React.lazy(() => import('./views/reports/Reports'));
+const Users = React.lazy(() => import('./views/admin/Users'));
+const Employees = React.lazy(() => import('./views/admin/Employees'));
+const PlansAndZones = React.lazy(() => import('./views/admin/PlansAndZones'));
+const GeneralSettings = React.lazy(() => import('./views/admin/GeneralSettings'));
+const SystemSettings = React.lazy(() => import('./views/admin/SystemSettings'));
+const DispatchControl = React.lazy(() => import('./views/dispatch/DispatchControl'));
+const EquipmentMonitoring = React.lazy(() => import('./views/equipment/EquipmentMonitoring'));
+const EvacuationOrganization = React.lazy(() => import('./views/safety/EvacuationOrganization'));
+const ReportsERPIntegration = React.lazy(() => import('./views/reports/ReportsERPIntegration'));
+const EmployeeEditPage = React.lazy(() => import('./views/pages/EmployeeEditPage'));
 
 const routes = [
   { path: '/', exact: true, name: 'Главная' },
@@ -27,6 +30,7 @@ const routes = [
   { path: '/equipment-monitoring', name: 'Мониторинг оборудования', element: EquipmentMonitoring },
   { path: '/evacuation-organization', name: 'Организация эвакуации', element: EvacuationOrganization },
   { path: '/reports-erp-integration', name: 'Интеграция с ERP', element: ReportsERPIntegration },
-]
+  { path: '/employee/edit/:id', name: 'Редактирование сотрудника', element: EmployeeEditPage },
+];
 
-export default routes
+export default routes;

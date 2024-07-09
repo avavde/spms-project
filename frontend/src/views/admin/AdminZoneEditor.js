@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllZones, createZone, updateZone, deleteZone } from 'src/services/zonesService';
+import zonesService from 'src/services/zonesService';
 import { getAvailableBeacons, updateBeaconCoordinates, deleteBeacon } from 'src/services/beaconService';
 import MapComponent from './components/MapComponent';
 import ZoneFormModal from './components/ZoneFormModal';
@@ -25,7 +25,7 @@ const AdminZoneEditor = () => {
 
   const fetchZones = async () => {
     try {
-      const data = await getAllZones();
+      const data = await zonesService.getAllZones();
       setZones(data);
     } catch (error) {
       console.error('Ошибка при получении зон:', error);
@@ -67,7 +67,7 @@ const AdminZoneEditor = () => {
     layers.eachLayer(async (layer) => {
       const zoneId = layer.options.id;
       try {
-        await deleteZone(zoneId);
+        await zonesService.deleteZone(zoneId);
         setZones((prevZones) => prevZones.filter((zone) => zone.id !== zoneId));
       } catch (error) {
         console.error('Ошибка при удалении зоны:', error);
@@ -78,10 +78,10 @@ const AdminZoneEditor = () => {
   const handleSaveZone = async (zone) => {
     try {
       if (zone.id) {
-        const updatedZone = await updateZone(zone.id, zone);
+        const updatedZone = await zonesService.updateZone(zone.id, zone);
         setZones((prevZones) => prevZones.map((z) => (z.id === updatedZone.id ? updatedZone : z)));
       } else {
-        const newZone = await createZone(zone);
+        const newZone = await zonesService.createZone(zone);
         setZones((prevZones) => [...prevZones, newZone]);
       }
     } catch (error) {

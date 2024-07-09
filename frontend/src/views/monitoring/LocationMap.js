@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { MapContainer, ImageOverlay, Polygon, Popup, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import ZoneEmployeesModal from '../../components/dashboard/ZoneEmployeesModal';
 import 'leaflet/dist/leaflet.css';
 import plan from 'src/assets/brand/plan.jpeg';
 import employeeIconUrl from 'src/assets/images/employee.png';
-import { getAllZones } from 'src/services/zonesService';
+import zonesService from 'src/services/zonesService';
 import { initWebSocket, closeWebSocket } from 'src/services/webSocketService';
 
 const imageBounds = [[0, 0], [1000, 1000]];
@@ -24,20 +24,19 @@ const LocationMap = () => {
   const [realTimeData, setRealTimeData] = useState([]);
 
   useEffect(() => {
+
     const fetchZones = async () => {
       try {
-        const zonesData = await getAllZones();
-        setZones(zonesData);
-        console.log('Fetched zones:', zonesData);
+        const data = await zonesService.getAllZones();
+        console.log('Fetched zones:', data); // Лог для проверки данных
+        setZones(data || []);
       } catch (error) {
         console.error('Ошибка при получении зон:', error);
       }
     };
-
     fetchZones();
 
     initWebSocket((data) => {
-      console.log('Received WebSocket data:', data);
       setRealTimeData((prevData) => {
         const existingIndex = prevData.findIndex(item => item.device_id === data.device_id);
         if (existingIndex !== -1) {
@@ -55,26 +54,17 @@ const LocationMap = () => {
     };
   }, []);
 
-  useEffect(() => {
-    // Обновление зон с учетом реальных данных
-    const updatedZones = zones.map(zone => {
-      const employees = realTimeData.filter(data => data.zone_id === zone.id).map(data => data.employee);
-      return { ...zone, employees };
-    });
-    setZones(updatedZones);
-  }, [realTimeData, zones]);
-
-  const handleOpenModal = (zone) => {
+  const handleOpenModal = useCallback((zone) => {
     setSelectedZone(zone);
     setModalVisible(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setModalVisible(false);
     setSelectedZone(null);
-  };
+  }, []);
 
-  const getColorByZoneType = (type) => {
+  const getColorByZoneType = useCallback((type) => {
     switch (type) {
       case 'regular':
         return 'blue';
@@ -87,14 +77,21 @@ const LocationMap = () => {
       default:
         return 'black';
     }
-  };
+  }, []);
+
+  const updatedZones = useMemo(() => {
+    return zones.map(zone => {
+      const employees = realTimeData.filter(data => data.zone_id === zone.id).map(data => data.employee);
+      return { ...zone, employees };
+    });
+  }, [zones, realTimeData]);
 
   return (
     <>
       <MapContainer
         center={[500, 500]}
         zoom={2}
-        style={{ height: '600px', width: '100%' }}
+        style={{ height: '100vh', width: '100%' }}
         crs={L.CRS.Simple}
       >
         <ImageOverlay
@@ -102,7 +99,7 @@ const LocationMap = () => {
           bounds={imageBounds}
           opacity={1}
         />
-        {zones && zones.length > 0 && zones.map((zone) => (
+        {updatedZones.map((zone) => (
           <Polygon
             key={zone.id}
             positions={zone.coordinates}
@@ -119,9 +116,8 @@ const LocationMap = () => {
             </Popup>
           </Polygon>
         ))}
-        {realTimeData && realTimeData.length > 0 && realTimeData.map((data) => {
-          console.log('Processing realTimeData entry:', data);
-          const zone = zones.find(zone => zone.id === data.zone_id);
+        {realTimeData.map((data) => {
+          const zone = updatedZones.find(zone => zone.id === data.zone_id);
           if (zone) {
             return (
               <Marker
@@ -133,7 +129,6 @@ const LocationMap = () => {
               </Marker>
             );
           } else {
-            // По умолчанию отображаем на координатах маяка, если зона не найдена
             const beacon = data.beacon_id && zones.find(zone => zone.beacons.includes(data.beacon_id));
             if (beacon && beacon.map_coordinates) {
               return (
