@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import L from 'leaflet';
+import L from 'leaflet'; // Добавлен импорт
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import plan from 'src/assets/brand/plan.jpeg';
-import beaconIconUrl from 'src/assets/images/ble-beacon.png'; // Импорт иконки маяка
+import beaconIconUrl from 'src/assets/images/ble-beacon.png';
 
 const imageBounds = [[0, 0], [1000, 1000]];
 L.drawLocal.draw.handlers.marker.tooltip.start = 'Кликните на карту, чтобы добавить маяк.';
@@ -64,7 +64,7 @@ const MapComponent = ({ zones, availableBeacons, onCreateZone, onEditZone, onDel
     availableBeacons.forEach((beacon) => {
       if (beacon.map_coordinates) {
         const icon = L.icon({
-          iconUrl: beaconIconUrl, // Используем импортированный путь
+          iconUrl: beaconIconUrl,
           iconSize: [50, 50],
         });
 

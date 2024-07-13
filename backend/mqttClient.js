@@ -1,3 +1,5 @@
+// backend/mqttClient.js
+
 const mqtt = require('mqtt');
 const { Pool } = require('pg');
 require('dotenv').config();
@@ -74,4 +76,17 @@ client.on('message', async (topic, message) => {
   }
 });
 
-module.exports = client;
+const sendMessage = (topic, message) => {
+  client.publish(topic, message, (error) => {
+    if (error) {
+      console.error('Error publishing message:', error);
+    } else {
+      console.log('Message published:', message);
+    }
+  });
+};
+
+module.exports = {
+  client,
+  sendMessage,
+};

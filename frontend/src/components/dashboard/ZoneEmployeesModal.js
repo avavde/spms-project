@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CButton } from '@coreui/react';
 
 const ZoneEmployeesModal = ({ visible, onClose, zone }) => {
+  console.log('Модальное окно открыто для зоны:', zone); // Лог для проверки данных зоны
   return (
     <CModal visible={visible} onClose={onClose}>
       <CModalHeader>

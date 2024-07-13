@@ -27,6 +27,7 @@ const AdminZoneEditor = () => {
     try {
       const data = await zonesService.getAllZones();
       setZones(data);
+      console.log('Зоны загружены:', data); // Лог загруженных зон
     } catch (error) {
       console.error('Ошибка при получении зон:', error);
     }
@@ -36,6 +37,7 @@ const AdminZoneEditor = () => {
     try {
       const data = await getAvailableBeacons();
       setAvailableBeacons(data);
+      console.log('Маяки загружены:', data); // Лог загруженных маяков
     } catch (error) {
       console.error('Ошибка при получении маяков:', error);
     }
@@ -53,6 +55,13 @@ const AdminZoneEditor = () => {
   };
 
   const handleEditZone = (layer, zone) => {
+    if (!zone) {
+      console.error('Ошибка: зона не найдена');
+      return;
+    }
+
+    console.log(`Редактирование зоны с ID: ${zone.id}`, zone); // Логирование ID зоны и информации о ней
+
     setCurrentZone({
       id: zone.id,
       name: zone.name,
@@ -66,7 +75,12 @@ const AdminZoneEditor = () => {
   const handleDeleteZone = async (layers) => {
     layers.eachLayer(async (layer) => {
       const zoneId = layer.options.id;
+      if (!zoneId) {
+        console.error('ID зоны не определен');
+        return;
+      }
       try {
+        console.log(`Удаление зоны с ID: ${zoneId}`);
         await zonesService.deleteZone(zoneId);
         setZones((prevZones) => prevZones.filter((zone) => zone.id !== zoneId));
       } catch (error) {
@@ -77,11 +91,14 @@ const AdminZoneEditor = () => {
 
   const handleSaveZone = async (zone) => {
     try {
+      console.log(`Сохранение зоны с ID: ${zone.id}`, zone); // Логирование ID зоны и информации о ней
       if (zone.id) {
         const updatedZone = await zonesService.updateZone(zone.id, zone);
+        console.log(`Обновленная зона: ${JSON.stringify(updatedZone)}`);
         setZones((prevZones) => prevZones.map((z) => (z.id === updatedZone.id ? updatedZone : z)));
       } else {
         const newZone = await zonesService.createZone(zone);
+        console.log(`Созданная зона: ${JSON.stringify(newZone)}`);
         setZones((prevZones) => [...prevZones, newZone]);
       }
     } catch (error) {

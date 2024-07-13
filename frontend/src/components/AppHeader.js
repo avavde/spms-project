@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
@@ -13,10 +13,12 @@ import {
   CNavLink,
   CNavItem,
   useColorModes,
+  COffcanvas,
+  COffcanvasHeader,
+  COffcanvasBody,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
-  cilBell,
   cilContrast,
   cilEnvelopeOpen,
   cilList,
@@ -27,6 +29,8 @@ import {
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
+import NotificationsImportant from './NotificationsImportant'
+import AllNotifications from './AllNotifications'
 
 const AppHeader = () => {
   const headerRef = useRef()
@@ -34,6 +38,7 @@ const AppHeader = () => {
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const [showOffcanvas, setShowOffcanvas] = useState(false)
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -66,12 +71,10 @@ const AppHeader = () => {
         </CHeaderNav>
         <CHeaderNav className="ms-auto">
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
-            </CNavLink>
+            <NotificationsImportant setShowOffcanvas={setShowOffcanvas} />
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">
+            <CNavLink href="#" onClick={() => setShowOffcanvas(true)}>
               <CIcon icon={cilList} size="lg" />
             </CNavLink>
           </CNavItem>
@@ -134,6 +137,14 @@ const AppHeader = () => {
       <CContainer className="px-4" fluid>
         <AppBreadcrumb />
       </CContainer>
+      <COffcanvas placement="end" visible={showOffcanvas} onHide={() => setShowOffcanvas(false)}>
+        <COffcanvasHeader>
+          <h5>Уведомления</h5>
+        </COffcanvasHeader>
+        <COffcanvasBody>
+          <AllNotifications showOffcanvas={showOffcanvas} setShowOffcanvas={setShowOffcanvas} />
+        </COffcanvasBody>
+      </COffcanvas>
     </CHeader>
   )
 }

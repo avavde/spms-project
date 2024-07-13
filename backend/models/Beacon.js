@@ -12,10 +12,11 @@ Beacon.init({
   },
   zone_id: {
     type: DataTypes.INTEGER,
-    allowNull: true, // Изменено на true
+    allowNull: true,
     references: {
-      model: Zone,
-      key: 'id'
+      model: 'zones',
+      key: 'id',
+      onDelete: 'CASCADE'  // Каскадное удаление
     }
   },
   beacon_mac: {

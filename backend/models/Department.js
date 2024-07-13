@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // Путь к вашему файлу конфигурации базы данных
+const sequelize = require('../config/db');
 
 class Department extends Model {}
 

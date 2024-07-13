@@ -8,6 +8,7 @@ const ZoneViolation = require('../models/ZoneViolation');
 const EmployeeZoneAssignment = require('../models/EmployeeZoneAssignment');
 const { broadcast } = require('../websocketServer');
 const { Op, Sequelize } = require('sequelize');
+const CICDecimator = require('../utils/CICDecimator'); // Импорт CIC-фильтра
 
 // Время ожидания без сигнала от устройства для фиксации выхода из зоны (например, 5 минут)
 const EXIT_TIMEOUT = 1 * 60 * 1000;
@@ -15,7 +16,10 @@ const EXIT_TIMEOUT = 1 * 60 * 1000;
 // Объект для хранения таймаутов по устройствам
 const exitTimeouts = {};
 
-async function handleZonePositionMessage(deviceId, payload) {
+// Создание экземпляра CIC-фильтра
+const cicDecimator = new CICDecimator(1, 2); // Пример: 3-ый порядок, коэффициент децимации 10
+
+const handleZonePositionMessage = async (deviceId, payload) => {
   if (!deviceId) {
     console.error('deviceId is null or undefined:', deviceId);
     return;
@@ -33,6 +37,13 @@ async function handleZonePositionMessage(deviceId, payload) {
         }
 
         if (rssi <= -90) {
+          continue;
+        }
+
+        // Применение CIC-фильтра к данным RSSI
+        const filteredRssi = cicDecimator.process(rssi);
+        if (filteredRssi === null) {
+          // Недостаточно данных для фильтрации
           continue;
         }
 
@@ -86,7 +97,6 @@ async function handleZonePositionMessage(deviceId, payload) {
         let zoneId = beacon.zone_id;
 
         if (!zoneId) {
-          // Попытка найти зону по маяку
           try {
             const zone = await Zone.findOne({
               where: Sequelize.literal(`"beacons" @> ARRAY['${bInst}']::text[]`)
@@ -106,7 +116,7 @@ async function handleZonePositionMessage(deviceId, payload) {
             device_id: deviceId,
             zone_id: zoneId,
             timestamp: new Date(ts * 1000),
-            rssi: rssi,
+            rssi: filteredRssi,
             temperature: T,
             pressure: P,
             createdat: new Date(),
@@ -117,7 +127,6 @@ async function handleZonePositionMessage(deviceId, payload) {
 
           console.log('Zone position saved successfully');
 
-          // Найти сотрудника по метке
           let employee = await Employee.findOne({ where: { beaconid: deviceId } });
 
           if (!employee) {
@@ -125,7 +134,6 @@ async function handleZonePositionMessage(deviceId, payload) {
             continue;
           }
 
-          // Проверка существующего события входа без соответствующего события выхода
           const existingEnterEvent = await ZoneEvent.findOne({
             where: {
               employee_id: employee.id,
@@ -136,7 +144,6 @@ async function handleZonePositionMessage(deviceId, payload) {
           });
 
           if (!existingEnterEvent) {
-            // Сохранить событие входа в зону
             if (zoneId) {
               await ZoneEvent.create({
                 employee_id: employee.id,
@@ -145,7 +152,6 @@ async function handleZonePositionMessage(deviceId, payload) {
                 timestamp: new Date(ts * 1000)
               });
 
-              // Проверка на нарушение зоны
               const forbiddenZoneAssignment = await EmployeeZoneAssignment.findOne({
                 where: {
                   employee_id: employee.id,
@@ -158,16 +164,17 @@ async function handleZonePositionMessage(deviceId, payload) {
                 await ZoneViolation.create({
                   employee_id: employee.id,
                   zone_id: zoneId,
+                  zone_type: 'forbidden',
                   timestamp: new Date(ts * 1000)
                 });
 
-                // Отправка уведомления по WebSocket
                 broadcast({
                   type: 'zone_violation',
                   data: {
-                    employeeId: employee.id,
-                    zoneId: zoneId,
-                    timestamp: new Date(ts * 1000),
+                    employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
+                    zone: `Зона ${zoneId}`,
+                    event_type: 'вошел в запрещенную зону',
+                    timestamp: new Date(ts * 1000).toLocaleString(),
                     message: 'Сотрудник вошел в запрещенную зону'
                   }
                 });
@@ -175,25 +182,27 @@ async function handleZonePositionMessage(deviceId, payload) {
             }
           }
 
-          // Удаляем таймаут выхода, если есть
           if (exitTimeouts[deviceId]) {
             clearTimeout(exitTimeouts[deviceId]);
             delete exitTimeouts[deviceId];
           }
 
-          // Устанавливаем новый таймаут для фиксации выхода из зоны
           exitTimeouts[deviceId] = setTimeout(async () => {
             try {
               const lastEvent = await ZoneEvent.findOne({
                 where: {
                   employee_id: employee.id,
                   zone_id: zoneId,
-                  event_type: 'enter'
+                  event_type: 'enter',
+                  duration: { [Op.is]: null }
                 },
                 order: [['timestamp', 'DESC']]
               });
 
-              if (lastEvent && !lastEvent.duration) {
+              if (lastEvent) {
+                const duration = Math.floor((Date.now() - new Date(lastEvent.timestamp).getTime()) / 1000);
+                await lastEvent.update({ duration });
+
                 await ZoneEvent.create({
                   employee_id: employee.id,
                   zone_id: zoneId,
@@ -201,13 +210,13 @@ async function handleZonePositionMessage(deviceId, payload) {
                   timestamp: new Date()
                 });
 
-                // Отправка уведомления о выходе из зоны
                 broadcast({
                   type: 'zone_exit',
                   data: {
-                    employeeId: employee.id,
-                    zoneId: zoneId,
-                    timestamp: new Date(),
+                    employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
+                    zone: `Зона ${zoneId}`,
+                    event_type: 'вышел из зоны',
+                    timestamp: new Date().toLocaleString(),
                     message: 'Сотрудник вышел из зоны'
                   }
                 });
@@ -219,17 +228,16 @@ async function handleZonePositionMessage(deviceId, payload) {
             }
           }, EXIT_TIMEOUT);
 
-          // Подготовка данных для отправки через WebSocket
           const updatedData = {
-            device_id: deviceId,
-            beacon_id: bInst,
-            zone_id: zoneId,
-            rssi: rssi,
-            timestamp: new Date(ts * 1000),
-            employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`
+            type: 'zone_event',
+            data: {
+              employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
+              zone: `Зона ${zoneId}`,
+              event_type: existingEnterEvent ? 'вошел в зону' : 'вышел из зоны',
+              timestamp: new Date(ts * 1000).toLocaleString(),
+            }
           };
 
-          // Отправка данных через WebSocket
           broadcast(updatedData);
         } catch (error) {
           console.error('Database error:', error);
@@ -239,6 +247,6 @@ async function handleZonePositionMessage(deviceId, payload) {
   } else {
     console.error('Invalid payload for DeviceZonePosition:', payload);
   }
-}
+};
 
 module.exports = { handleZonePositionMessage };

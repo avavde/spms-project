@@ -1,3 +1,5 @@
+// backend/server.js
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -22,6 +24,7 @@ const websocketServer = require('./websocketServer');
 const beaconRoutes = require('./routes/beaconRoutes');
 const employeeZoneAssignmentRoutes = require('./routes/employeeZoneAssignmentRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const sosRoutes = require('./routes/sosRoutes'); // импортируем sosRoutes
 
 const app = express();
 const server = require('http').createServer(app);
@@ -48,6 +51,7 @@ app.use('/api/device-events', deviceEventRoutes);
 app.use('/api/device-self-tests', deviceSelfTestRoutes);
 app.use('/api/beacons', beaconRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/send-sos', sosRoutes); // используем sosRoutes
 
 sequelize.sync().then(() => {
   server.listen(PORT, () => {

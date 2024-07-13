@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton } from '@coreui/react';
+import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CIcon } from '@coreui/react';
+import { cilMap } from '@coreui/icons';
 
 const EmployeeList = ({ employees, onEdit, onDelete, onShowCurrentZone }) => {
   return (
@@ -33,6 +34,10 @@ const EmployeeList = ({ employees, onEdit, onDelete, onShowCurrentZone }) => {
               <CButton color="info" size="sm" onClick={() => onShowCurrentZone(employee)}>Показать зону</CButton>
               {' '}
               <CButton color="danger" size="sm" onClick={() => onDelete(employee.id)}>Удалить</CButton>
+              {' '}
+              <CButton color="success" size="sm" onClick={() => onShowCurrentZone(employee)}>
+                <CIcon icon={cilMap} />
+              </CButton>
             </CTableDataCell>
           </CTableRow>
         ))}
@@ -41,11 +46,4 @@ const EmployeeList = ({ employees, onEdit, onDelete, onShowCurrentZone }) => {
   );
 };
 
-EmployeeList.propTypes = {
-  employees: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onEdit: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onShowCurrentZone: PropTypes.func.isRequired,
-};
-
-export default EmployeeList;
+EmployeeList

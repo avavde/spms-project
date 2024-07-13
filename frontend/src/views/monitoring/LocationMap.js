@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { MapContainer, ImageOverlay, Polygon, Popup, Marker } from 'react-leaflet';
+import { MapContainer, ImageOverlay, Polygon, Popup, Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import ZoneEmployeesModal from '../../components/dashboard/ZoneEmployeesModal';
 import 'leaflet/dist/leaflet.css';
@@ -24,7 +24,6 @@ const LocationMap = () => {
   const [realTimeData, setRealTimeData] = useState([]);
 
   useEffect(() => {
-
     const fetchZones = async () => {
       try {
         const data = await zonesService.getAllZones();
@@ -36,17 +35,17 @@ const LocationMap = () => {
     };
     fetchZones();
 
-    initWebSocket((data) => {
-      setRealTimeData((prevData) => {
-        const existingIndex = prevData.findIndex(item => item.device_id === data.device_id);
-        if (existingIndex !== -1) {
-          const newData = [...prevData];
-          newData[existingIndex] = data;
+    initWebSocket((message) => {
+      const { type, data } = message;
+      if (type === 'zone_event') {
+        setRealTimeData((prevData) => {
+          const newData = prevData.filter(item => item.employee !== data.employee);
+          if (data.event_type === 'вошел в зону') {
+            newData.push({ ...data, device_id: data.employee });
+          }
           return newData;
-        } else {
-          return [...prevData, data];
-        }
-      });
+        });
+      }
     });
 
     return () => {
@@ -55,6 +54,7 @@ const LocationMap = () => {
   }, []);
 
   const handleOpenModal = useCallback((zone) => {
+    console.log('Открытие модального окна для зоны:', zone); // Лог для проверки данных зоны
     setSelectedZone(zone);
     setModalVisible(true);
   }, []);
@@ -80,10 +80,12 @@ const LocationMap = () => {
   }, []);
 
   const updatedZones = useMemo(() => {
-    return zones.map(zone => {
-      const employees = realTimeData.filter(data => data.zone_id === zone.id).map(data => data.employee);
+    const newZones = zones.map(zone => {
+      const employees = realTimeData.filter(data => data.zone === `Зона ${zone.id}`).map(data => data.employee);
       return { ...zone, employees };
     });
+    console.log('Updated zones with employees:', newZones); // Лог для проверки обновленных данных
+    return newZones;
   }, [zones, realTimeData]);
 
   return (
@@ -111,6 +113,9 @@ const LocationMap = () => {
               },
             }}
           >
+            <Tooltip direction="center" permanent>
+              {zone.name}: {zone.employees ? zone.employees.length : 0} сотрудников
+            </Tooltip>
             <Popup>
               {zone.name}: {zone.employees ? zone.employees.length : 0} сотрудников
             </Popup>

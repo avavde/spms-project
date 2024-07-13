@@ -21,7 +21,7 @@ ZoneViolation.init({
   },
   zone_type: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // Разрешить NULL
   },
   zones: {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
