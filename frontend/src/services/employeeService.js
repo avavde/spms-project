@@ -6,6 +6,16 @@ const getAllEmployees = () => {
   return axios.get(`${API_URL}/employees`);
 };
 
+const getDeviceStatus = async (beaconId) => {
+  const response = await axios.get(`${API_URL}/device-statuses/${beaconId}`);
+  return response.data;
+};
+
+const getZoneAssignments = async (employeeId) => {
+  const response = await axios.get(`${API_URL}/employee-zone-assignments/employee/${employeeId}`);
+  return response.data;
+};
+
 const getEmployeeById = (id) => {
   return axios.get(`${API_URL}/employees/${id}`);
 };
@@ -35,4 +45,6 @@ export default {
   updateEmployee,
   deleteEmployee,
   assignBeacon,
+  getDeviceStatus,
+  getZoneAssignments,
 };

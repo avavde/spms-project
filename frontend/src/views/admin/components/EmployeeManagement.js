@@ -17,9 +17,10 @@ import {
   CFormInput
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPencil, cilTrash, cilPlus } from '@coreui/icons';
+import { cilPencil, cilTrash, cilPlus, cilMap } from '@coreui/icons';
 import EmployeeFormModal from './EmployeeFormModal';
 import DepartmentFormModal from './DepartmentFormModal';
+import EmployeeLocationModal from 'src/components/EmployeeLocationModal';
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
@@ -35,6 +36,8 @@ const EmployeeManagement = () => {
     position: '',
     beaconid: '',
   });
+  const [isZoneMapOpen, setIsZoneMapOpen] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   useEffect(() => {
     fetchEmployees();
@@ -127,6 +130,16 @@ const EmployeeManagement = () => {
     setFilteredEmployees(filtered);
   };
 
+  const handleShowCurrentZone = (employee) => {
+    setSelectedEmployee(employee);
+    setShowLocationModal(true);
+  };
+
+  const handleCloseLocationModal = () => {
+    setShowLocationModal(false);
+    setSelectedEmployee(null);
+  };
+
   const handleSaveZones = async (employeeId, zones) => {
     try {
       // Logic to save zones for the employee
@@ -200,6 +213,15 @@ const EmployeeManagement = () => {
                       >
                         <CIcon icon={cilTrash} />
                       </CButton>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => handleShowCurrentZone(employee)}
+                      >
+                        <CIcon icon={cilMap} />
+                      </CButton>
                     </CTableDataCell>
                   </CTableRow>
                 ))}
@@ -221,6 +243,13 @@ const EmployeeManagement = () => {
         department={selectedDepartment}
         onSave={handleDepartmentSave}
       />
+      {selectedEmployee && (
+        <EmployeeLocationModal
+          employeeId={selectedEmployee.id}
+          visible={showLocationModal}
+          onClose={handleCloseLocationModal}
+        />
+      )}
     </CRow>
   );
 };

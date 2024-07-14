@@ -1,5 +1,10 @@
 const Employee = require('../models/Employee');
 const Beacon = require('../models/Beacon');
+const GNSSPosition = require('../models/GNSSPosition');
+const DeviceZonePosition = require('../models/DeviceZonePosition');
+const Zone = require('../models/Zone');
+const Department = require('../models/Department');
+
 
 exports.getAllEmployees = async (req, res) => {
   try {
@@ -133,5 +138,78 @@ exports.assignBeacon = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при назначении метки:', error.message, error.stack);
     res.status(500).json({ error: 'Ошибка при назначении метки' });
+  }
+};
+
+exports.getEmployeeLocation = async (req, res) => {
+  try {
+    const employee = await Employee.findByPk(req.params.id, {
+      include: [
+        { model: Department, attributes: ['name'] }
+      ]
+    });
+
+    if (!employee) {
+      console.log('Employee not found:', req.params.id); // Отладка
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    let locationData;
+    const gnssPosition = await GNSSPosition.findOne({
+      where: { device_id: employee.beaconid },
+      order: [['timestamp', 'DESC']]
+    });
+
+    if (gnssPosition) {
+      console.log('GNSS position found:', gnssPosition); // Отладка
+      locationData = {
+        gps: true,
+        coordinates: [gnssPosition.latitude, gnssPosition.longitude],
+      };
+    } else {
+      const deviceZonePosition = await DeviceZonePosition.findOne({
+        where: { device_id: employee.beaconid },
+        order: [['timestamp', 'DESC']]
+      });
+
+      if (deviceZonePosition) {
+        const zone = await Zone.findByPk(deviceZonePosition.zone_id);
+        const beacon = await Beacon.findOne({ where: { beacon_mac: deviceZonePosition.device_id } });
+
+        console.log('Device zone position found:', deviceZonePosition); // Отладка
+        console.log('Zone found:', zone); // Отладка
+        console.log('Beacon found:', beacon); // Отладка
+
+        locationData = {
+          gps: false,
+          coordinates: beacon ? beacon.map_coordinates : [0, 0],
+          zone,
+          mapUrl: '/path/to/plan.jpeg'
+        };
+      } else {
+        console.log('No device zone position found'); // Отладка
+      }
+    }
+
+    if (!locationData) {
+      return res.status(404).json({ error: 'Location data not found' });
+    }
+
+    const fullName = `${employee.last_name} ${employee.first_name} ${employee.middle_name}`;
+    const position = employee.position || 'Не указано';
+    const department = employee.Department ? employee.Department.name : 'Не указано';
+
+    const result = {
+      ...locationData,
+      full_name: fullName,
+      position: position,
+      department: department
+    };
+
+    console.log('Location data:', result); // Отладка
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching employee location:', error.message, error.stack); // Улучшенное логирование
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 };

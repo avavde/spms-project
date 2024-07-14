@@ -20,4 +20,7 @@ router.delete('/:id', employeeController.deleteEmployee);
 // Маршрут для назначения метки сотруднику
 router.put('/:id/assign-beacon', employeeController.assignBeacon);
 
+// Маршрут для отображения позиции сотрудника
+router.get('/:id/location', employeeController.getEmployeeLocation);
+
 module.exports = router;

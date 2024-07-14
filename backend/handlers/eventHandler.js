@@ -38,9 +38,10 @@ async function handleEventMessage(deviceId, payload) {
       const updatedData = {
         type: 'device_event',
         data: {
+          employee_id: employee.id, // ID сотрудника
           employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
           event: event,
-          timestamp: new Date(ts * 1000).toLocaleString(),
+          timestamp: new Date(ts * 1000).toISOString(),
           message: `Событие: ${event}`
         }
       };

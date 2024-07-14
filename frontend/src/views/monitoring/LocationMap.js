@@ -1,3 +1,4 @@
+// src/components/LocationMap.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { MapContainer, ImageOverlay, Polygon, Popup, Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
@@ -6,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import plan from 'src/assets/brand/plan.jpeg';
 import employeeIconUrl from 'src/assets/images/employee.png';
 import zonesService from 'src/services/zonesService';
-import { initWebSocket, closeWebSocket } from 'src/services/webSocketService';
+import { useWebSocket } from 'src/context/WebSocketContext';  // Импортируем WebSocketContext
 
 const imageBounds = [[0, 0], [1000, 1000]];
 
@@ -21,6 +22,7 @@ const LocationMap = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
   const [zones, setZones] = useState([]);
+  const notifications = useWebSocket();  // Используем WebSocketContext
   const [realTimeData, setRealTimeData] = useState([]);
 
   useEffect(() => {
@@ -34,24 +36,22 @@ const LocationMap = () => {
       }
     };
     fetchZones();
+  }, []);
 
-    initWebSocket((message) => {
+  useEffect(() => {
+    notifications.forEach((message) => {
       const { type, data } = message;
       if (type === 'zone_event') {
         setRealTimeData((prevData) => {
-          const newData = prevData.filter(item => item.employee !== data.employee);
+          const newData = prevData.filter(item => item.employee_id !== data.employee_id);
           if (data.event_type === 'вошел в зону') {
-            newData.push({ ...data, device_id: data.employee });
+            newData.push(data);
           }
           return newData;
         });
       }
     });
-
-    return () => {
-      closeWebSocket();
-    };
-  }, []);
+  }, [notifications]);
 
   const handleOpenModal = useCallback((zone) => {
     console.log('Открытие модального окна для зоны:', zone); // Лог для проверки данных зоны
@@ -81,7 +81,7 @@ const LocationMap = () => {
 
   const updatedZones = useMemo(() => {
     const newZones = zones.map(zone => {
-      const employees = realTimeData.filter(data => data.zone === `Зона ${zone.id}`).map(data => data.employee);
+      const employees = realTimeData.filter(data => data.zone_id === zone.id).map(data => data.employee);
       return { ...zone, employees };
     });
     console.log('Updated zones with employees:', newZones); // Лог для проверки обновленных данных
@@ -124,28 +124,16 @@ const LocationMap = () => {
         {realTimeData.map((data) => {
           const zone = updatedZones.find(zone => zone.id === data.zone_id);
           if (zone) {
+            const beacon = data.beacon_id && zones.find(zone => zone.beacons.includes(data.beacon_id));
             return (
               <Marker
-                key={data.device_id}
-                position={L.latLngBounds(zone.coordinates).getCenter()}
+                key={data.employee_id}
+                position={beacon && beacon.map_coordinates ? L.latLng(beacon.map_coordinates) : L.latLngBounds(zone.coordinates).getCenter()}
                 icon={employeeIcon}
               >
                 <Popup>Сотрудник {data.employee} в зоне {zone.name}</Popup>
               </Marker>
             );
-          } else {
-            const beacon = data.beacon_id && zones.find(zone => zone.beacons.includes(data.beacon_id));
-            if (beacon && beacon.map_coordinates) {
-              return (
-                <Marker
-                  key={data.device_id}
-                  position={L.latLng(beacon.map_coordinates)}
-                  icon={employeeIcon}
-                >
-                  <Popup>Сотрудник {data.employee} рядом с маяком {beacon.beacon_mac}</Popup>
-                </Marker>
-              );
-            }
           }
           return null;
         })}

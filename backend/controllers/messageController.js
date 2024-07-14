@@ -5,15 +5,10 @@ const { sendMessage } = require('../mqttClient');
 
 const sendMessageToDevices = async (req, res) => {
     try {
-        const devices = await Device.findAll({ where: { devicetype: 'badge' } });
+        const devices = await Device.findAll({ devicetype: 'badge' });
         devices.forEach(device => {
-            const topic = `Badge/${device.id}/down/commands`;
-            const message = JSON.stringify({
-                message: {
-                    event: 'SOS_START',
-                    sync: 'AAAAAA'
-                }
-            });
+            const topic = device.mqttTopic;
+            const message = 'SOS_START';
             sendMessage(topic, message);
         });
         res.status(200).send({ message: 'Messages sent successfully' });
@@ -22,6 +17,21 @@ const sendMessageToDevices = async (req, res) => {
     }
 };
 
+const cancelSosMessage = async (req, res) => {
+    try {
+        const devices = await Device.findAll({ devicetype: 'badge' });
+        devices.forEach(device => {
+            const topic = device.mqttTopic;
+            const message = 'SOS_STOP';
+            sendMessage(topic, message);
+        });
+        res.status(200).send({ message: 'Cancel SOS messages sent successfully' });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+};
+
 module.exports = {
     sendMessageToDevices,
+    cancelSosMessage,
 };

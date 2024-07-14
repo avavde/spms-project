@@ -1,55 +1,71 @@
+// src/components/AllNotifications.js
 import React, { useEffect, useState } from 'react';
-import {
-  CListGroup,
-  CListGroupItem,
-  CAlert,
-} from '@coreui/react';
+import { CListGroup, CListGroupItem, CAlert, CButton } from '@coreui/react';
 import PropTypes from 'prop-types';
 import CIcon from '@coreui/icons-react';
-import {
-  cilBell,
-  cilInfo,
-  cilWarning,
-  cilUserFollow,
-  cilUserUnfollow,
-} from '@coreui/icons';
-import { initWebSocket, closeWebSocket } from '../services/webSocketService';
+import { cilBell, cilInfo, cilWarning, cilUserFollow, cilUserUnfollow, cilBurn } from '@coreui/icons';
+import { useWebSocket } from '../context/WebSocketContext';
+import EmployeeLocationModal from './EmployeeLocationModal';
 
-const AllNotifications = ({ showOffcanvas, setShowOffcanvas }) => {
-  const [notifications, setNotifications] = useState([]);
+const AllNotifications = () => {
+  const notifications = useWebSocket();
   const [logs, setLogs] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   useEffect(() => {
-    const handleNotification = (notification) => {
-      setNotifications((prevNotifications) => [notification, ...prevNotifications]);
-      setLogs((prevLogs) => [
-        ...prevLogs,
-        { timestamp: new Date().toLocaleString(), message: JSON.stringify(notification) },
-      ]);
-    };
+    setLogs((prevLogs) => [
+      ...prevLogs,
+      ...notifications.map((notification) => ({
+        timestamp: new Date().toLocaleString(),
+        message: JSON.stringify(notification),
+      }))
+    ]);
+  }, [notifications]);
 
-    initWebSocket(handleNotification);
-
-    return () => {
-      closeWebSocket();
-    };
-  }, []);
-
-  const renderNotificationIcon = (type) => {
-    switch (type) {
-      case 'enter':
-        return <CIcon icon={cilUserFollow} className="me-2 text-success" />;
-      case 'exit':
-        return <CIcon icon={cilUserUnfollow} className="me-2 text-danger" />;
+  const getAlertColor = (eventType) => {
+    switch (eventType) {
       case 'violation':
-        return <CIcon icon={cilWarning} className="me-2 text-warning" />;
-      case 'low_battery':
-        return <CIcon icon={cilWarning} className="me-2 text-danger" />;
+      case 'вошел в запрещенную зону':
+        return 'warning';
       case 'sos_signal':
-        return <CIcon icon={cilBell} className="me-2 text-danger" />;
+      case 'fall':
+      case 'SOS_START':
+      case 'FALL':
+        return 'danger';
+      case 'sos_stop':
+      case 'SOS_STOP':
+        return 'success';
       default:
-        return <CIcon icon={cilInfo} className="me-2 text-info" />;
+        return 'info';
     }
+  };
+
+  const getIcon = (eventType) => {
+    switch (eventType) {
+      case 'enter':
+        return cilUserFollow;
+      case 'exit':
+        return cilUserUnfollow;
+      case 'violation':
+      case 'вошел в запрещенную зону':
+        return cilWarning;
+      case 'low_battery':
+        return cilWarning;
+      case 'sos_signal':
+      case 'SOS_START':
+        return cilBell;
+      case 'fall':
+      case 'FALL':
+        return cilBurn;
+      default:
+        return cilInfo;
+    }
+  };
+
+  const handleShowModal = (employeeId) => {
+    setSelectedEmployee(employeeId);
+    setModalVisible(true);
   };
 
   const renderNotificationContent = (notification) => {
@@ -59,16 +75,52 @@ const AllNotifications = ({ showOffcanvas, setShowOffcanvas }) => {
       return <div>Некорректное сообщение</div>;
     }
 
-    const { employee, timestamp, message, zone } = data;
+    const { employee, employee_id, timestamp, message, zone_name, event_type, event } = data;
+    const alertColor = getAlertColor(event_type || event);
+    const icon = getIcon(event_type || event);
+
+    let informativeMessage;
+    switch (event_type || event) {
+      case 'violation':
+        informativeMessage = `Сотрудник ${employee} нарушил зону ${zone_name}.`;
+        break;
+      case 'вошел в запрещенную зону':
+        informativeMessage = `Сотрудник ${employee} вошел в запрещенную зону ${zone_name}.`;
+        break;
+      case 'sos_signal':
+      case 'SOS_START':
+        informativeMessage = `Сотрудник ${employee} послал сигнал SOS!`;
+        break;
+      case 'fall':
+      case 'FALL':
+        informativeMessage = `Сотрудник ${employee} упал!`;
+        break;
+      case 'sos_stop':
+      case 'SOS_STOP':
+        informativeMessage = `Сотрудник ${employee} отменил сигнал SOS.`;
+        break;
+      default:
+        informativeMessage = message || 'Отклик от маяка';
+    }
 
     return (
-      <div>
-        <div>{message || 'Отклик от маяка'} {zone && `(${zone})`}</div>
-        {employee && <div>Сотрудник: {employee}</div>}
-        <small className="text-muted d-block">
-          {timestamp ? new Date(timestamp).toLocaleString() : 'Время не указано'}
-        </small>
-      </div>
+      <CAlert color={alertColor} className="d-flex align-items-center">
+        <CIcon icon={icon} className="me-2" />
+        <div>
+          <div>
+            {informativeMessage} {zone_name && `(${zone_name})`}
+          </div>
+          {employee && <div>Сотрудник: {employee}</div>}
+          <small className="text-muted d-block">
+            {timestamp ? new Date(timestamp).toLocaleString() : 'Время не указано'}
+          </small>
+          {(event_type === 'sos_signal' || event_type === 'fall' || event === 'SOS_START' || event === 'FALL' || event_type === 'вошел в запрещенную зону') && (
+            <CButton color="link" onClick={() => handleShowModal(employee_id)}>
+              Показать на карте
+            </CButton>
+          )}
+        </div>
+      </CAlert>
     );
   };
 
@@ -82,7 +134,6 @@ const AllNotifications = ({ showOffcanvas, setShowOffcanvas }) => {
       <CListGroup className="drop-down-custom">
         {notifications.map((notification, index) => (
           <CListGroupItem key={index} className="d-flex">
-            {renderNotificationIcon(notification.data.event_type)}
             {renderNotificationContent(notification)}
           </CListGroupItem>
         ))}
@@ -98,6 +149,12 @@ const AllNotifications = ({ showOffcanvas, setShowOffcanvas }) => {
           ))}
         </CListGroup>
       </div>
+
+      <EmployeeLocationModal
+        employeeId={selectedEmployee}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </>
   );
 };

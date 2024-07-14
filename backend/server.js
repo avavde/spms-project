@@ -25,6 +25,7 @@ const beaconRoutes = require('./routes/beaconRoutes');
 const employeeZoneAssignmentRoutes = require('./routes/employeeZoneAssignmentRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const sosRoutes = require('./routes/sosRoutes'); // импортируем sosRoutes
+const cancelSosRoutes = require('./routes/cancelSosRoutes');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -33,6 +34,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.json());
 
+app.use('/api/cancel-sos', cancelSosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/departments', departmentRoutes);

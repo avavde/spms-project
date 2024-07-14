@@ -74,12 +74,12 @@ const AppHeader = () => {
             <NotificationsImportant setShowOffcanvas={setShowOffcanvas} />
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#" onClick={() => setShowOffcanvas(true)}>
+            <CNavLink href={window.location.href} onClick={() => setShowOffcanvas(true)}>
               <CIcon icon={cilList} size="lg" />
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">
+            <CNavLink href={window.location.href}>
               <CIcon icon={cilEnvelopeOpen} size="lg" />
             </CNavLink>
           </CNavItem>

@@ -46,4 +46,11 @@ const EmployeeList = ({ employees, onEdit, onDelete, onShowCurrentZone }) => {
   );
 };
 
-EmployeeList
+EmployeeList.propTypes = {
+  employees: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onShowCurrentZone: PropTypes.func.isRequired,
+};
+
+export default EmployeeList;

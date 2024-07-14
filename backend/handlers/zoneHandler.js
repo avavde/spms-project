@@ -11,13 +11,13 @@ const { Op, Sequelize } = require('sequelize');
 const CICDecimator = require('../utils/CICDecimator'); // Импорт CIC-фильтра
 
 // Время ожидания без сигнала от устройства для фиксации выхода из зоны (например, 5 минут)
-const EXIT_TIMEOUT = 1 * 60 * 1000;
+const EXIT_TIMEOUT = 5 * 60 * 1000;
 
 // Объект для хранения таймаутов по устройствам
 const exitTimeouts = {};
 
 // Создание экземпляра CIC-фильтра
-const cicDecimator = new CICDecimator(1, 2); // Пример: 3-ый порядок, коэффициент децимации 10
+const cicDecimator = new CICDecimator(3, 10); // Пример: 3-ый порядок, коэффициент децимации 10
 
 const handleZonePositionMessage = async (deviceId, payload) => {
   if (!deviceId) {
@@ -171,8 +171,11 @@ const handleZonePositionMessage = async (deviceId, payload) => {
                 broadcast({
                   type: 'zone_violation',
                   data: {
+                    employee_id: employee.id,
                     employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
-                    zone: `Зона ${zoneId}`,
+                    zone_id: zoneId,
+                    zone_name: `Зона ${zoneId}`,
+                    beacon_id: bInst,
                     event_type: 'вошел в запрещенную зону',
                     timestamp: new Date(ts * 1000).toLocaleString(),
                     message: 'Сотрудник вошел в запрещенную зону'
@@ -213,8 +216,11 @@ const handleZonePositionMessage = async (deviceId, payload) => {
                 broadcast({
                   type: 'zone_exit',
                   data: {
+                    employee_id: employee.id,
                     employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
-                    zone: `Зона ${zoneId}`,
+                    zone_id: zoneId,
+                    zone_name: `Зона ${zoneId}`,
+                    beacon_id: bInst,
                     event_type: 'вышел из зоны',
                     timestamp: new Date().toLocaleString(),
                     message: 'Сотрудник вышел из зоны'
@@ -231,8 +237,11 @@ const handleZonePositionMessage = async (deviceId, payload) => {
           const updatedData = {
             type: 'zone_event',
             data: {
+              employee_id: employee.id,
               employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
-              zone: `Зона ${zoneId}`,
+              zone_id: zoneId,
+              zone_name: `Зона ${zoneId}`,
+              beacon_id: bInst,
               event_type: existingEnterEvent ? 'вошел в зону' : 'вышел из зоны',
               timestamp: new Date(ts * 1000).toLocaleString(),
             }

@@ -5,8 +5,9 @@ const { broadcast } = require('../websocketServer');
 
 async function handleStatusMessage(deviceId, payload) {
   if (payload.message) {
-    const { ts, battery, sos, gps, beacons } = payload.message;
-    console.log(`Device ${deviceId} status: battery=${battery}, sos=${sos}, gps=${gps}, beacons=${beacons}`);
+    const { ts, battery, sos, gps, beacons, fall } = payload.message;
+    console.log(`Device ${deviceId} status: battery=${battery}, sos=${sos}, gps=${gps}, beacons=${beacons}, fall=${fall}`);
+    
     try {
       await Device.upsert({
         id: deviceId,
@@ -21,11 +22,13 @@ async function handleStatusMessage(deviceId, payload) {
         sos: sos,
         gps: gps,
         beacons: beacons,
+        fall: fall,
         createdat: new Date(),
         updatedat: new Date()
       }, {
         conflictFields: ['device_id', 'timestamp']
       });
+
       console.log('Device status saved successfully');
 
       // Найти сотрудника по метке
@@ -39,10 +42,11 @@ async function handleStatusMessage(deviceId, payload) {
       // Подготовка данных для отправки через WebSocket
       const statusMessages = [];
 
-      if (battery <= 20) {
+      if (battery <= 10) {
         statusMessages.push({
           type: 'device_status',
           data: {
+            employee_id: employee.id, // ID сотрудника
             employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
             event: 'low_battery',
             timestamp: new Date(ts * 1000).toLocaleString(),
@@ -55,10 +59,24 @@ async function handleStatusMessage(deviceId, payload) {
         statusMessages.push({
           type: 'device_status',
           data: {
+            employee_id: employee.id, // ID сотрудника
             employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
             event: 'sos_signal',
             timestamp: new Date(ts * 1000).toLocaleString(),
             message: 'Активирован SOS сигнал'
+          }
+        });
+      }
+
+      if (fall) {
+        statusMessages.push({
+          type: 'device_status',
+          data: {
+            employee_id: employee.id, // ID сотрудника
+            employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
+            event: 'fall_detected',
+            timestamp: new Date(ts * 1000).toLocaleString(),
+            message: 'Обнаружено падение'
           }
         });
       }
