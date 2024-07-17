@@ -65,21 +65,21 @@ const EmployeeForm = ({ employee, departments, devices, onSave, onClose }) => {
 
   return (
     <CForm onSubmit={handleSubmit}>
+            <div className="mb-3">
+        <CFormLabel htmlFor="last_name">Фамилия</CFormLabel>
+        <CFormInput
+          id="last_name"
+          name="last_name"
+          value={formData.last_name}
+          onChange={handleChange}
+        />
+      </div>
       <div className="mb-3">
         <CFormLabel htmlFor="first_name">Имя</CFormLabel>
         <CFormInput
           id="first_name"
           name="first_name"
           value={formData.first_name}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="mb-3">
-        <CFormLabel htmlFor="last_name">Фамилия</CFormLabel>
-        <CFormInput
-          id="last_name"
-          name="last_name"
-          value={formData.last_name}
           onChange={handleChange}
         />
       </div>
@@ -148,6 +148,7 @@ const EmployeeForm = ({ employee, departments, devices, onSave, onClose }) => {
         </CFormSelect>
       </div>
       <CButton color="primary" type="submit">Сохранить</CButton>
+      <CButton color="secondary" type="button" onClick={onClose}>Закрыть</CButton> {/* Добавлено использование onClose */}
     </CForm>
   );
 };

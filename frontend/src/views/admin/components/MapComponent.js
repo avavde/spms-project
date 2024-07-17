@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import L from 'leaflet'; // Добавлен импорт
+import L from 'leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
@@ -68,7 +68,7 @@ const MapComponent = ({ zones, availableBeacons, onCreateZone, onEditZone, onDel
           iconSize: [50, 50],
         });
 
-        const marker = L.marker(beacon.map_coordinates, { icon, draggable: true })
+        L.marker(beacon.map_coordinates, { icon, draggable: true })
           .on('dragend', (event) => {
             console.log(`Beacon ${beacon.beacon_mac} moved to ${JSON.stringify(event.target.getLatLng())}`);
             onEditBeacon(event.target.getLatLng(), beacon.beacon_mac);

@@ -78,6 +78,12 @@ const _nav = [
   },
   {
     component: CNavItem,
+    name: 'Контроль техники',
+    to: '/proximity-control',
+    icon: <CIcon icon={cilChartLine} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: 'Организация эвакуации',
     to: '/evacuation-organization',
     icon: <CIcon icon={cilWarning} customClassName="nav-icon" />,

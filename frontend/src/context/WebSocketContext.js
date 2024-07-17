@@ -1,15 +1,16 @@
-// src/context/WebSocketContext.js
 import React, { createContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types'; // Импортируем PropTypes
 
 let ws;
 
 const WebSocketContext = createContext(null);
+const WS_URL = process.env.REACT_APP_WS_URL;
 
 export const WebSocketProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    ws = new WebSocket('ws://localhost:8080');
+    ws = new WebSocket({WS_URL});
 
     ws.onopen = () => {
       console.log('WebSocket connected');
@@ -40,6 +41,10 @@ export const WebSocketProvider = ({ children }) => {
       {children}
     </WebSocketContext.Provider>
   );
+};
+
+WebSocketProvider.propTypes = {
+  children: PropTypes.node.isRequired, // Добавляем валидацию PropTypes
 };
 
 export const useWebSocket = () => {

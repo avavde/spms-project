@@ -1,0 +1,85 @@
+// src/views/ProximityControl.js
+import React, { useState, useEffect, useRef } from 'react';
+import { CToast, CToastBody, CToaster, CToastHeader, CContainer, CRow, CCol } from '@coreui/react';
+import MapProximity from 'src/components/MapProximity';
+
+const ProximityControl = () => {
+  const [tags, setTags] = useState([]);
+  const [dangerZones, setDangerZones] = useState([]);
+  const [toast, addToast] = useState(0);
+  const toaster = useRef();
+
+  const wsUrl = 'ws://194.164.52.193:3000';
+
+  useEffect(() => {
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('WebSocket connection established');
+    };
+
+    ws.onmessage = (event) => {
+      console.log('Received message:', event.data);
+      const data = JSON.parse(event.data);
+      if (data.type === 'tag_update') {
+        setTags(prevTags => {
+          const tagIndex = prevTags.findIndex(tag => tag.id === data.id);
+          if (tagIndex !== -1) {
+            const updatedTags = [...prevTags];
+            updatedTags[tagIndex] = data;
+            console.log('Updated tags:', updatedTags);
+            return updatedTags;
+          }
+          const newTags = [...prevTags, data];
+          console.log('New tags:', newTags);
+          return newTags;
+        });
+      } else if (data.type === 'danger_zones') {
+        console.log('Received danger zones:', data.zones);
+        setDangerZones(data.zones);
+      } else if (data.type === 'stop') {
+        console.log('Received stop message:', data.message);
+        const newToast = (
+          <CToast autohide={false} color="danger">
+            <CToastHeader closeButton>
+              Опасность
+            </CToastHeader>
+            <CToastBody>
+              {data.message}
+            </CToastBody>
+          </CToast>
+        );
+        addToast(newToast);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  return (
+    <CContainer>
+      <CRow>
+        <CCol>
+          <MapProximity tags={tags} dangerZones={dangerZones} />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol>
+          <CToaster ref={toaster} push={toast} placement="top-end" />
+        </CCol>
+      </CRow>
+    </CContainer>
+  );
+};
+
+export default ProximityControl;

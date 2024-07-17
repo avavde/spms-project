@@ -1,5 +1,4 @@
 // src/routes.js
-
 import React from 'react';
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'));
@@ -15,6 +14,7 @@ const EquipmentMonitoring = React.lazy(() => import('./views/equipment/Equipment
 const EvacuationOrganization = React.lazy(() => import('./views/safety/EvacuationOrganization'));
 const ReportsERPIntegration = React.lazy(() => import('./views/reports/ReportsERPIntegration'));
 const EmployeeEditPage = React.lazy(() => import('./views/pages/EmployeeEditPage'));
+const ProximityControl = React.lazy(() => import('./views/ProximityControl'));
 
 const routes = [
   { path: '/', exact: true, name: 'Главная' },
@@ -31,6 +31,7 @@ const routes = [
   { path: '/evacuation-organization', name: 'Организация эвакуации', element: EvacuationOrganization },
   { path: '/reports-erp-integration', name: 'Интеграция с ERP', element: ReportsERPIntegration },
   { path: '/employee/edit/:id', name: 'Редактирование сотрудника', element: EmployeeEditPage },
+  { path: '/proximity-control', name: 'Контроль приближения техники', element: ProximityControl }, 
 ];
 
 export default routes;

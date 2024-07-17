@@ -36,7 +36,6 @@ const EmployeeManagement = () => {
     position: '',
     beaconid: '',
   });
-  const [isZoneMapOpen, setIsZoneMapOpen] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
 
   useEffect(() => {

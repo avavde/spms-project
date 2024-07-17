@@ -3,7 +3,7 @@ import { CToaster, CToast, CToastBody, CToastHeader } from '@coreui/react';
 import { useAlert } from '../context/AlertContext';
 
 const SOSAlert = () => {
-  const { alerts, removeAlert } = useAlert();
+  const { alerts } = useAlert();
 
   const getIcon = (type) => {
     switch (type) {

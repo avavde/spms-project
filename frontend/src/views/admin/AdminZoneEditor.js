@@ -9,6 +9,7 @@ import {
   CCardBody,
   CCardHeader,
 } from '@coreui/react';
+import L from 'leaflet'; // Импортируем L из библиотеки leaflet
 
 const AdminZoneEditor = () => {
   const [zones, setZones] = useState([]);
