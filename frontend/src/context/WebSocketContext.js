@@ -4,18 +4,13 @@ import PropTypes from 'prop-types'; // Импортируем PropTypes
 let ws;
 
 const WebSocketContext = createContext(null);
-const WS_URL = process.env.REACT_APP_WS_URL || "ws://localhost:8080/"; // Убедитесь, что URL правильный
+const WS_URL = process.env.REACT_APP_WS_URL;
 
 export const WebSocketProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    ws = new WebSocket(WS_URL, [
-      "protocolOne",
-      "protocolTwo",
-    ]); // Исправляем URL
-  
-   
+    ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
       console.log('WebSocket connected');

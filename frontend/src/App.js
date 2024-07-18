@@ -1,4 +1,3 @@
-// src/App.js
 import React, { Suspense, useEffect } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -36,7 +35,7 @@ const App = () => {
   }, []);
 
   return (
-  
+
       <WebSocketProvider>
           <AlertProvider>
         <HashRouter>
@@ -57,10 +56,10 @@ const App = () => {
           </Suspense>
         </HashRouter>
         <ToasterProvider />
-        <SOSAlert /> 
+        <SOSAlert />
         </AlertProvider>
       </WebSocketProvider>
-   
+
   );
 };
 
