@@ -1,6 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Zone = require('./Zone');
 const FloorPlan = require('./FloorPlan');
 
 class Beacon extends Model {}
@@ -11,14 +10,14 @@ Beacon.init({
     primaryKey: true,
     autoIncrement: true,
   },
-  zone_id: {
+  floor_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: Zone,
+      model: FloorPlan,
       key: 'id',
     },
-    allowNull: true,
-    onDelete: 'SET NULL',
+    allowNull: false,
+    onDelete: 'CASCADE',
   },
   beacon_mac: {
     type: DataTypes.STRING,
@@ -32,15 +31,6 @@ Beacon.init({
     type: DataTypes.JSON,
     allowNull: true,
   },
-  floor_id: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: FloorPlan,
-      key: 'id',
-    },
-    allowNull: true,
-    onDelete: 'SET NULL',
-  },
 }, {
   sequelize,
   modelName: 'Beacon',
@@ -48,7 +38,6 @@ Beacon.init({
   timestamps: false,
 });
 
-Beacon.belongsTo(Zone, { foreignKey: 'zone_id', as: 'zone' });
-Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id', as: 'floor_plan' });
+Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id', as: 'floor' });
 
 module.exports = Beacon;

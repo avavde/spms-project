@@ -1,7 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
-const Beacon = require('./Beacon');
 
 class FloorPlan extends Model {}
 
@@ -30,12 +29,12 @@ FloorPlan.init({
   },
   created_at: {
     type: DataTypes.DATE,
-    allowNull: true,
+    allowNull: false,
     defaultValue: DataTypes.NOW,
   },
   updated_at: {
     type: DataTypes.DATE,
-    allowNull: true,
+    allowNull: false,
     defaultValue: DataTypes.NOW,
   },
 }, {
@@ -46,6 +45,5 @@ FloorPlan.init({
 });
 
 FloorPlan.belongsTo(Building, { foreignKey: 'building_id', as: 'building' });
-FloorPlan.hasMany(Beacon, { foreignKey: 'floor_id', as: 'beacons' });
 
 module.exports = FloorPlan;

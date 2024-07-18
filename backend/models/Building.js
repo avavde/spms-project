@@ -1,6 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const FloorPlan = require('./FloorPlan'); // Убедитесь, что путь правильный
 
 class Building extends Model {}
 
@@ -16,20 +15,20 @@ Building.init({
   },
   gps_coordinates: {
     type: DataTypes.JSONB,
-    allowNull: false,
+    allowNull: true,
   },
   dimensions: {
     type: DataTypes.JSONB,
-    allowNull: false,
+    allowNull: true,
   },
   created_at: {
     type: DataTypes.DATE,
-    allowNull: true,
+    allowNull: false,
     defaultValue: DataTypes.NOW,
   },
   updated_at: {
     type: DataTypes.DATE,
-    allowNull: true,
+    allowNull: false,
     defaultValue: DataTypes.NOW,
   },
 }, {
@@ -38,7 +37,5 @@ Building.init({
   tableName: 'buildings',
   timestamps: false,
 });
-
-Building.hasMany(FloorPlan, { foreignKey: 'building_id', as: 'floor_plans' });
 
 module.exports = Building;
