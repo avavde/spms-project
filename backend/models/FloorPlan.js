@@ -45,7 +45,7 @@ FloorPlan.init({
   timestamps: false,
 });
 
-FloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
-FloorPlan.hasMany(Beacon, { foreignKey: 'floor_id' }); // Устанавливаем связь с Beacon
+FloorPlan.belongsTo(Building, { foreignKey: 'building_id', as: 'building' });
+FloorPlan.hasMany(Beacon, { foreignKey: 'floor_id', as: 'beacons' }); // Устанавливаем связь с Beacon
 
 module.exports = FloorPlan;

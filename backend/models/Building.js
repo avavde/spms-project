@@ -39,6 +39,6 @@ Building.init({
   timestamps: false,
 });
 
-Building.hasMany(FloorPlan, { foreignKey: 'building_id' }); // Устанавливаем связь с FloorPlan
+Building.hasMany(FloorPlan, { foreignKey: 'building_id', as: 'floorPlans' }); // Устанавливаем связь с FloorPlan
 
 module.exports = Building;

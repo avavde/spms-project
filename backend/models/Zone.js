@@ -43,7 +43,7 @@ Zone.init({
 });
 
 // Устанавливаем связи после определения моделей
-Zone.belongsTo(Department, { foreignKey: 'department_id' });
-Zone.hasMany(Beacon, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
+Zone.belongsTo(Department, { foreignKey: 'department_id', as: 'department' });
+Zone.hasMany(Beacon, { foreignKey: 'zone_id', as: 'beacons', onDelete: 'CASCADE' });
 
 module.exports = Zone;
