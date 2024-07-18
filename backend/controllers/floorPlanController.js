@@ -1,58 +1,85 @@
-// controllers/floorPlanController.js
 const FloorPlan = require('../models/FloorPlan');
+const Building = require('../models/Building');
 
 exports.createFloorPlan = async (req, res) => {
   try {
-    const floorPlan = await FloorPlan.create(req.body);
+    const { building_id, name, map } = req.body;
+
+    const floorPlan = await FloorPlan.create({ building_id, name, map });
     res.status(201).json(floorPlan);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка создания плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка создания плана этажа' });
   }
 };
 
 exports.getFloorPlans = async (req, res) => {
   try {
-    const floorPlans = await FloorPlan.findAll();
+    const floorPlans = await FloorPlan.findAll({
+      include: [
+        { model: Building },
+      ],
+    });
     res.status(200).json(floorPlans);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка загрузки планов этажей:', error);
+    res.status(500).json({ error: 'Ошибка загрузки планов этажей' });
   }
 };
 
 exports.getFloorPlanById = async (req, res) => {
   try {
-    const floorPlan = await FloorPlan.findByPk(req.params.id);
+    const { id } = req.params;
+    const floorPlan = await FloorPlan.findByPk(id, {
+      include: [
+        { model: Building },
+      ],
+    });
+
     if (!floorPlan) {
-      return res.status(404).json({ error: 'Floor plan not found' });
+      return res.status(404).json({ error: 'План этажа не найден' });
     }
+
     res.status(200).json(floorPlan);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка загрузки плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка загрузки плана этажа' });
   }
 };
 
 exports.updateFloorPlan = async (req, res) => {
   try {
-    const floorPlan = await FloorPlan.findByPk(req.params.id);
+    const { id } = req.params;
+    const { building_id, name, map } = req.body;
+
+    const floorPlan = await FloorPlan.findByPk(id);
+
     if (!floorPlan) {
-      return res.status(404).json({ error: 'Floor plan not found' });
+      return res.status(404).json({ error: 'План этажа не найден' });
     }
-    await floorPlan.update(req.body);
+
+    await floorPlan.update({ building_id, name, map });
     res.status(200).json(floorPlan);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка обновления плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка обновления плана этажа' });
   }
 };
 
 exports.deleteFloorPlan = async (req, res) => {
   try {
-    const floorPlan = await FloorPlan.findByPk(req.params.id);
+    const { id } = req.params;
+
+    const floorPlan = await FloorPlan.findByPk(id);
+
     if (!floorPlan) {
-      return res.status(404).json({ error: 'Floor plan not found' });
+      return res.status(404).json({ error: 'План этажа не найден' });
     }
+
     await floorPlan.destroy();
     res.status(204).send();
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Ошибка удаления плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка удаления плана этажа' });
   }
 };

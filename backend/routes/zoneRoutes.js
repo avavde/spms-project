@@ -1,10 +1,10 @@
 const express = require('express');
-const zoneController = require('../controllers/zoneController');
 const router = express.Router();
+const zoneController = require('../controllers/zoneController');
 
+router.post('/', zoneController.createZone);
 router.get('/', zoneController.getAllZones);
 router.get('/:id', zoneController.getZoneById);
-router.post('/', zoneController.createZone);
 router.put('/:id', zoneController.updateZone);
 router.delete('/:id', zoneController.deleteZone);
 

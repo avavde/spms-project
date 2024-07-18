@@ -1,4 +1,6 @@
 const Zone = require('../models/Zone');
+const Department = require('../models/Department');
+const Beacon = require('../models/Beacon');
 
 exports.getAllZones = async (req, res) => {
   try {
@@ -13,7 +15,12 @@ exports.getAllZones = async (req, res) => {
 exports.getZoneById = async (req, res) => {
   try {
     console.log(`Запрос на получение зоны с ID: ${req.params.id}`);
-    const zone = await Zone.findByPk(req.params.id);
+    const zone = await Zone.findByPk(req.params.id, {
+      include: [
+        { model: Department },
+        { model: Beacon },
+      ],
+    });
     if (!zone) {
       console.log(`Зона с ID ${req.params.id} не найдена`);
       return res.status(404).json({ error: 'Зона не найдена' });
@@ -28,9 +35,9 @@ exports.getZoneById = async (req, res) => {
 
 exports.createZone = async (req, res) => {
   try {
-    const { name, coordinates, beacons, type } = req.body;
-    console.log('Создание новой зоны с данными:', { name, coordinates, beacons, type });
-    const newZone = await Zone.create({ name, coordinates, beacons, type });
+    const { name, coordinates, beacons, type, department_id } = req.body;
+    console.log('Создание новой зоны с данными:', { name, coordinates, beacons, type, department_id });
+    const newZone = await Zone.create({ name, coordinates, beacons, type, department_id });
     res.status(201).json(newZone);
   } catch (error) {
     console.error('Ошибка при создании зоны:', error);
@@ -40,14 +47,14 @@ exports.createZone = async (req, res) => {
 
 exports.updateZone = async (req, res) => {
   try {
-    const { name, coordinates, beacons, type } = req.body;
-    console.log(`Запрос на обновление зоны с ID ${req.params.id} данными:`, { name, coordinates, beacons, type });
+    const { name, coordinates, beacons, type, department_id } = req.body;
+    console.log(`Запрос на обновление зоны с ID ${req.params.id} данными:`, { name, coordinates, beacons, type, department_id });
     const zone = await Zone.findByPk(req.params.id);
     if (!zone) {
       console.log(`Зона с ID ${req.params.id} не найдена`);
       return res.status(404).json({ error: 'Зона не найдена' });
     }
-    await zone.update({ name, coordinates, beacons, type });
+    await zone.update({ name, coordinates, beacons, type, department_id });
     console.log(`Обновленная зона: ${JSON.stringify(zone)}`);
     res.json(zone);
   } catch (error) {
