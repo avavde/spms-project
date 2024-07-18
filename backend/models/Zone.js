@@ -1,7 +1,8 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Department = require('./Department');  // Импорт модели Department
-const Beacon = require('./Beacon');          // Импорт модели Beacon
+const Department = require('./Department');
+const Beacon = require('./Beacon');
+const FloorPlan = require('./FloorPlan');
 
 class Zone extends Model {}
 
@@ -30,10 +31,19 @@ Zone.init({
   department_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: Department,
-      key: 'id'
+      model: 'departments',
+      key: 'id',
     },
     allowNull: true,
+  },
+  floor_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'floor_plans',
+      key: 'id',
+    },
+    allowNull: true,
+    onDelete: 'SET NULL',
   },
 }, {
   sequelize,
@@ -43,6 +53,7 @@ Zone.init({
 });
 
 Zone.belongsTo(Department, { foreignKey: 'department_id', as: 'department' });
-Zone.hasMany(Beacon, { foreignKey: 'zone_id', as: 'beacons', onDelete: 'CASCADE' });
+Zone.belongsTo(FloorPlan, { foreignKey: 'floor_id', as: 'floor_plan' });
+Zone.hasMany(Beacon, { foreignKey: 'zone_id', onDelete: 'CASCADE', as: 'beacons' });
 
 module.exports = Zone;

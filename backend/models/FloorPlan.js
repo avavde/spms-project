@@ -1,7 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
-const Beacon = require('./Beacon'); // Импорт модели Beacon
+const Beacon = require('./Beacon');
 
 class FloorPlan extends Model {}
 
@@ -14,11 +14,11 @@ FloorPlan.init({
   building_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: Building,
+      model: 'buildings',
       key: 'id',
     },
     allowNull: false,
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
   },
   name: {
     type: DataTypes.STRING,
@@ -30,12 +30,12 @@ FloorPlan.init({
   },
   created_at: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     defaultValue: DataTypes.NOW,
   },
   updated_at: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     defaultValue: DataTypes.NOW,
   },
 }, {

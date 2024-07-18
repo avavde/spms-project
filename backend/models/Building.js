@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const FloorPlan = require('./FloorPlan'); // Импорт модели FloorPlan
+const FloorPlan = require('./FloorPlan');
 
 class Building extends Model {}
 
@@ -15,21 +15,21 @@ Building.init({
     allowNull: false,
   },
   gps_coordinates: {
-    type: DataTypes.JSON,
-    allowNull: true,
+    type: DataTypes.JSONB,
+    allowNull: false,
   },
   dimensions: {
-    type: DataTypes.JSON,
-    allowNull: true,
+    type: DataTypes.JSONB,
+    allowNull: false,
   },
   created_at: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     defaultValue: DataTypes.NOW,
   },
   updated_at: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     defaultValue: DataTypes.NOW,
   },
 }, {
@@ -39,6 +39,6 @@ Building.init({
   timestamps: false,
 });
 
-Building.hasMany(FloorPlan, { foreignKey: 'building_id', as: 'floorPlans' });
+Building.hasMany(FloorPlan, { foreignKey: 'building_id', as: 'floor_plans' });
 
 module.exports = Building;
