@@ -1,6 +1,7 @@
 import React from 'react';
 import { CCard, CContainer, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react';
 import DeviceList from 'src/components/DeviceList';
+import BuildingManager from 'src/components/BuildingManager';
 
 const GeneralSettings = () => {
   return (
@@ -11,10 +12,10 @@ const GeneralSettings = () => {
             Общие настройки
           </CCardHeader>
           <CCardBody>
-            {/* Добавьте функционал для общих настроек */}
             <CContainer>
-      <DeviceList />
-    </CContainer>
+              <DeviceList />
+              <BuildingManager />
+            </CContainer>
           </CCardBody>
         </CCard>
       </CCol>

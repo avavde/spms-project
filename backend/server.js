@@ -1,5 +1,3 @@
-// backend/server.js
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -24,8 +22,11 @@ const websocketServer = require('./websocketServer');
 const beaconRoutes = require('./routes/beaconRoutes');
 const employeeZoneAssignmentRoutes = require('./routes/employeeZoneAssignmentRoutes');
 const reportRoutes = require('./routes/reportRoutes');
-const sosRoutes = require('./routes/sosRoutes'); // импортируем sosRoutes
+const sosRoutes = require('./routes/sosRoutes');
 const cancelSosRoutes = require('./routes/cancelSosRoutes');
+const buildingRoutes = require('./routes/buildingRoutes');
+const floorPlanRoutes = require('./routes/floorPlanRoutes');
+const beaconFloorPlanRoutes = require('./routes/beaconFloorPlanRoutes');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -53,7 +54,10 @@ app.use('/api/device-events', deviceEventRoutes);
 app.use('/api/device-self-tests', deviceSelfTestRoutes);
 app.use('/api/beacons', beaconRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/api/send-sos', sosRoutes); // используем sosRoutes
+app.use('/api/send-sos', sosRoutes);
+app.use('/api/buildings', buildingRoutes);
+app.use('/api/floor-plans', floorPlanRoutes);
+app.use('/api/beacon-floor-plans', beaconFloorPlanRoutes);
 
 sequelize.sync().then(() => {
   server.listen(PORT, () => {
