@@ -12,13 +12,13 @@ const ProximityControl = () => {
   const wsUrl = 'ws://194.164.52.193:3000';
 
   useEffect(() => {
-    const ws = new WebSocket(wsUrl);
+    const wss = new WebSocket(wsUrl);
 
-    ws.onopen = () => {
+    wss.onopen = () => {
       console.log('WebSocket connection established');
     };
 
-    ws.onmessage = (event) => {
+    wss.onmessage = (event) => {
       console.log('Received message:', event.data);
       const data = JSON.parse(event.data);
       if (data.type === 'tag_update') {
@@ -53,16 +53,16 @@ const ProximityControl = () => {
       }
     };
 
-    ws.onerror = (error) => {
+    wss.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
 
-    ws.onclose = () => {
+    wss.onclose = () => {
       console.log('WebSocket connection closed');
     };
 
     return () => {
-      ws.close();
+      wss.close();
     };
   }, []);
 

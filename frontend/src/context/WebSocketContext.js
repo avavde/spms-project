@@ -4,13 +4,18 @@ import PropTypes from 'prop-types'; // Импортируем PropTypes
 let ws;
 
 const WebSocketContext = createContext(null);
-const WS_URL = 'ws//194.164.52.193:8080';
+const WS_URL = process.env.REACT_APP_WS_URL || "ws://localhost:8080/"; // Убедитесь, что URL правильный
 
 export const WebSocketProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    ws = new WebSocket(WS_URL);
+    ws = new WebSocket(WS_URL, [
+      "protocolOne",
+      "protocolTwo",
+    ]); // Исправляем URL
+  
+   
 
     ws.onopen = () => {
       console.log('WebSocket connected');
@@ -44,7 +49,7 @@ export const WebSocketProvider = ({ children }) => {
 };
 
 WebSocketProvider.propTypes = {
-  children: PropTypes.node.isRequired, 
+  children: PropTypes.node.isRequired, // Добавляем валидацию PropTypes
 };
 
 export const useWebSocket = () => {
