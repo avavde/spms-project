@@ -14,7 +14,7 @@ FloorPlan.init({
   building_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'buildings',
+      model: Building,
       key: 'id',
     },
     allowNull: false,

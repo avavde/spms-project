@@ -14,7 +14,7 @@ Beacon.init({
   zone_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'zones',
+      model: Zone,
       key: 'id',
     },
     allowNull: true,
@@ -35,7 +35,7 @@ Beacon.init({
   floor_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'floor_plans',
+      model: FloorPlan,
       key: 'id',
     },
     allowNull: true,
