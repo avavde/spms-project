@@ -1,11 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const floorPlanController = require('../controllers/floorPlanController');
 
-const router = express.Router();
 
-router.post('/', floorPlanController.createFloorPlan);
-router.get('/', floorPlanController.getFloorPlans);
+router.get('/', floorPlanController.getAllFloorPlans);
 router.get('/:id', floorPlanController.getFloorPlanById);
+router.post('/', floorPlanController.createFloorPlan);
 router.put('/:id', floorPlanController.updateFloorPlan);
 router.delete('/:id', floorPlanController.deleteFloorPlan);
 
