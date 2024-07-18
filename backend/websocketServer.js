@@ -28,6 +28,6 @@ function broadcast(data) {
 module.exports = { broadcast };
 
 const PORT = process.env.WS_PORT || 8080;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`WebSocket server is running on port ${PORT}`);
 });
