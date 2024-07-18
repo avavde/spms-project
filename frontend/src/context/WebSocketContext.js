@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'; // Импортируем PropTypes
 let ws;
 
 const WebSocketContext = createContext(null);
-const WS_URL = process.env.REACT_APP_WS_URL || 'ws//194.164.52.193:8080';
+const WS_URL = 'ws//194.164.52.193:8080';
 
 export const WebSocketProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
