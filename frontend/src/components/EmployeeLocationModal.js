@@ -26,7 +26,7 @@ import locationService from '../services/locationService';
 import employeeService from '../services/employeeService';
 import { useWebSocket } from '../context/WebSocketContext';
 import employeeIconUrl from 'src/assets/images/employee.png';
-import plan from 'src/assets/brand/plan.jpeg';
+import plan from 'src/assets/brand/plan.jpg';
 
 const employeeIcon = new L.Icon({
   iconUrl: employeeIconUrl,

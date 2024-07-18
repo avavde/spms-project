@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
-import plan from 'src/assets/brand/plan.jpeg';
+import plan from 'src/assets/brand/plan.jpg';
 import beaconIconUrl from 'src/assets/images/ble-beacon.png';
 
 const imageBounds = [[0, 0], [1000, 1000]];

@@ -3,21 +3,21 @@
     "username": "spmsuser",
     "password": "spmspass",
     "database": "spms",
-    "host": "127.0.0.1",
+    "host": "194.164.52.193",
     "dialect": "postgres"
   },
   "test": {
     "username": "spmsuser",
     "password": "spmspass",
     "database": "spms",
-    "host": "127.0.0.1",
+    "host": "194.164.52.193",
     "dialect": "postgres"
   },
   "production": {
     "username": "spmsuser",
     "password": "spmspass",
     "database": "spms",
-    "host": "127.0.0.1",
+    "host": "194.164.52.193",
     "dialect": "postgres"
   }
 }

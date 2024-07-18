@@ -4,7 +4,7 @@ import { MapContainer, ImageOverlay, Polygon, Popup, Marker, Tooltip } from 'rea
 import L from 'leaflet';
 import ZoneEmployeesModal from '../../components/dashboard/ZoneEmployeesModal';
 import 'leaflet/dist/leaflet.css';
-import plan from 'src/assets/brand/plan.jpeg';
+import plan from 'src/assets/brand/plan.jpg';
 import employeeIconUrl from 'src/assets/images/employee.png';
 import zonesService from 'src/services/zonesService';
 import { useWebSocket } from 'src/context/WebSocketContext';  // Импортируем WebSocketContext

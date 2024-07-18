@@ -184,7 +184,7 @@ exports.getEmployeeLocation = async (req, res) => {
           gps: false,
           coordinates: beacon ? beacon.map_coordinates : [0, 0],
           zone,
-          mapUrl: '/path/to/plan.jpeg'
+          mapUrl: '/path/to/plan.jpg'
         };
       } else {
         console.log('No device zone position found'); // Отладка

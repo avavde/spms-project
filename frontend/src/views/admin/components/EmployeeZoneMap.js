@@ -6,7 +6,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import locationService from 'src/services/locationService';
 import employeeIconUrl from 'src/assets/images/employee.png';
-import plan from 'src/assets/brand/plan.jpeg';
+import plan from 'src/assets/brand/plan.jpg';
 
 const employeeIcon = new L.Icon({
   iconUrl: employeeIconUrl,
