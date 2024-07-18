@@ -5,8 +5,8 @@ exports.getAllBeaconFloorPlans = async (req, res) => {
     const beaconFloorPlans = await BeaconFloorPlan.findAll();
     res.json(beaconFloorPlans);
   } catch (error) {
-    console.error('Ошибка при получении планов маяков:', error);
-    res.status(500).json({ error: 'Ошибка при получении планов маяков' });
+    console.error('Ошибка при получении планов этажей:', error);
+    res.status(500).json({ error: 'Ошибка при получении планов этажей' });
   }
 };
 
@@ -14,38 +14,36 @@ exports.getBeaconFloorPlanById = async (req, res) => {
   try {
     const beaconFloorPlan = await BeaconFloorPlan.findByPk(req.params.id);
     if (!beaconFloorPlan) {
-      return res.status(404).json({ error: 'План маяка не найден' });
+      return res.status(404).json({ error: 'План этажа не найден' });
     }
     res.json(beaconFloorPlan);
   } catch (error) {
-    console.error('Ошибка при получении плана маяка:', error);
-    res.status(500).json({ error: 'Ошибка при получении плана маяка' });
+    console.error('Ошибка при получении плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка при получении плана этажа' });
   }
 };
 
 exports.createBeaconFloorPlan = async (req, res) => {
   try {
-    const { building_id, floorplan_id } = req.body;
-    const newBeaconFloorPlan = await BeaconFloorPlan.create({ building_id, floorplan_id });
+    const newBeaconFloorPlan = await BeaconFloorPlan.create(req.body);
     res.status(201).json(newBeaconFloorPlan);
   } catch (error) {
-    console.error('Ошибка при создании плана маяка:', error);
-    res.status(500).json({ error: 'Ошибка при создании плана маяка' });
+    console.error('Ошибка при создании плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка при создании плана этажа' });
   }
 };
 
 exports.updateBeaconFloorPlan = async (req, res) => {
   try {
-    const { building_id, floorplan_id } = req.body;
     const beaconFloorPlan = await BeaconFloorPlan.findByPk(req.params.id);
     if (!beaconFloorPlan) {
-      return res.status(404).json({ error: 'План маяка не найден' });
+      return res.status(404).json({ error: 'План этажа не найден' });
     }
-    await beaconFloorPlan.update({ building_id, floorplan_id });
+    await beaconFloorPlan.update(req.body);
     res.json(beaconFloorPlan);
   } catch (error) {
-    console.error('Ошибка при обновлении плана маяка:', error);
-    res.status(500).json({ error: 'Ошибка при обновлении плана маяка' });
+    console.error('Ошибка при обновлении плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка при обновлении плана этажа' });
   }
 };
 
@@ -53,12 +51,12 @@ exports.deleteBeaconFloorPlan = async (req, res) => {
   try {
     const beaconFloorPlan = await BeaconFloorPlan.findByPk(req.params.id);
     if (!beaconFloorPlan) {
-      return res.status(404).json({ error: 'План маяка не найден' });
+      return res.status(404).json({ error: 'План этажа не найден' });
     }
     await beaconFloorPlan.destroy();
     res.status(204).send();
   } catch (error) {
-    console.error('Ошибка при удалении плана маяка:', error);
-    res.status(500).json({ error: 'Ошибка при удалении плана маяка' });
+    console.error('Ошибка при удалении плана этажа:', error);
+    res.status(500).json({ error: 'Ошибка при удалении плана этажа' });
   }
 };
