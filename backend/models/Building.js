@@ -1,7 +1,6 @@
-// models/Building.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Floor = require('./FloorPlan'); // Импортируем модель Floor
+const FloorPlan = require('./FloorPlan'); // Импортируем модель FloorPlan
 
 class Building extends Model {}
 
@@ -40,6 +39,6 @@ Building.init({
   timestamps: false,
 });
 
-Building.hasMany(Floor, { foreignKey: 'building_id' }); // Устанавливаем связь с Floor
+Building.hasMany(FloorPlan, { foreignKey: 'building_id' }); // Устанавливаем связь с FloorPlan
 
 module.exports = Building;

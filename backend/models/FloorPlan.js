@@ -1,4 +1,3 @@
-// models/Floor.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
@@ -41,8 +40,8 @@ FloorPlan.init({
   },
 }, {
   sequelize,
-  modelName: 'Floor',
-  tableName: 'floors',
+  modelName: 'FloorPlan',
+  tableName: 'floor_plans',
   timestamps: false,
 });
 
