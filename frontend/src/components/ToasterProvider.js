@@ -1,11 +1,11 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { CToaster, CToast, CToastBody, CToastHeader } from '@coreui/react';
 import { useAlert } from '../context/AlertContext';
 
 const ToasterProvider = () => {
   const { alerts } = useAlert();
   const toaster = useRef();
-  const [toast, setToast] = useState(null);
+  const [toasts, setToasts] = useState([]);
 
   const getIcon = (type) => {
     switch (type) {
@@ -23,8 +23,8 @@ const ToasterProvider = () => {
   useEffect(() => {
     alerts.forEach(alert => {
       const newToast = (
-        <CToast color={alert.type} className="text-white" autohide={5000} fade>
-          <CToastHeader closeButton>
+        <CToast key={alert.timestamp} color={alert.type} className="text-white" autohide={true} fade={true}>
+          <CToastHeader closeButton={true}>
             {getIcon(alert.type)}
             <strong className="me-auto ms-2">Уведомление</strong>
             <small className="text-muted ms-auto">{new Date(alert.timestamp).toLocaleString()}</small>
@@ -42,12 +42,12 @@ const ToasterProvider = () => {
           </CToastBody>
         </CToast>
       );
-      setToast(newToast);
+      setToasts(prevToasts => [...prevToasts, newToast]);
     });
   }, [alerts]);
 
   return (
-    <CToaster ref={toaster} push={toast} placement="top-end" />
+    <CToaster ref={toaster} push={toasts} placement="top-end" />
   );
 };
 
