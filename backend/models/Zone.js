@@ -1,7 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Department = require('./Department');  // Статический импорт
-const Beacon = require('./Beacon');          // Статический импорт
+const Department = require('./Department');  // Импорт модели Department
+const Beacon = require('./Beacon');          // Импорт модели Beacon
 
 class Zone extends Model {}
 
@@ -30,7 +30,7 @@ Zone.init({
   department_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'departments',
+      model: Department,
       key: 'id'
     },
     allowNull: true,
@@ -42,7 +42,6 @@ Zone.init({
   timestamps: false,
 });
 
-// Устанавливаем связи после определения моделей
 Zone.belongsTo(Department, { foreignKey: 'department_id', as: 'department' });
 Zone.hasMany(Beacon, { foreignKey: 'zone_id', as: 'beacons', onDelete: 'CASCADE' });
 

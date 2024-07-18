@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const FloorPlan = require('./FloorPlan'); // Убедитесь, что путь правильный
+const FloorPlan = require('./FloorPlan'); // Импорт модели FloorPlan
 
 class Building extends Model {}
 
@@ -16,11 +16,11 @@ Building.init({
   },
   gps_coordinates: {
     type: DataTypes.JSON,
-    allowNull: true, // GPS координаты здания
+    allowNull: true,
   },
   dimensions: {
     type: DataTypes.JSON,
-    allowNull: true, // Размеры здания (например, ширина и длина)
+    allowNull: true,
   },
   created_at: {
     type: DataTypes.DATE,

@@ -1,7 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
-const Beacon = require('./Beacon'); // Импортируем модель Beacon
+const Beacon = require('./Beacon'); // Импорт модели Beacon
 
 class FloorPlan extends Model {}
 
@@ -46,6 +46,6 @@ FloorPlan.init({
 });
 
 FloorPlan.belongsTo(Building, { foreignKey: 'building_id', as: 'building' });
-FloorPlan.hasMany(Beacon, { foreignKey: 'floor_id', as: 'beacons' }); // Устанавливаем связь с Beacon
+FloorPlan.hasMany(Beacon, { foreignKey: 'floor_id', as: 'beacons' });
 
 module.exports = FloorPlan;
