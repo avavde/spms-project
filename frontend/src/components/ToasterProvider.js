@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { CToaster, CToast, CToastBody, CToastHeader } from '@coreui/react';
 import { useAlert } from '../context/AlertContext';
 
 const ToasterProvider = () => {
   const { alerts } = useAlert();
+  const toaster = useRef();
+  const [toast, setToast] = useState(null);
 
   const getIcon = (type) => {
     switch (type) {
@@ -18,10 +20,10 @@ const ToasterProvider = () => {
     }
   };
 
-  return (
-    <CToaster position="top-right">
-      {alerts.map((alert, index) => (
-        <CToast key={index} color={alert.type} className="text-white" autohide={5000} fade>
+  useEffect(() => {
+    alerts.forEach(alert => {
+      const newToast = (
+        <CToast color={alert.type} className="text-white" autohide={5000} fade>
           <CToastHeader closeButton>
             {getIcon(alert.type)}
             <strong className="me-auto ms-2">Уведомление</strong>
@@ -39,8 +41,13 @@ const ToasterProvider = () => {
             )}
           </CToastBody>
         </CToast>
-      ))}
-    </CToaster>
+      );
+      setToast(newToast);
+    });
+  }, [alerts]);
+
+  return (
+    <CToaster ref={toaster} push={toast} placement="top-end" />
   );
 };
 
