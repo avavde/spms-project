@@ -1,6 +1,8 @@
+// models/Beacon.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Zone = require('./Zone');
+const Floor = require('./FloorPlan'); // Импортируем модель Floor
 
 class Beacon extends Model {}
 
@@ -14,9 +16,18 @@ Beacon.init({
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'zones',
+      model: Zone,
       key: 'id',
-      onDelete: 'CASCADE'  // Каскадное удаление
+      onDelete: 'CASCADE', // Каскадное удаление
+    }
+  },
+  floor_id: { // Добавляем связь с Floor
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: Floor,
+      key: 'id',
+      onDelete: 'CASCADE', // Каскадное удаление
     }
   },
   beacon_mac: {
@@ -37,5 +48,8 @@ Beacon.init({
   tableName: 'beacons',
   timestamps: false,
 });
+
+Beacon.belongsTo(Zone, { foreignKey: 'zone_id' });
+Beacon.belongsTo(Floor, { foreignKey: 'floor_id' }); // Устанавливаем связь с Floor
 
 module.exports = Beacon;

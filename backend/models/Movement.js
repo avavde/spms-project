@@ -1,3 +1,4 @@
+// models/Movement.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Device = require('./Device');
@@ -35,9 +36,35 @@ Movement.init({
     },
     allowNull: false,
   },
+  from_gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  to_gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  from_beacon_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  to_beacon_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
   timestamp: {
     type: DataTypes.DATE,
     allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
 }, {
   sequelize,
