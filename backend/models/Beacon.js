@@ -38,6 +38,6 @@ Beacon.init({
   timestamps: false,
 });
 
-Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id', as: 'floor' });
+Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
 
 module.exports = Beacon;

@@ -38,4 +38,6 @@ Building.init({
   timestamps: false,
 });
 
+Building.hasMany(FloorPlan, { foreignKey: 'building_id' });
+
 module.exports = Building;

@@ -44,6 +44,6 @@ FloorPlan.init({
   timestamps: false,
 });
 
-FloorPlan.belongsTo(Building, { foreignKey: 'building_id', as: 'building' });
+FloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
 
 module.exports = FloorPlan;

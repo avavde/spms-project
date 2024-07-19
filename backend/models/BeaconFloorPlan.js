@@ -33,4 +33,6 @@ BeaconFloorPlan.init({
   timestamps: false,
 });
 
+BeaconFloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
+
 module.exports = BeaconFloorPlan;
