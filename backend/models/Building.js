@@ -1,6 +1,7 @@
+// Building.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const FloorPlan = require('./FloorPlan'); // Убедитесь, что путь к FloorPlan правильный и модель загружается корректно
 
 class Building extends Model {}
 
@@ -38,12 +39,5 @@ Building.init({
   tableName: 'buildings',
   timestamps: false,
 });
-
-// Проверка на корректность модели FloorPlan
-if (FloorPlan.prototype instanceof Model) {
-  Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE' });
-} else {
-  console.error('FloorPlan is not a subclass of Sequelize.Model');
-}
 
 module.exports = Building;

@@ -1,7 +1,10 @@
 ======= Beacon.js ======= 
+// Beacon.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const FloorPlan = require('./FloorPlan');
+const Zone = require('./Zone');
 
 class Beacon extends Model {}
 
@@ -17,7 +20,16 @@ Beacon.init({
       model: FloorPlan,
       key: 'id',
     },
-    allowNull: false,
+    allowNull: true,  // Сделал allowNull true для соответствия базе данных
+    onDelete: 'CASCADE',
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id',
+    },
+    allowNull: true,  // Добавлено allowNull true
     onDelete: 'CASCADE',
   },
   beacon_mac: {
@@ -40,9 +52,12 @@ Beacon.init({
 });
 
 Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
+Beacon.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = Beacon;
 ======= BeaconFloorPlan.js ======= 
+// BeaconFloorPlan.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
@@ -82,9 +97,11 @@ BeaconFloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
 
 module.exports = BeaconFloorPlan;
 ======= Building.js ======= 
+// Building.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const FloorPlan = require('./FloorPlan');
+const FloorPlan = require('./FloorPlan'); // Убедитесь, что путь к FloorPlan правильный и модель загружается корректно
 
 class Building extends Model {}
 
@@ -123,10 +140,17 @@ Building.init({
   timestamps: false,
 });
 
-Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE'  });
+// Проверка на корректность модели FloorPlan
+if (FloorPlan.prototype instanceof Model) {
+  Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE' });
+} else {
+  console.error('FloorPlan is not a subclass of Sequelize.Model');
+}
 
 module.exports = Building;
 ======= Department.js ======= 
+// Department.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -155,6 +179,8 @@ Department.init({
 
 module.exports = Department;
 ======= DepartmentZone.js ======= 
+// DepartmentZone.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Department = require('./Department');
@@ -196,6 +222,8 @@ DepartmentZone.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = DepartmentZone;
 ======= Device.js ======= 
+// Device.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -300,6 +328,8 @@ DeviceEvent.init({
 module.exports = DeviceEvent;
 
 ======= DeviceSelfTest.js ======= 
+// DeviceSelfTest.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -334,6 +364,8 @@ DeviceSelfTest.init({
 
 module.exports = DeviceSelfTest;
 ======= DeviceStatus.js ======= 
+// DeviceStatus.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -389,6 +421,8 @@ DeviceStatus.init({
 });
 
 module.exports = DeviceStatus;======= DeviceZonePosition.js ======= 
+// DeviceZonePosition.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -440,6 +474,8 @@ DeviceZonePosition.init({
 
 module.exports = DeviceZonePosition;
 ======= Employee.js ======= 
+// Employee.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Department = require('./Department');
@@ -507,6 +543,8 @@ Employee.belongsTo(Device, { foreignKey: 'beaconid', targetKey: 'id' });
 
 module.exports = Employee;
 ======= EmployeeZone.js ======= 
+// EmployeeZone.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Employee = require('./Employee');
@@ -548,6 +586,8 @@ EmployeeZone.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = EmployeeZone;
 ======= EmployeeZoneAssignment.js ======= 
+// EmployeeZoneAssignment.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Employee = require('./Employee');
@@ -593,6 +633,8 @@ EmployeeZoneAssignment.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = EmployeeZoneAssignment;
 ======= FloorPlan.js ======= 
+// FloorPlan.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
@@ -643,6 +685,8 @@ FloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
 
 module.exports = FloorPlan;
 ======= GNSSPosition.js ======= 
+// GNSSPosition.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -700,10 +744,8 @@ GNSSPosition.init({
 });
 
 module.exports = GNSSPosition;
-======= models.txt ======= 
-�� 㤠���� ���樠����஢��� ���ன�⢮ PRN
 ======= Movement.js ======= 
-// models/Movement.js
+// Movement.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Device = require('./Device');
@@ -781,9 +823,12 @@ Movement.init({
 module.exports = Movement;
 ======= output.txt ======= 
 ======= Beacon.js ======= 
+// Beacon.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const FloorPlan = require('./FloorPlan');
+const Zone = require('./Zone');
 
 class Beacon extends Model {}
 
@@ -799,7 +844,16 @@ Beacon.init({
       model: FloorPlan,
       key: 'id',
     },
-    allowNull: false,
+    allowNull: true,  // Сделал allowNull true для соответствия базе данных
+    onDelete: 'CASCADE',
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id',
+    },
+    allowNull: true,  // Добавлено allowNull true
     onDelete: 'CASCADE',
   },
   beacon_mac: {
@@ -822,9 +876,12 @@ Beacon.init({
 });
 
 Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
+Beacon.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = Beacon;
 ======= BeaconFloorPlan.js ======= 
+// BeaconFloorPlan.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
@@ -864,9 +921,11 @@ BeaconFloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
 
 module.exports = BeaconFloorPlan;
 ======= Building.js ======= 
+// Building.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const FloorPlan = require('./FloorPlan');
+const FloorPlan = require('./FloorPlan'); // Убедитесь, что путь к FloorPlan правильный и модель загружается корректно
 
 class Building extends Model {}
 
@@ -905,10 +964,17 @@ Building.init({
   timestamps: false,
 });
 
-Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE'  });
+// Проверка на корректность модели FloorPlan
+if (FloorPlan.prototype instanceof Model) {
+  Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE' });
+} else {
+  console.error('FloorPlan is not a subclass of Sequelize.Model');
+}
 
 module.exports = Building;
 ======= Department.js ======= 
+// Department.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -937,6 +1003,8 @@ Department.init({
 
 module.exports = Department;
 ======= DepartmentZone.js ======= 
+// DepartmentZone.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Department = require('./Department');
@@ -978,6 +1046,8 @@ DepartmentZone.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = DepartmentZone;
 ======= Device.js ======= 
+// Device.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -1082,6 +1152,8 @@ DeviceEvent.init({
 module.exports = DeviceEvent;
 
 ======= DeviceSelfTest.js ======= 
+// DeviceSelfTest.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -1116,6 +1188,8 @@ DeviceSelfTest.init({
 
 module.exports = DeviceSelfTest;
 ======= DeviceStatus.js ======= 
+// DeviceStatus.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -1171,6 +1245,8 @@ DeviceStatus.init({
 });
 
 module.exports = DeviceStatus;======= DeviceZonePosition.js ======= 
+// DeviceZonePosition.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -1222,6 +1298,8 @@ DeviceZonePosition.init({
 
 module.exports = DeviceZonePosition;
 ======= Employee.js ======= 
+// Employee.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Department = require('./Department');
@@ -1289,6 +1367,8 @@ Employee.belongsTo(Device, { foreignKey: 'beaconid', targetKey: 'id' });
 
 module.exports = Employee;
 ======= EmployeeZone.js ======= 
+// EmployeeZone.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Employee = require('./Employee');
@@ -1330,6 +1410,8 @@ EmployeeZone.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = EmployeeZone;
 ======= EmployeeZoneAssignment.js ======= 
+// EmployeeZoneAssignment.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Employee = require('./Employee');
@@ -1375,6 +1457,8 @@ EmployeeZoneAssignment.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = EmployeeZoneAssignment;
 ======= FloorPlan.js ======= 
+// FloorPlan.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
@@ -1425,6 +1509,8 @@ FloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
 
 module.exports = FloorPlan;
 ======= GNSSPosition.js ======= 
+// GNSSPosition.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -1482,10 +1568,8 @@ GNSSPosition.init({
 });
 
 module.exports = GNSSPosition;
-======= models.txt ======= 
-�� 㤠���� ���樠����஢��� ���ன�⢮ PRN
 ======= Movement.js ======= 
-// models/Movement.js
+// Movement.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Device = require('./Device');
@@ -1562,7 +1646,11 @@ Movement.init({
 
 module.exports = Movement;
 ======= output.txt ======= 
-======= Beacon.js ========= Report.js ======= 
+======= Beacon.js ======= 
+// Beacon.js
+
+const { Model, DataTypes } = require('sequelize');
+const sequelize = r======= Report.js ======= 
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -1629,6 +1717,8 @@ const updateSchema = async () => {
 
 updateSchema();
 ======= User.js ======= 
+// User.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -1693,6 +1783,8 @@ User.init({
 
 module.exports = User;
 ======= UserAction.js ======= 
+// UserAction.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const User = require('./User');
@@ -1730,11 +1822,13 @@ UserAction.init({
 
 module.exports = UserAction;
 ======= Zone.js ======= 
-const { Model, DataTypes } = require('sequelize');
+// Zone.js
+
+onst { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Department = require('./Department');
-const Beacon = require('./Beacon');
 const FloorPlan = require('./FloorPlan');
+const Beacon = require('./Beacon');
 
 class Zone extends Model {}
 
@@ -1751,10 +1845,6 @@ Zone.init({
   coordinates: {
     type: DataTypes.JSON,
     allowNull: false,
-  },
-  beacons: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
-    allowNull: true,
   },
   type: {
     type: DataTypes.STRING,
@@ -1786,7 +1876,7 @@ Zone.init({
 
 Zone.belongsTo(Department, { foreignKey: 'department_id' });
 Zone.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
-Zone.hasMany(Beacon, { foreignKey: 'beacon_id', onDelete: 'CASCADE' });
+Zone.hasMany(Beacon, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 module.exports = Zone;
 ======= ZoneEvent.js ======= 
@@ -1841,6 +1931,8 @@ ZoneEvent.init({
 
 module.exports = ZoneEvent;
 ======= ZoneViolation.js ======= 
+// ZoneViolation.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Employee = require('./Employee');

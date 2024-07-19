@@ -1,7 +1,5 @@
-const Zone = require('../models/Zone');
-const Department = require('../models/Department');
-const Beacon = require('../models/Beacon');
 
+const { Zone, Department, Beacon } = require('../models');
 exports.getAllZones = async (req, res) => {
   try {
     const zones = await Zone.findAll();

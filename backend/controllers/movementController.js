@@ -1,5 +1,5 @@
-const Movement = require('../models/Movement');
-const Device = require('../models/Device');
+
+const { Device, Movement } = require('../models');
 
 // Получить все передвижения
 exports.getAllMovements = async (req, res) => {

@@ -1,7 +1,5 @@
-const Report = require('../models/Report');
-const ZoneViolation = require('../models/ZoneViolation');
-const Employee = require('../models/Employee');
-const Department = require('../models/Department');
+
+const { Report, ZoneViolation, Employee } = require('../models');
 
 const generateReport = async (reportType, parameters) => {
   try {

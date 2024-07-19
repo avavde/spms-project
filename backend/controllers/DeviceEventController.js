@@ -1,4 +1,4 @@
-const DeviceEvent = require('../models/DeviceEvent');
+const { DeviceEvent } = require('../models');
 
 exports.getAllDeviceEvents = async (req, res) => {
   try {

@@ -1,7 +1,7 @@
+// Beacon.js
+
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
-const FloorPlan = require('./FloorPlan');
-const Zone = require('./Zone');
+const sequelize = require('../config/db'); // Убедитесь, что путь к config/db правильный
 
 class Beacon extends Model {}
 
@@ -14,19 +14,19 @@ Beacon.init({
   floor_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: FloorPlan,
+      model: 'FloorPlans', // имя модели должно совпадать с именем таблицы в базе данных
       key: 'id',
     },
-    allowNull: true,  // Сделал allowNull true для соответствия базе данных
+    allowNull: true,
     onDelete: 'CASCADE',
   },
   zone_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: Zone,
+      model: 'Zones', // имя модели должно совпадать с именем таблицы в базе данных
       key: 'id',
     },
-    allowNull: true,  // Добавлено allowNull true
+    allowNull: true,
     onDelete: 'CASCADE',
   },
   beacon_mac: {
@@ -47,8 +47,5 @@ Beacon.init({
   tableName: 'beacons',
   timestamps: false,
 });
-
-Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
-Beacon.belongsTo(Zone, { foreignKey: 'zone_id' });
 
 module.exports = Beacon;

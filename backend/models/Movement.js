@@ -1,4 +1,4 @@
-// models/Movement.js
+// Movement.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Device = require('./Device');

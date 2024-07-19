@@ -1,5 +1,5 @@
-const FloorPlan = require('../models/FloorPlan');
-const Beacon = require('../models/Beacon');
+const { FloorPlan, Beacon } = require('../models');
+
 
 exports.getAllFloorPlans = async (req, res) => {
   try {

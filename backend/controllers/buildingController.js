@@ -1,5 +1,5 @@
-const Building = require('../models/Building');
-const FloorPlan = require('../models/FloorPlan');
+const { Building, FloorPlans } = require('../models');
+
 
 exports.getAllBuildings = async (req, res) => {
   try {

@@ -1,7 +1,7 @@
+// Employee.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Department = require('./Department');
-const Device = require('./Device');
 
 class Employee extends Model {}
 
@@ -37,7 +37,7 @@ Employee.init({
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: Department,
+      model: 'Departments',
       key: 'id',
     },
   },
@@ -46,10 +46,10 @@ Employee.init({
     allowNull: true,
   },
   beaconid: {
-    type: DataTypes.STRING, // Изменяем на STRING
+    type: DataTypes.STRING,
     allowNull: true,
     references: {
-      model: Device,
+      model: 'Devices',
       key: 'id',
     },
   },
@@ -59,8 +59,5 @@ Employee.init({
   tableName: 'employees',
   timestamps: false,
 });
-
-Employee.belongsTo(Department, { foreignKey: 'department_id' });
-Employee.belongsTo(Device, { foreignKey: 'beaconid', targetKey: 'id' });
 
 module.exports = Employee;

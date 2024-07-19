@@ -1,3 +1,5 @@
+// FloorPlan.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');

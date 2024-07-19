@@ -1,5 +1,4 @@
-const Beacon = require('../models/Beacon');
-const Device = require('../models/Device');
+const { Beacon, Device } = require('../models');
 
 exports.getAvailableBeacons = async (req, res) => {
   try {

@@ -1,5 +1,6 @@
-const Device = require('../models/Device');
+const { Device } = require('../models'); // Импортируем Device из index.js
 
+// Получение всех устройств
 exports.getAllDevices = async (req, res) => {
   try {
     const devices = await Device.findAll();
@@ -9,6 +10,7 @@ exports.getAllDevices = async (req, res) => {
   }
 };
 
+// Получение устройства по ID
 exports.getDeviceById = async (req, res) => {
   try {
     const device = await Device.findByPk(req.params.id);
@@ -22,6 +24,7 @@ exports.getDeviceById = async (req, res) => {
   }
 };
 
+// Создание нового устройства
 exports.createDevice = async (req, res) => {
   try {
     const newDevice = await Device.create(req.body);
@@ -31,6 +34,7 @@ exports.createDevice = async (req, res) => {
   }
 };
 
+// Обновление устройства
 exports.updateDevice = async (req, res) => {
   try {
     const device = await Device.findByPk(req.params.id);
@@ -45,6 +49,7 @@ exports.updateDevice = async (req, res) => {
   }
 };
 
+// Удаление устройства
 exports.deleteDevice = async (req, res) => {
   try {
     const device = await Device.findByPk(req.params.id);
@@ -59,6 +64,7 @@ exports.deleteDevice = async (req, res) => {
   }
 };
 
+// Получение доступных маяков
 exports.getAvailableBeacons = async (req, res) => {
   try {
     const beacons = await Device.findAll({ where: { devicetype: 'beacon' } });
@@ -68,6 +74,7 @@ exports.getAvailableBeacons = async (req, res) => {
   }
 };
 
+// Получение доступных меток
 exports.getAvailableBadges = async (req, res) => {
   try {
     const beacons = await Device.findAll({ where: { devicetype: 'badge' } });

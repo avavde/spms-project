@@ -1,9 +1,5 @@
-const Employee = require('../models/Employee');
-const Beacon = require('../models/Beacon');
-const GNSSPosition = require('../models/GNSSPosition');
-const DeviceZonePosition = require('../models/DeviceZonePosition');
-const Zone = require('../models/Zone');
-const Department = require('../models/Department');
+const { Employee, Beacon, GNSSPosition, DeviceZonePosition, Zone, Department } = require('../models');
+
 
 
 exports.getAllEmployees = async (req, res) => {

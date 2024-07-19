@@ -1,5 +1,5 @@
-const ZoneEvent = require('../models/ZoneEvent');
-const ZoneViolation = require('../models/ZoneViolation');
+
+const {ZoneEvent, ZoneViolation} = require('../models');
 
 const handleZoneEvent = async (employeeId, zoneId, eventType) => {
   try {

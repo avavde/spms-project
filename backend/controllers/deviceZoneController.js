@@ -1,4 +1,4 @@
-const DeviceZonePosition = require('../models/DeviceZonePosition');
+const { DeviceZonePosition } = require('../models');
 
 // Создание новой записи
 exports.createDeviceZonePosition = async (req, res) => {

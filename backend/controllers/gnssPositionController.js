@@ -1,4 +1,4 @@
-const GNSSPosition = require('../models/GNSSPosition');
+const { GNSSPosition } = require('../models');
 
 exports.getAllGNSSPositions = async (req, res) => {
   try {

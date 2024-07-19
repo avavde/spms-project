@@ -1,4 +1,4 @@
-const DeviceSelfTest = require('../models/DeviceSelfTest');
+const { DeviceSelfTest } = require('../models');
 
 exports.getAllDeviceSelfTests = async (req, res) => {
   try {

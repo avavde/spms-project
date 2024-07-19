@@ -1,4 +1,4 @@
-const DeviceStatus = require('../models/DeviceStatus');
+const { DeviceStatus } = require('../models');
 
 exports.getAllDeviceStatuses = async (req, res) => {
   try {

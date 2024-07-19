@@ -1,6 +1,8 @@
 // backend/controllers/messageController.js
 
-const Device = require('../models/Device');
+const { Device }= require('../models');
+
+
 const { sendMessage } = require('../mqttClient');
 
 const sendMessageToDevices = async (req, res) => {

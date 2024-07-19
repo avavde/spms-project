@@ -1,5 +1,5 @@
-const UserAction = require('../models/UserAction');
-const User = require('../models/User');
+
+const {User, UserAction } = require('../models');
 
 // Получить все действия пользователей
 exports.getAllUserActions = async (req, res) => {

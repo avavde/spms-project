@@ -1,6 +1,4 @@
-const EmployeeZoneAssignment = require('../models/EmployeeZoneAssignment');
-const Employee = require('../models/Employee');
-const Zone = require('../models/Zone');
+const { Zone, Employee, EmployeeZoneAssignment } = require('../models');
 
 // Получить все назначения зон для сотрудников
 exports.getAllAssignments = async (req, res) => {

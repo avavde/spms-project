@@ -1,6 +1,4 @@
-const EmployeeZone = require('../models/EmployeeZone');
-const Employee = require('../models/Employee');
-const Zone = require('../models/Zone');
+;const { Zone, Employee, EmployeeZone } = require('../models');
 
 // Получить все EmployeeZone
 exports.getAllEmployeeZones = async (req, res) => {

@@ -1,6 +1,5 @@
-const DepartmentZone = require('../models/DepartmentZone');
-const Department = require('../models/Department');
-const Zone = require('../models/Zone');
+const { DepartmentZone, Department, Zone } = require('../models');
+
 
 // Получить все DepartmentZone
 exports.getAllDepartmentZones = async (req, res) => {

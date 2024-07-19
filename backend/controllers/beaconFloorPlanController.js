@@ -1,4 +1,4 @@
-const BeaconFloorPlan = require('../models/BeaconFloorPlan');
+const { BeaconFloorPlan }= require('../models');
 
 exports.getAllBeaconFloorPlans = async (req, res) => {
   try {
