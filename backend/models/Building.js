@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const FloorPlan = require('./FloorPlan');
 
 class Building extends Model {}
 
