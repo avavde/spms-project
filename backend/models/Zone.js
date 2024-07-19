@@ -54,6 +54,6 @@ Zone.init({
 
 Zone.belongsTo(Department, { foreignKey: 'department_id' });
 Zone.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
-Zone.hasMany(Beacon, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
+Zone.hasMany(Beacon, { foreignKey: 'beacon_id', onDelete: 'CASCADE' });
 
 module.exports = Zone;
