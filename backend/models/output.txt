@@ -1,0 +1,1895 @@
+======= Beacon.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const FloorPlan = require('./FloorPlan');
+
+class Beacon extends Model {}
+
+Beacon.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  floor_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: FloorPlan,
+      key: 'id',
+    },
+    allowNull: false,
+    onDelete: 'CASCADE',
+  },
+  beacon_mac: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  map_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+}, {
+  sequelize,
+  modelName: 'Beacon',
+  tableName: 'beacons',
+  timestamps: false,
+});
+
+Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
+
+module.exports = Beacon;
+======= BeaconFloorPlan.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Building = require('./Building');
+const FloorPlan = require('./FloorPlan');
+
+class BeaconFloorPlan extends Model {}
+
+BeaconFloorPlan.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  building_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Building,
+      key: 'id',
+    },
+  },
+  floorplan_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: FloorPlan,
+      key: 'id',
+    },
+  },
+  // другие поля
+}, {
+  sequelize,
+  modelName: 'BeaconFloorPlan',
+  tableName: 'beacon_floor_plans',
+  timestamps: false,
+});
+
+BeaconFloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
+
+module.exports = BeaconFloorPlan;
+======= Building.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const FloorPlan = require('./FloorPlan');
+
+class Building extends Model {}
+
+Building.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  gps_coordinates: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+  },
+  dimensions: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'Building',
+  tableName: 'buildings',
+  timestamps: false,
+});
+
+Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE'  });
+
+module.exports = Building;
+======= Department.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class Department extends Model {}
+
+Department.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+}, {
+  sequelize,
+  modelName: 'Department',
+  tableName: 'departments',
+  timestamps: false,
+});
+
+module.exports = Department;
+======= DepartmentZone.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Department = require('./Department');
+const Zone = require('./Zone');
+
+class DepartmentZone extends Model {}
+
+DepartmentZone.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Department,
+      key: 'id'
+    }
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Zone,
+      key: 'id'
+    }
+  }
+}, {
+  sequelize,
+  modelName: 'DepartmentZone',
+  tableName: 'department_zones',
+  timestamps: false,
+});
+
+DepartmentZone.belongsTo(Department, { foreignKey: 'department_id' });
+DepartmentZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+module.exports = DepartmentZone;
+======= Device.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class Device extends Model {}
+
+Device.init({
+  id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  fw_version: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  nfc_uid: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  imei: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  mac_uwb: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  ip: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  devicetype: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'Device',
+  tableName: 'devices',
+  timestamps: false,
+});
+
+module.exports = Device;
+======= DeviceEvent.js ======= 
+// models/DeviceEvent.js
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceEvent extends Model {}
+
+DeviceEvent.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  event: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  sync: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceEvent',
+  tableName: 'device_events',
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['device_id', 'timestamp']
+    }
+  ]
+});
+
+module.exports = DeviceEvent;
+
+======= DeviceSelfTest.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceSelfTest extends Model {}
+
+DeviceSelfTest.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  result: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceSelfTest',
+  tableName: 'device_self_tests',
+  timestamps: false,
+});
+
+module.exports = DeviceSelfTest;
+======= DeviceStatus.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceStatus extends Model {}
+
+DeviceStatus.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  battery: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  sos: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  gps: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  beacons: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceStatus',
+  tableName: 'device_statuses',
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['device_id', 'timestamp']
+    }
+  ]
+});
+
+module.exports = DeviceStatus;======= DeviceZonePosition.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceZonePosition extends Model {}
+
+DeviceZonePosition.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,  // Разрешить NULL
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    primaryKey: true
+  },
+  rssi: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  temperature: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  pressure: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  sequelize,
+  modelName: 'DeviceZonePosition',
+  timestamps: false,
+  tableName: 'device_zone_positions'
+});
+
+module.exports = DeviceZonePosition;
+======= Employee.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Department = require('./Department');
+const Device = require('./Device');
+
+class Employee extends Model {}
+
+Employee.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  first_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  last_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  middle_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true,
+  },
+  phone: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: Department,
+      key: 'id',
+    },
+  },
+  position: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  beaconid: {
+    type: DataTypes.STRING, // Изменяем на STRING
+    allowNull: true,
+    references: {
+      model: Device,
+      key: 'id',
+    },
+  },
+}, {
+  sequelize,
+  modelName: 'Employee',
+  tableName: 'employees',
+  timestamps: false,
+});
+
+Employee.belongsTo(Department, { foreignKey: 'department_id' });
+Employee.belongsTo(Device, { foreignKey: 'beaconid', targetKey: 'id' });
+
+module.exports = Employee;
+======= EmployeeZone.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Employee = require('./Employee');
+const Zone = require('./Zone');
+
+class EmployeeZone extends Model {}
+
+EmployeeZone.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  employee_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Employee,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+}, {
+  sequelize,
+  modelName: 'EmployeeZone',
+  tableName: 'employee_zones',
+  timestamps: false,
+});
+
+EmployeeZone.belongsTo(Employee, { foreignKey: 'employee_id' });
+EmployeeZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+module.exports = EmployeeZone;
+======= EmployeeZoneAssignment.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Employee = require('./Employee');
+const Zone = require('./Zone');
+
+class EmployeeZoneAssignment extends Model {}
+
+EmployeeZoneAssignment.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  employee_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Employee,
+      key: 'id',
+    },
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Zone,
+      key: 'id',
+    },
+  },
+  assignment_type: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+  },
+}, {
+  sequelize,
+  modelName: 'EmployeeZoneAssignment',
+  tableName: 'employee_zone_assignments',
+  timestamps: false,
+});
+
+EmployeeZoneAssignment.belongsTo(Employee, { foreignKey: 'employee_id' });
+EmployeeZoneAssignment.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+module.exports = EmployeeZoneAssignment;
+======= FloorPlan.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Building = require('./Building');
+
+class FloorPlan extends Model {}
+
+FloorPlan.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  building_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Building,
+      key: 'id',
+    },
+    allowNull: false,
+    onDelete: 'CASCADE',
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  map: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'FloorPlan',
+  tableName: 'floor_plans',
+  timestamps: false,
+});
+
+FloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
+
+module.exports = FloorPlan;
+======= GNSSPosition.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class GNSSPosition extends Model {}
+
+GNSSPosition.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  latitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  longitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  height: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  sat_quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  hdop: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  vdop: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'GNSSPosition',
+  tableName: 'gnss_positions',
+  timestamps: false,
+});
+
+module.exports = GNSSPosition;
+======= models.txt ======= 
+�� 㤠���� ���樠����஢��� ���ன�⢮ PRN
+======= Movement.js ======= 
+// models/Movement.js
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Device = require('./Device');
+const Zone = require('./Zone');
+
+class Movement extends Model {}
+
+Movement.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  device_id: {
+    type: DataTypes.STRING,
+    references: {
+      model: Device,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  from_zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  to_zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  from_gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  to_gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  from_beacon_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  to_beacon_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'Movement',
+  tableName: 'movements',
+  timestamps: false,
+});
+
+module.exports = Movement;
+======= output.txt ======= 
+======= Beacon.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const FloorPlan = require('./FloorPlan');
+
+class Beacon extends Model {}
+
+Beacon.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  floor_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: FloorPlan,
+      key: 'id',
+    },
+    allowNull: false,
+    onDelete: 'CASCADE',
+  },
+  beacon_mac: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  map_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+}, {
+  sequelize,
+  modelName: 'Beacon',
+  tableName: 'beacons',
+  timestamps: false,
+});
+
+Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
+
+module.exports = Beacon;
+======= BeaconFloorPlan.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Building = require('./Building');
+const FloorPlan = require('./FloorPlan');
+
+class BeaconFloorPlan extends Model {}
+
+BeaconFloorPlan.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  building_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Building,
+      key: 'id',
+    },
+  },
+  floorplan_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: FloorPlan,
+      key: 'id',
+    },
+  },
+  // другие поля
+}, {
+  sequelize,
+  modelName: 'BeaconFloorPlan',
+  tableName: 'beacon_floor_plans',
+  timestamps: false,
+});
+
+BeaconFloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
+
+module.exports = BeaconFloorPlan;
+======= Building.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const FloorPlan = require('./FloorPlan');
+
+class Building extends Model {}
+
+Building.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  gps_coordinates: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+  },
+  dimensions: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'Building',
+  tableName: 'buildings',
+  timestamps: false,
+});
+
+Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE'  });
+
+module.exports = Building;
+======= Department.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class Department extends Model {}
+
+Department.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+}, {
+  sequelize,
+  modelName: 'Department',
+  tableName: 'departments',
+  timestamps: false,
+});
+
+module.exports = Department;
+======= DepartmentZone.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Department = require('./Department');
+const Zone = require('./Zone');
+
+class DepartmentZone extends Model {}
+
+DepartmentZone.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Department,
+      key: 'id'
+    }
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Zone,
+      key: 'id'
+    }
+  }
+}, {
+  sequelize,
+  modelName: 'DepartmentZone',
+  tableName: 'department_zones',
+  timestamps: false,
+});
+
+DepartmentZone.belongsTo(Department, { foreignKey: 'department_id' });
+DepartmentZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+module.exports = DepartmentZone;
+======= Device.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class Device extends Model {}
+
+Device.init({
+  id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  fw_version: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  nfc_uid: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  imei: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  mac_uwb: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  ip: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  devicetype: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'Device',
+  tableName: 'devices',
+  timestamps: false,
+});
+
+module.exports = Device;
+======= DeviceEvent.js ======= 
+// models/DeviceEvent.js
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceEvent extends Model {}
+
+DeviceEvent.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  event: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  sync: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceEvent',
+  tableName: 'device_events',
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['device_id', 'timestamp']
+    }
+  ]
+});
+
+module.exports = DeviceEvent;
+
+======= DeviceSelfTest.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceSelfTest extends Model {}
+
+DeviceSelfTest.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  result: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceSelfTest',
+  tableName: 'device_self_tests',
+  timestamps: false,
+});
+
+module.exports = DeviceSelfTest;
+======= DeviceStatus.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceStatus extends Model {}
+
+DeviceStatus.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  battery: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  sos: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  gps: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  beacons: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'DeviceStatus',
+  tableName: 'device_statuses',
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['device_id', 'timestamp']
+    }
+  ]
+});
+
+module.exports = DeviceStatus;======= DeviceZonePosition.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class DeviceZonePosition extends Model {}
+
+DeviceZonePosition.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,  // Разрешить NULL
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    primaryKey: true
+  },
+  rssi: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  temperature: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  pressure: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  sequelize,
+  modelName: 'DeviceZonePosition',
+  timestamps: false,
+  tableName: 'device_zone_positions'
+});
+
+module.exports = DeviceZonePosition;
+======= Employee.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Department = require('./Department');
+const Device = require('./Device');
+
+class Employee extends Model {}
+
+Employee.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  first_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  last_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  middle_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true,
+  },
+  phone: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: Department,
+      key: 'id',
+    },
+  },
+  position: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  beaconid: {
+    type: DataTypes.STRING, // Изменяем на STRING
+    allowNull: true,
+    references: {
+      model: Device,
+      key: 'id',
+    },
+  },
+}, {
+  sequelize,
+  modelName: 'Employee',
+  tableName: 'employees',
+  timestamps: false,
+});
+
+Employee.belongsTo(Department, { foreignKey: 'department_id' });
+Employee.belongsTo(Device, { foreignKey: 'beaconid', targetKey: 'id' });
+
+module.exports = Employee;
+======= EmployeeZone.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Employee = require('./Employee');
+const Zone = require('./Zone');
+
+class EmployeeZone extends Model {}
+
+EmployeeZone.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  employee_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Employee,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+}, {
+  sequelize,
+  modelName: 'EmployeeZone',
+  tableName: 'employee_zones',
+  timestamps: false,
+});
+
+EmployeeZone.belongsTo(Employee, { foreignKey: 'employee_id' });
+EmployeeZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+module.exports = EmployeeZone;
+======= EmployeeZoneAssignment.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Employee = require('./Employee');
+const Zone = require('./Zone');
+
+class EmployeeZoneAssignment extends Model {}
+
+EmployeeZoneAssignment.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  employee_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Employee,
+      key: 'id',
+    },
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Zone,
+      key: 'id',
+    },
+  },
+  assignment_type: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+  },
+}, {
+  sequelize,
+  modelName: 'EmployeeZoneAssignment',
+  tableName: 'employee_zone_assignments',
+  timestamps: false,
+});
+
+EmployeeZoneAssignment.belongsTo(Employee, { foreignKey: 'employee_id' });
+EmployeeZoneAssignment.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+module.exports = EmployeeZoneAssignment;
+======= FloorPlan.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Building = require('./Building');
+
+class FloorPlan extends Model {}
+
+FloorPlan.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  building_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Building,
+      key: 'id',
+    },
+    allowNull: false,
+    onDelete: 'CASCADE',
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  map: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'FloorPlan',
+  tableName: 'floor_plans',
+  timestamps: false,
+});
+
+FloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
+
+module.exports = FloorPlan;
+======= GNSSPosition.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class GNSSPosition extends Model {}
+
+GNSSPosition.init({
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  latitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  longitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  height: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  sat_quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  hdop: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  vdop: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  createdat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedat: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'GNSSPosition',
+  tableName: 'gnss_positions',
+  timestamps: false,
+});
+
+module.exports = GNSSPosition;
+======= models.txt ======= 
+�� 㤠���� ���樠����஢��� ���ன�⢮ PRN
+======= Movement.js ======= 
+// models/Movement.js
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Device = require('./Device');
+const Zone = require('./Zone');
+
+class Movement extends Model {}
+
+Movement.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  device_id: {
+    type: DataTypes.STRING,
+    references: {
+      model: Device,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  from_zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  to_zone_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Zone,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  from_gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  to_gps_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  from_beacon_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  to_beacon_coordinates: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'Movement',
+  tableName: 'movements',
+  timestamps: false,
+});
+
+module.exports = Movement;
+======= output.txt ======= 
+======= Beacon.js ========= Report.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class Report extends Model {}
+
+Report.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  report_type: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  parameters: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  link: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  }
+}, {
+  sequelize,
+  modelName: 'Report',
+  tableName: 'reports',
+  timestamps: false,
+});
+
+module.exports = Report;
+======= updateSchema.js ======= 
+const { Client } = require('pg');
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL, // замените на вашу строку подключения
+});
+
+const updateSchema = async () => {
+  try {
+    await client.connect();
+
+    // Удаляем существующий внешний ключ
+    await client.query('ALTER TABLE beacons DROP CONSTRAINT IF EXISTS beacons_zone_id_fkey');
+
+    // Добавляем новый внешний ключ с каскадным удалением
+    await client.query(`ALTER TABLE beacons ADD CONSTRAINT beacons_zone_id_fkey
+      FOREIGN KEY (zone_id)
+      REFERENCES zones (id)
+      ON DELETE CASCADE`);
+
+    console.log('Schema updated successfully');
+  } catch (err) {
+    console.error('Error updating schema:', err);
+  } finally {
+    await client.end();
+  }
+};
+
+updateSchema();
+======= User.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+class User extends Model {}
+
+User.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  username: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  first_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  last_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  middle_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true,
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  role: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  sequelize,
+  modelName: 'User',
+  tableName: 'users',
+  timestamps: false,
+});
+
+module.exports = User;
+======= UserAction.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const User = require('./User');
+
+class UserAction extends Model {}
+
+UserAction.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  user_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: User,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+  action: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+}, {
+  sequelize,
+  modelName: 'UserAction',
+  tableName: 'user_actions',
+  timestamps: false,
+});
+
+module.exports = UserAction;
+======= Zone.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Department = require('./Department');
+const Beacon = require('./Beacon');
+const FloorPlan = require('./FloorPlan');
+
+class Zone extends Model {}
+
+Zone.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  coordinates: {
+    type: DataTypes.JSON,
+    allowNull: false,
+  },
+  beacons: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: true,
+  },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  department_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'departments',
+      key: 'id',
+    },
+    allowNull: true,
+  },
+  floor_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'floor_plans',
+      key: 'id',
+    },
+    allowNull: true,
+    onDelete: 'SET NULL',
+  },
+}, {
+  sequelize,
+  modelName: 'Zone',
+  tableName: 'zones',
+  timestamps: false,
+});
+
+Zone.belongsTo(Department, { foreignKey: 'department_id' });
+Zone.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
+Zone.hasMany(Beacon, { foreignKey: 'beacon_id', onDelete: 'CASCADE' });
+
+module.exports = Zone;
+======= ZoneEvent.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Employee = require('./Employee');
+const Zone = require('./Zone');
+
+class ZoneEvent extends Model {}
+
+ZoneEvent.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  employee_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Employee,
+      key: 'id'
+    }
+  },
+  zone_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Zone,
+      key: 'id'
+    }
+  },
+  event_type: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  duration: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  }
+}, {
+  sequelize,
+  modelName: 'ZoneEvent',
+  tableName: 'zone_events',
+  timestamps: false,
+});
+
+module.exports = ZoneEvent;
+======= ZoneViolation.js ======= 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Employee = require('./Employee');
+const Zone = require('./Zone');
+
+class ZoneViolation extends Model {}
+
+ZoneViolation.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  employee_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Employee,
+      key: 'id'
+    }
+  },
+  zone_type: {
+    type: DataTypes.STRING,
+    allowNull: true, // Разрешить NULL
+  },
+  zones: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
+    allowNull: true,
+  },
+  time_spent: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  violation_count: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  last_updated: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  }
+}, {
+  sequelize,
+  modelName: 'ZoneViolation',
+  tableName: 'zone_violations',
+  timestamps: false,
+});
+
+module.exports = ZoneViolation;

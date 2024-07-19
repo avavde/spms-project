@@ -1,8 +1,8 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Department = require('./Department');
-const Beacon = require('./Beacon');
 const FloorPlan = require('./FloorPlan');
+const Beacon = require('./Beacon');
 
 class Zone extends Model {}
 
@@ -19,10 +19,6 @@ Zone.init({
   coordinates: {
     type: DataTypes.JSON,
     allowNull: false,
-  },
-  beacons: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
-    allowNull: true,
   },
   type: {
     type: DataTypes.STRING,
@@ -54,6 +50,6 @@ Zone.init({
 
 Zone.belongsTo(Department, { foreignKey: 'department_id' });
 Zone.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
-Zone.hasMany(Beacon, { foreignKey: 'beacon_id', onDelete: 'CASCADE' });
+Zone.hasMany(Beacon, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 module.exports = Zone;
