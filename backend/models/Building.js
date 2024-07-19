@@ -39,6 +39,6 @@ Building.init({
   timestamps: false,
 });
 
-Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE'  });
+Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE' });
 
 module.exports = Building;
