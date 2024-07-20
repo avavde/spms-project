@@ -28,8 +28,8 @@ const BuildingManager = () => {
   const loadBuildings = async () => {
     try {
       const response = await buildingsAndPlansService.getBuildings();
-      setBuildings(response.data);
       console.log('Buildings loaded:', response.data); // Debug log
+      setBuildings(response.data);
     } catch (error) {
       console.error('Ошибка загрузки зданий:', error);
     }
@@ -38,8 +38,8 @@ const BuildingManager = () => {
   const loadZones = async () => {
     try {
       const response = await buildingsAndPlansService.getZones();
-      setZones(response.data);
       console.log('Zones loaded:', response.data); // Debug log
+      setZones(response.data);
     } catch (error) {
       console.error('Ошибка загрузки зон:', error);
     }
@@ -62,21 +62,23 @@ const BuildingManager = () => {
   };
 
   const handleFileChange = (e) => {
-    setUploadedFile(e.target.files[0]);
     console.log('File selected:', e.target.files[0]); // Debug log
+    setUploadedFile(e.target.files[0]);
   };
 
   const handleCreateBuilding = async () => {
     try {
-      const formData = new FormData();
-      for (const key in newBuilding) {
-        formData.append(key, newBuilding[key]);
-      }
       if (uploadedFile) {
+        const formData = new FormData();
         formData.append('file', uploadedFile);
+        for (const key in newBuilding) {
+          formData.append(key, newBuilding[key]);
+        }
+        console.log('Form data with file:', formData); // Debug log
+        await buildingsAndPlansService.createBuilding(formData);
+      } else {
+        await buildingsAndPlansService.createBuilding(newBuilding);
       }
-      console.log('Form data with file:', formData); // Debug log
-      await buildingsAndPlansService.createBuilding(formData);
       loadBuildings();
       setIsModalOpen(false);
       resetForm();
@@ -86,21 +88,21 @@ const BuildingManager = () => {
   };
 
   const handleEditBuilding = (building) => {
+    console.log('Editing building:', building); // Debug log
     setCurrentBuilding(building);
     setNewBuilding(building);
     setSelectedZones(building.zones || []);
     setIsModalOpen(true);
-    console.log('Editing building:', building); // Debug log
   };
 
   const handleUpdateBuilding = async () => {
     try {
       const formData = new FormData();
-      for (const key in newBuilding) {
-        formData.append(key, newBuilding[key]);
-      }
       if (uploadedFile) {
         formData.append('file', uploadedFile);
+      }
+      for (const key in newBuilding) {
+        formData.append(key, newBuilding[key]);
       }
       console.log('Form data with file:', formData); // Debug log
       await buildingsAndPlansService.updateBuilding(currentBuilding.id, formData);
@@ -125,7 +127,6 @@ const BuildingManager = () => {
   const resetForm = () => {
     setNewBuilding({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
     setSelectedZones([]);
-    setUploadedFile(null);
   };
 
   const toggleModal = () => {
