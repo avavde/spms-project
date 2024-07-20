@@ -1,5 +1,4 @@
-// FloorPlan.js
-
+// models/FloorPlan.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Building = require('./Building');
@@ -25,10 +24,6 @@ FloorPlan.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  map: {
-    type: DataTypes.JSON,
-    allowNull: true,
-  },
   created_at: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -38,6 +33,14 @@ FloorPlan.init({
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
+  },
+  file_url: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  file_type: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
 }, {
   sequelize,

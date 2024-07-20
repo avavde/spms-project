@@ -1,4 +1,4 @@
-// models/DeviceEvent.js
+// DeviceEvent.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 

@@ -12,17 +12,21 @@ const ZoneForm = ({ employeeId, onSave }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const zones = await zonesService.getAllZones(employeeId);
-      const assignments = await employeeZoneAssignmentService.getAssignmentByEmployeeId(employeeId);
-      const initialCheckboxesState = zones.reduce((acc, zone) => {
-        acc[zone.id] = assignments.some(a => a.zone_id === zone.id && a.assignment_type === 'forbidden');
-        return acc;
-      }, {});
-      const workingZone = assignments.find(a => a.assignment_type === 'working')?.zone_id || '';
-      setZones(zones);
-      setCheckboxes(initialCheckboxesState);
-      setSelectedZone(workingZone.toString());
-      setAssignments(assignments);
+      try {
+        const zones = await zonesService.getAllZones();
+        const assignments = await employeeZoneAssignmentService.getAssignmentByEmployeeId(employeeId);
+        const initialCheckboxesState = zones.reduce((acc, zone) => {
+          acc[zone.id] = assignments.some(a => a.zone_id === zone.id && a.assignment_type === 'forbidden');
+          return acc;
+        }, {});
+        const workingZone = assignments.find(a => a.assignment_type === 'working')?.zone_id || '';
+        setZones(zones);
+        setCheckboxes(initialCheckboxesState);
+        setSelectedZone(workingZone.toString());
+        setAssignments(assignments);
+      } catch (error) {
+        console.error('Ошибка при загрузке данных для зон:', error);
+      }
     };
 
     fetchData();

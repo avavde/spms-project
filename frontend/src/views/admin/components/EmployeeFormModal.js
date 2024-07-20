@@ -82,15 +82,22 @@ const EmployeeFormModal = ({ show, onClose, employee, onSave, onSaveZones }) => 
         employeeData.department_id = null;
       }
 
+      let savedEmployee;
       if (employeeData.id !== null && employeeData.id !== undefined) {
         console.log('Updating employee:', employeeData.id, employeeData); // Добавлено для отладки
         await employeeService.updateEmployee(employeeData.id, employeeData);
+        savedEmployee = employeeData;
       } else {
         console.log('Creating new employee:', employeeData); // Добавлено для отладки
-        await employeeService.createEmployee(employeeData);
+        const response = await employeeService.createEmployee(employeeData);
+        savedEmployee = response.data;
       }
+
       onSave();
       onClose();
+      if (onSaveZones) {
+        onSaveZones(savedEmployee.id);
+      }
     } catch (error) {
       console.error('Ошибка при сохранении сотрудника:', error.response ? error.response.data : error.message);
     }
@@ -108,8 +115,8 @@ const EmployeeFormModal = ({ show, onClose, employee, onSave, onSaveZones }) => 
           onClose={onClose}
         />
         <hr />
-        {employee && employee.id && (
-          <ZoneForm employeeId={employee.id} onSave={onSaveZones} />
+        {formState.id && (
+          <ZoneForm employeeId={formState.id} onSave={onSaveZones} />
         )}
       </CModalBody>
       <CModalFooter>
@@ -124,7 +131,7 @@ EmployeeFormModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   employee: PropTypes.object,
   onSave: PropTypes.func.isRequired,
-  onSaveZones: PropTypes.func.isRequired,
+  onSaveZones: PropTypes.func,
 };
 
 export default EmployeeFormModal;

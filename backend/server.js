@@ -27,6 +27,7 @@ const cancelSosRoutes = require('./routes/cancelSosRoutes');
 const buildingRoutes = require('./routes/buildingRoutes');
 const floorPlanRoutes = require('./routes/floorPlanRoutes');
 const beaconFloorPlanRoutes = require('./routes/beaconFloorPlanRoutes');
+const path = require('path');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -58,6 +59,7 @@ app.use('/api/send-sos', sosRoutes);
 app.use('/api/buildings', buildingRoutes);
 app.use('/api/floor-plans', floorPlanRoutes);
 app.use('/api/beacon-floor-plans', beaconFloorPlanRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 sequelize.sync().then(() => {
   server.listen(PORT, () => {

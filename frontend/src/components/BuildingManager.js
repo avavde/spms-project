@@ -5,22 +5,20 @@ import {
   CListGroup, CListGroupItem, CFormCheck 
 } from '@coreui/react';
 import buildingsAndPlansService from '../services/buildingsAndPlansService';
+import LeafletMap from './LeafletMap'; // Assuming LeafletMap is a component to display the map
 
 const BuildingManager = () => {
   const [buildings, setBuildings] = useState([]);
   const [currentBuilding, setCurrentBuilding] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newBuilding, setNewBuilding] = useState({ 
-    name: '', address: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } 
-  });
-  const [floorPlans, setFloorPlans] = useState([]);
+  const [isFloorPlanModalOpen, setIsFloorPlanModalOpen] = useState(false);
+  const [newBuilding, setNewBuilding] = useState({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
   const [zones, setZones] = useState([]);
-  const [selectedFloorPlans, setSelectedFloorPlans] = useState([]);
   const [selectedZones, setSelectedZones] = useState([]);
+  const [selectedFloorPlan, setSelectedFloorPlan] = useState(null);
 
   useEffect(() => {
     loadBuildings();
-    loadFloorPlans();
     loadZones();
   }, []);
 
@@ -30,15 +28,6 @@ const BuildingManager = () => {
       setBuildings(response.data);
     } catch (error) {
       console.error('Ошибка загрузки зданий:', error);
-    }
-  };
-
-  const loadFloorPlans = async () => {
-    try {
-      const response = await buildingsAndPlansService.getFloorPlans();
-      setFloorPlans(response.data);
-    } catch (error) {
-      console.error('Ошибка загрузки планов этажей:', error);
     }
   };
 
@@ -67,9 +56,16 @@ const BuildingManager = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    setNewBuilding((prevState) => ({
+      ...prevState,
+      file: e.target.files[0]
+    }));
+  };
+
   const handleCreateBuilding = async () => {
     try {
-      await buildingsAndPlansService.createBuilding({ ...newBuilding, floorPlans: selectedFloorPlans, zones: selectedZones });
+      await buildingsAndPlansService.createBuilding({ ...newBuilding, zones: selectedZones });
       loadBuildings();
       setIsModalOpen(false);
       resetForm();
@@ -81,14 +77,13 @@ const BuildingManager = () => {
   const handleEditBuilding = (building) => {
     setCurrentBuilding(building);
     setNewBuilding(building);
-    setSelectedFloorPlans(building.floorPlans || []);
     setSelectedZones(building.zones || []);
     setIsModalOpen(true);
   };
 
   const handleUpdateBuilding = async () => {
     try {
-      await buildingsAndPlansService.updateBuilding(currentBuilding.id, { ...newBuilding, floorPlans: selectedFloorPlans, zones: selectedZones });
+      await buildingsAndPlansService.updateBuilding(currentBuilding.id, { ...newBuilding, zones: selectedZones });
       loadBuildings();
       setIsModalOpen(false);
       setCurrentBuilding(null);
@@ -108,8 +103,7 @@ const BuildingManager = () => {
   };
 
   const resetForm = () => {
-    setNewBuilding({ name: '', address: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
-    setSelectedFloorPlans([]);
+    setNewBuilding({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
     setSelectedZones([]);
   };
 
@@ -118,18 +112,20 @@ const BuildingManager = () => {
     if (isModalOpen) resetForm();
   };
 
-  const handleFloorPlanChange = (e) => {
-    const { value, checked } = e.target;
-    setSelectedFloorPlans((prev) => 
-      checked ? [...prev, parseInt(value)] : prev.filter((id) => id !== parseInt(value))
-    );
-  };
-
   const handleZoneChange = (e) => {
     const { value, checked } = e.target;
     setSelectedZones((prev) => 
       checked ? [...prev, parseInt(value)] : prev.filter((id) => id !== parseInt(value))
     );
+  };
+
+  const handleViewFloorPlan = (plans) => {
+    if (plans && plans.length > 0) {
+      setSelectedFloorPlan(plans[0]);
+      setIsFloorPlanModalOpen(true);
+    } else {
+      alert('Планы этажей не прикреплены к этому зданию.');
+    }
   };
 
   return (
@@ -147,11 +143,11 @@ const BuildingManager = () => {
                   <CListGroupItem key={building.id} className="d-flex justify-content-between align-items-center">
                     <div>
                       <h5>{building.name}</h5>
-                      <p>{building.address}</p>
                     </div>
                     <div>
                       <CButton color="info" className="me-2" onClick={() => handleEditBuilding(building)}>Редактировать</CButton>
                       <CButton color="danger" onClick={() => handleDeleteBuilding(building.id)}>Удалить</CButton>
+                      <CButton color="primary" onClick={() => handleViewFloorPlan(building.floorPlans)}>Просмотр плана</CButton>
                     </div>
                   </CListGroupItem>
                 ))}
@@ -169,12 +165,6 @@ const BuildingManager = () => {
               <CCol>
                 <CFormLabel htmlFor="name">Название</CFormLabel>
                 <CFormInput id="name" name="name" value={newBuilding.name} onChange={handleInputChange} />
-              </CCol>
-            </CRow>
-            <CRow className="mb-3">
-              <CCol>
-                <CFormLabel htmlFor="address">Адрес</CFormLabel>
-                <CFormInput id="address" name="address" value={newBuilding.address} onChange={handleInputChange} />
               </CCol>
             </CRow>
             <CRow className="mb-3">
@@ -199,17 +189,8 @@ const BuildingManager = () => {
             </CRow>
             <CRow className="mb-3">
               <CCol>
-                <CFormLabel htmlFor="floorPlans">Планы этажей</CFormLabel>
-                {floorPlans.map((plan) => (
-                  <CFormCheck 
-                    key={plan.id} 
-                    id={`floorPlan-${plan.id}`} 
-                    value={plan.id} 
-                    label={plan.name} 
-                    checked={selectedFloorPlans.includes(plan.id)}
-                    onChange={handleFloorPlanChange}
-                  />
-                ))}
+                <CFormLabel htmlFor="floorPlans">Загрузить план этажа (SVG, PNG или JPG)</CFormLabel>
+                <input type="file" id="floorPlans" onChange={handleFileChange} />
               </CCol>
             </CRow>
             <CRow className="mb-3">
@@ -235,6 +216,17 @@ const BuildingManager = () => {
             {currentBuilding ? 'Сохранить изменения' : 'Добавить'}
           </CButton>
         </CModalFooter>
+      </CModal>
+
+      <CModal visible={isFloorPlanModalOpen} onClose={() => setIsFloorPlanModalOpen(false)}>
+        <CModalHeader>Просмотр плана этажа</CModalHeader>
+        <CModalBody>
+          {selectedFloorPlan ? (
+            <LeafletMap floorPlan={selectedFloorPlan} />
+          ) : (
+            <p>План этажа не загружен.</p>
+          )}
+        </CModalBody>
       </CModal>
     </CContainer>
   );
