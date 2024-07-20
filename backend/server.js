@@ -61,6 +61,12 @@ app.use('/api/beacon-floor-plans', beaconFloorPlanRoutes);
 app.use('/api/floor-plans', floorPlanRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+
 sequelize.sync().then(() => {
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
