@@ -29,7 +29,6 @@ exports.getFloorPlanById = async (req, res) => {
   try {
     const floorPlan = await FloorPlan.findByPk(req.params.id);
     if (!floorPlan) {
-      console.error('Этаж не найден:', req.params.id); // Debug log
       return res.status(404).json({ error: 'Этаж не найден' });
     }
     console.log('Floor plan by ID:', floorPlan); // Debug log
@@ -47,14 +46,15 @@ exports.createFloorPlan = async (req, res) => {
       return res.status(500).json({ error: 'Ошибка загрузки файла' });
     }
     try {
-      console.log('Uploaded file:', req.file); // Debug log
       console.log('Request body:', req.body); // Debug log
+      console.log('Uploaded file:', req.file); // Debug log
+
       const { building_id, name } = req.body;
       const file_url = `/uploads/${req.file.filename}`;
       const file_type = req.file.mimetype;
 
       const newFloorPlan = await FloorPlan.create({ building_id, name, file_url, file_type });
-      console.log('New floor plan created:', newFloorPlan); // Debug log
+      console.log('Created floor plan:', newFloorPlan); // Debug log
       res.status(201).json(newFloorPlan);
     } catch (error) {
       console.error('Ошибка при создании этажа:', error);
@@ -70,19 +70,19 @@ exports.updateFloorPlan = async (req, res) => {
       return res.status(500).json({ error: 'Ошибка загрузки файла' });
     }
     try {
-      console.log('Uploaded file:', req.file); // Debug log
       console.log('Request body:', req.body); // Debug log
+      console.log('Uploaded file:', req.file); // Debug log
+
       const { building_id, name } = req.body;
       const floorPlan = await FloorPlan.findByPk(req.params.id);
       if (!floorPlan) {
-        console.error('Этаж не найден:', req.params.id); // Debug log
         return res.status(404).json({ error: 'Этаж не найден' });
       }
       const file_url = req.file ? `/uploads/${req.file.filename}` : floorPlan.file_url;
       const file_type = req.file ? req.file.mimetype : floorPlan.file_type;
 
       await floorPlan.update({ building_id, name, file_url, file_type });
-      console.log('Floor plan updated:', floorPlan); // Debug log
+      console.log('Updated floor plan:', floorPlan); // Debug log
       res.json(floorPlan);
     } catch (error) {
       console.error('Ошибка при обновлении этажа:', error);
@@ -95,11 +95,10 @@ exports.deleteFloorPlan = async (req, res) => {
   try {
     const floorPlan = await FloorPlan.findByPk(req.params.id);
     if (!floorPlan) {
-      console.error('Этаж не найден:', req.params.id); // Debug log
       return res.status(404).json({ error: 'Этаж не найден' });
     }
     await floorPlan.destroy();
-    console.log('Floor plan deleted:', req.params.id); // Debug log
+    console.log('Deleted floor plan:', floorPlan); // Debug log
     res.status(204).send();
   } catch (error) {
     console.error('Ошибка при удалении этажа:', error);

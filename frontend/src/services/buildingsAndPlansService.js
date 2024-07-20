@@ -7,7 +7,11 @@ const buildingsAndPlansService = {
   getBuildingById: (id) => axios.get(`${API_URL}/buildings/${id}`),
   createBuilding: (data) => {
     console.log('Creating building with data:', data); // Debug log
-    return axios.post(`${API_URL}/buildings`, data, {
+    const formData = new FormData();
+    for (const key in data) {
+      formData.append(key, data[key]);
+    }
+    return axios.post(`${API_URL}/buildings`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -15,7 +19,11 @@ const buildingsAndPlansService = {
   },
   updateBuilding: (id, data) => {
     console.log('Updating building with data:', data); // Debug log
-    return axios.put(`${API_URL}/buildings/${id}`, data, {
+    const formData = new FormData();
+    for (const key in data) {
+      formData.append(key, data[key]);
+    }
+    return axios.put(`${API_URL}/buildings/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -26,11 +34,11 @@ const buildingsAndPlansService = {
   getFloorPlans: () => axios.get(`${API_URL}/floor-plans`),
   getFloorPlanById: (id) => axios.get(`${API_URL}/floor-plans/${id}`),
   createFloorPlan: (data) => {
+    console.log('Creating floor plan with data:', data); // Debug log
     const formData = new FormData();
     for (const key in data) {
       formData.append(key, data[key]);
     }
-    console.log('Creating floor plan with data:', formData); // Debug log
     return axios.post(`${API_URL}/floor-plans`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -38,11 +46,11 @@ const buildingsAndPlansService = {
     });
   },
   updateFloorPlan: (id, data) => {
+    console.log('Updating floor plan with data:', data); // Debug log
     const formData = new FormData();
     for (const key in data) {
       formData.append(key, data[key]);
     }
-    console.log('Updating floor plan with data:', formData); // Debug log
     return axios.put(`${API_URL}/floor-plans/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

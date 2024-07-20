@@ -5,7 +5,7 @@ import {
   CListGroup, CListGroupItem, CFormCheck 
 } from '@coreui/react';
 import buildingsAndPlansService from '../services/buildingsAndPlansService';
-import LeafletMap from './LeafletMap'; // Assuming LeafletMap is a component to display the map
+import LeafletMap from './LeafletMap';
 
 const BuildingManager = () => {
   const [buildings, setBuildings] = useState([]);
@@ -62,23 +62,21 @@ const BuildingManager = () => {
   };
 
   const handleFileChange = (e) => {
-    console.log('File selected:', e.target.files[0]); // Debug log
     setUploadedFile(e.target.files[0]);
+    console.log('File selected:', e.target.files[0]); // Debug log
   };
 
   const handleCreateBuilding = async () => {
     try {
-      if (uploadedFile) {
-        const formData = new FormData();
-        formData.append('file', uploadedFile);
-        for (const key in newBuilding) {
-          formData.append(key, newBuilding[key]);
-        }
-        console.log('Form data with file:', formData); // Debug log
-        await buildingsAndPlansService.createBuilding(formData);
-      } else {
-        await buildingsAndPlansService.createBuilding(newBuilding);
+      const formData = new FormData();
+      for (const key in newBuilding) {
+        formData.append(key, newBuilding[key]);
       }
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      }
+      console.log('Form data with file:', formData); // Debug log
+      await buildingsAndPlansService.createBuilding(formData);
       loadBuildings();
       setIsModalOpen(false);
       resetForm();
@@ -98,11 +96,11 @@ const BuildingManager = () => {
   const handleUpdateBuilding = async () => {
     try {
       const formData = new FormData();
-      if (uploadedFile) {
-        formData.append('file', uploadedFile);
-      }
       for (const key in newBuilding) {
         formData.append(key, newBuilding[key]);
+      }
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
       }
       console.log('Form data with file:', formData); // Debug log
       await buildingsAndPlansService.updateBuilding(currentBuilding.id, formData);
