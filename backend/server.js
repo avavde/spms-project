@@ -57,8 +57,8 @@ app.use('/api/beacons', beaconRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/send-sos', sosRoutes);
 app.use('/api/buildings', buildingRoutes);
-app.use('/api/floor-plans', floorPlanRoutes);
 app.use('/api/beacon-floor-plans', beaconFloorPlanRoutes);
+app.use('/api/floor-plans', floorPlanRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 sequelize.sync().then(() => {

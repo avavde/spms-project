@@ -85,6 +85,10 @@ exports.deleteFloorPlan = async (req, res) => {
     if (!floorPlan) {
       return res.status(404).json({ error: 'Этаж не найден' });
     }
+    const filePath = path.join(__dirname, '..', floorPlan.file_url);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
     await floorPlan.destroy();
     res.status(204).send();
   } catch (error) {

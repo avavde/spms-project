@@ -12,10 +12,13 @@ const BuildingManager = () => {
   const [currentBuilding, setCurrentBuilding] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFloorPlanModalOpen, setIsFloorPlanModalOpen] = useState(false);
-  const [newBuilding, setNewBuilding] = useState({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
+  const [newBuilding, setNewBuilding] = useState({ 
+    name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } 
+  });
   const [zones, setZones] = useState([]);
   const [selectedZones, setSelectedZones] = useState([]);
   const [selectedFloorPlan, setSelectedFloorPlan] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
 
   useEffect(() => {
     loadBuildings();
@@ -57,15 +60,23 @@ const BuildingManager = () => {
   };
 
   const handleFileChange = (e) => {
-    setNewBuilding((prevState) => ({
-      ...prevState,
-      file: e.target.files[0]
-    }));
+    setUploadedFile(e.target.files[0]);
   };
 
   const handleCreateBuilding = async () => {
     try {
-      await buildingsAndPlansService.createBuilding({ ...newBuilding, zones: selectedZones });
+      const formData = new FormData();
+      formData.append('name', newBuilding.name);
+      formData.append('gps_coordinates.lat', newBuilding.gps_coordinates.lat);
+      formData.append('gps_coordinates.lng', newBuilding.gps_coordinates.lng);
+      formData.append('dimensions.width', newBuilding.dimensions.width);
+      formData.append('dimensions.height', newBuilding.dimensions.height);
+      formData.append('zones', JSON.stringify(selectedZones));
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      }
+
+      await buildingsAndPlansService.createBuilding(formData);
       loadBuildings();
       setIsModalOpen(false);
       resetForm();
@@ -83,7 +94,18 @@ const BuildingManager = () => {
 
   const handleUpdateBuilding = async () => {
     try {
-      await buildingsAndPlansService.updateBuilding(currentBuilding.id, { ...newBuilding, zones: selectedZones });
+      const formData = new FormData();
+      formData.append('name', newBuilding.name);
+      formData.append('gps_coordinates.lat', newBuilding.gps_coordinates.lat);
+      formData.append('gps_coordinates.lng', newBuilding.gps_coordinates.lng);
+      formData.append('dimensions.width', newBuilding.dimensions.width);
+      formData.append('dimensions.height', newBuilding.dimensions.height);
+      formData.append('zones', JSON.stringify(selectedZones));
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      }
+
+      await buildingsAndPlansService.updateBuilding(currentBuilding.id, formData);
       loadBuildings();
       setIsModalOpen(false);
       setCurrentBuilding(null);
@@ -189,7 +211,7 @@ const BuildingManager = () => {
             </CRow>
             <CRow className="mb-3">
               <CCol>
-                <CFormLabel htmlFor="floorPlans">Загрузить план этажа (SVG, PNG или JPG)</CFormLabel>
+                <CFormLabel htmlFor="floorPlans">Загрузить план этажа (JSON или SVG)</CFormLabel>
                 <input type="file" id="floorPlans" onChange={handleFileChange} />
               </CCol>
             </CRow>

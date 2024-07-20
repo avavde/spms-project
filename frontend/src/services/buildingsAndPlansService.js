@@ -13,9 +13,9 @@ const buildingsAndPlansService = {
   getFloorPlanById: (id) => axios.get(`${API_URL}/floor-plans/${id}`),
   createFloorPlan: (data) => {
     const formData = new FormData();
-    for (const key in data) {
+    Object.keys(data).forEach(key => {
       formData.append(key, data[key]);
-    }
+    });
     return axios.post(`${API_URL}/floor-plans`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -24,9 +24,9 @@ const buildingsAndPlansService = {
   },
   updateFloorPlan: (id, data) => {
     const formData = new FormData();
-    for (const key in data) {
+    Object.keys(data).forEach(key => {
       formData.append(key, data[key]);
-    }
+    });
     return axios.put(`${API_URL}/floor-plans/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -38,7 +38,7 @@ const buildingsAndPlansService = {
   getBeaconFloorPlans: () => axios.get(`${API_URL}/beacon-floor-plans`),
   getBeaconFloorPlanById: (id) => axios.get(`${API_URL}/beacon-floor-plans/${id}`),
   createBeaconFloorPlan: (data) => axios.post(`${API_URL}/beacon-floor-plans`, data),
-  updateBeaconFloorPlan: (id, data) => axios.put(`${API_URL}/beacon-floor-plans/${id}`),
+  updateBeaconFloorPlan: (id, data) => axios.put(`${API_URL}/beacon-floor-plans/${id}`, data),
   deleteBeaconFloorPlan: (id) => axios.delete(`${API_URL}/beacon-floor-plans/${id}`)
 };
 
