@@ -17,8 +17,8 @@ FloorPlan.init({
       model: Building,
       key: 'id',
     },
-    allowNull: false,
-    onDelete: 'CASCADE',
+    allowNull: true,
+    onDelete: 'SET NULL',
   },
   name: {
     type: DataTypes.STRING,
