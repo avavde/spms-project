@@ -1,4 +1,4 @@
-const { FloorPlan, Beacon } = require('../models');
+const { FloorPlan, Beacon, Building } = require('../models');
 const path = require('path');
 const multer = require('multer');
 
@@ -127,5 +127,20 @@ exports.getBeaconsForFloorPlan = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при получении маяков для этажа:', error);
     res.status(500).json({ error: 'Ошибка при получении маяков для этажа' });
+  }
+};
+
+exports.getUnassignedFloorPlans = async (req, res) => {
+  try {
+    const unassignedFloorPlans = await FloorPlan.findAll({
+      where: {
+        building_id: null
+      }
+    });
+    console.log('Unassigned floor plans:', unassignedFloorPlans); // Debug log
+    res.json(unassignedFloorPlans);
+  } catch (error) {
+    console.error('Ошибка при получении незакрепленных этажей:', error);
+    res.status(500).json({ error: 'Ошибка при получении незакрепленных этажей' });
   }
 };
