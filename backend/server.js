@@ -28,14 +28,31 @@ const buildingRoutes = require('./routes/buildingRoutes');
 const floorPlanRoutes = require('./routes/floorPlanRoutes');
 const beaconFloorPlanRoutes = require('./routes/beaconFloorPlanRoutes');
 const path = require('path');
+const morgan = require('morgan');
 
 const app = express();
 const server = require('http').createServer(app);
 const PORT = process.env.PORT || 5000;
 
+// Настройка CORS
 app.use(cors());
+
+// Настройка логирования с помощью morgan
+app.use(morgan('combined'));
+
+// Настройки body-parser
 app.use(bodyParser.json());
 
+// Настройка статической директории для загрузки файлов
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Логирование всех запросов
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+// Настройка маршрутов
 app.use('/api/cancel-sos', cancelSosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -59,13 +76,6 @@ app.use('/api/send-sos', sosRoutes);
 app.use('/api/buildings', buildingRoutes);
 app.use('/api/beacon-floor-plans', beaconFloorPlanRoutes);
 app.use('/api/floor-plans', floorPlanRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
 
 sequelize.sync().then(() => {
   server.listen(PORT, () => {
