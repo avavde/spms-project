@@ -62,25 +62,22 @@ const BuildingManager = () => {
   };
 
   const handleFileChange = (e) => {
-    setUploadedFile(e.target.files[0]);
-    console.log('File selected:', e.target.files[0]); // Debug log
+    const file = e.target.files[0];
+    setUploadedFile(file);
+    console.log('File selected:', file); // Debug log
   };
 
   const handleCreateBuilding = async () => {
     try {
-      const formData = new FormData();
-      formData.append('name', newBuilding.name);
-      formData.append('gps_coordinates.lat', newBuilding.gps_coordinates.lat);
-      formData.append('gps_coordinates.lng', newBuilding.gps_coordinates.lng);
-      formData.append('dimensions.width', newBuilding.dimensions.width);
-      formData.append('dimensions.height', newBuilding.dimensions.height);
-      formData.append('zones', JSON.stringify(selectedZones));
       if (uploadedFile) {
+        const formData = new FormData();
+        formData.append('building_id', newBuilding.building_id);
+        formData.append('name', newBuilding.name);
         formData.append('file', uploadedFile);
-        console.log('Form data with file:', formData); // Debug log
-      }
 
-      await buildingsAndPlansService.createBuilding(formData);
+        await buildingsAndPlansService.createFloorPlan(formData);
+      }
+      await buildingsAndPlansService.createBuilding({ ...newBuilding, zones: selectedZones });
       loadBuildings();
       setIsModalOpen(false);
       resetForm();
@@ -99,19 +96,15 @@ const BuildingManager = () => {
 
   const handleUpdateBuilding = async () => {
     try {
-      const formData = new FormData();
-      formData.append('name', newBuilding.name);
-      formData.append('gps_coordinates.lat', newBuilding.gps_coordinates.lat);
-      formData.append('gps_coordinates.lng', newBuilding.gps_coordinates.lng);
-      formData.append('dimensions.width', newBuilding.dimensions.width);
-      formData.append('dimensions.height', newBuilding.dimensions.height);
-      formData.append('zones', JSON.stringify(selectedZones));
       if (uploadedFile) {
+        const formData = new FormData();
+        formData.append('building_id', newBuilding.building_id);
+        formData.append('name', newBuilding.name);
         formData.append('file', uploadedFile);
-        console.log('Form data with file:', formData); // Debug log
-      }
 
-      await buildingsAndPlansService.updateBuilding(currentBuilding.id, formData);
+        await buildingsAndPlansService.updateFloorPlan(currentBuilding.id, formData);
+      }
+      await buildingsAndPlansService.updateBuilding(currentBuilding.id, { ...newBuilding, zones: selectedZones });
       loadBuildings();
       setIsModalOpen(false);
       setCurrentBuilding(null);
@@ -125,7 +118,6 @@ const BuildingManager = () => {
     try {
       await buildingsAndPlansService.deleteBuilding(id);
       loadBuildings();
-      console.log('Building deleted:', id); // Debug log
     } catch (error) {
       console.error('Ошибка удаления здания:', error);
     }
@@ -134,7 +126,6 @@ const BuildingManager = () => {
   const resetForm = () => {
     setNewBuilding({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
     setSelectedZones([]);
-    setUploadedFile(null);
   };
 
   const toggleModal = () => {
@@ -147,14 +138,12 @@ const BuildingManager = () => {
     setSelectedZones((prev) => 
       checked ? [...prev, parseInt(value)] : prev.filter((id) => id !== parseInt(value))
     );
-    console.log('Zones selected:', selectedZones); // Debug log
   };
 
   const handleViewFloorPlan = (plans) => {
     if (plans && plans.length > 0) {
       setSelectedFloorPlan(plans[0]);
       setIsFloorPlanModalOpen(true);
-      console.log('Floor plan selected:', plans[0]); // Debug log
     } else {
       alert('Планы этажей не прикреплены к этому зданию.');
     }

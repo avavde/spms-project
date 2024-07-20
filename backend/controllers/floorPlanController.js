@@ -46,6 +46,9 @@ exports.createFloorPlan = async (req, res) => {
       return res.status(500).json({ error: 'Ошибка загрузки файла' });
     }
     try {
+      console.log('Request body:', req.body); // Debug log
+      console.log('Uploaded file:', req.file); // Debug log
+
       const { building_id, name } = req.body;
       const file_url = `/uploads/${req.file.filename}`;
       const file_type = req.file.mimetype;
@@ -67,6 +70,9 @@ exports.updateFloorPlan = async (req, res) => {
       return res.status(500).json({ error: 'Ошибка загрузки файла' });
     }
     try {
+      console.log('Request body:', req.body); // Debug log
+      console.log('Uploaded file:', req.file); // Debug log
+
       const { building_id, name } = req.body;
       const floorPlan = await FloorPlan.findByPk(req.params.id);
       if (!floorPlan) {
