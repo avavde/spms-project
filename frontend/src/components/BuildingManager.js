@@ -62,8 +62,8 @@ const BuildingManager = () => {
   };
 
   const handleFileChange = (e) => {
-    setUploadedFile(e.target.files[0]);
     console.log('File selected:', e.target.files[0]); // Debug log
+    setUploadedFile(e.target.files[0]);
   };
 
   const handleCreateBuilding = async () => {
@@ -125,6 +125,7 @@ const BuildingManager = () => {
   const resetForm = () => {
     setNewBuilding({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
     setSelectedZones([]);
+    setUploadedFile(null); // Clear uploaded file
   };
 
   const toggleModal = () => {

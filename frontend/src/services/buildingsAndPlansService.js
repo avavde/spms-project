@@ -11,6 +11,7 @@ const buildingsAndPlansService = {
     for (const key in data) {
       formData.append(key, data[key]);
     }
+    console.log('Form data to be sent:', formData); // Debug log
     return axios.post(`${API_URL}/buildings`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -23,6 +24,7 @@ const buildingsAndPlansService = {
     for (const key in data) {
       formData.append(key, data[key]);
     }
+    console.log('Form data to be sent:', formData); // Debug log
     return axios.put(`${API_URL}/buildings/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -39,6 +41,7 @@ const buildingsAndPlansService = {
     for (const key in data) {
       formData.append(key, data[key]);
     }
+    console.log('Form data to be sent:', formData); // Debug log
     return axios.post(`${API_URL}/floor-plans`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -51,6 +54,7 @@ const buildingsAndPlansService = {
     for (const key in data) {
       formData.append(key, data[key]);
     }
+    console.log('Form data to be sent:', formData); // Debug log
     return axios.put(`${API_URL}/floor-plans/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

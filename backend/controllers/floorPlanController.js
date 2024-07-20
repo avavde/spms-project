@@ -5,9 +5,11 @@ const multer = require('multer');
 // Настройка хранения файлов с помощью multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    console.log('Setting destination for file upload'); // Debug log
     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
+    console.log('Setting filename for file upload'); // Debug log
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
@@ -40,6 +42,7 @@ exports.getFloorPlanById = async (req, res) => {
 };
 
 exports.createFloorPlan = async (req, res) => {
+  console.log('Handling createFloorPlan request'); // Debug log
   upload.single('file')(req, res, async function (err) {
     if (err) {
       console.error('Ошибка загрузки файла:', err); // Debug log
@@ -64,6 +67,7 @@ exports.createFloorPlan = async (req, res) => {
 };
 
 exports.updateFloorPlan = async (req, res) => {
+  console.log('Handling updateFloorPlan request'); // Debug log
   upload.single('file')(req, res, async function (err) {
     if (err) {
       console.error('Ошибка загрузки файла:', err); // Debug log
@@ -76,6 +80,7 @@ exports.updateFloorPlan = async (req, res) => {
       const { building_id, name } = req.body;
       const floorPlan = await FloorPlan.findByPk(req.params.id);
       if (!floorPlan) {
+        console.error('Этаж не найден'); // Debug log
         return res.status(404).json({ error: 'Этаж не найден' });
       }
       const file_url = req.file ? `/uploads/${req.file.filename}` : floorPlan.file_url;
@@ -93,8 +98,10 @@ exports.updateFloorPlan = async (req, res) => {
 
 exports.deleteFloorPlan = async (req, res) => {
   try {
+    console.log('Handling deleteFloorPlan request'); // Debug log
     const floorPlan = await FloorPlan.findByPk(req.params.id);
     if (!floorPlan) {
+      console.error('Этаж не найден'); // Debug log
       return res.status(404).json({ error: 'Этаж не найден' });
     }
     await floorPlan.destroy();
@@ -108,6 +115,7 @@ exports.deleteFloorPlan = async (req, res) => {
 
 exports.getBeaconsForFloorPlan = async (req, res) => {
   try {
+    console.log('Handling getBeaconsForFloorPlan request'); // Debug log
     const beacons = await Beacon.findAll({ where: { floor_id: req.params.id } });
     console.log('Beacons for floor plan:', beacons); // Debug log
     res.json(beacons);
