@@ -5,17 +5,32 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const buildingsAndPlansService = {
   getBuildings: () => axios.get(`${API_URL}/buildings`),
   getBuildingById: (id) => axios.get(`${API_URL}/buildings/${id}`),
-  createBuilding: (data) => axios.post(`${API_URL}/buildings`, data),
-  updateBuilding: (id, data) => axios.put(`${API_URL}/buildings/${id}`, data),
+  createBuilding: (data) => {
+    console.log('Creating building with data:', data); // Debug log
+    return axios.post(`${API_URL}/buildings`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  updateBuilding: (id, data) => {
+    console.log('Updating building with data:', data); // Debug log
+    return axios.put(`${API_URL}/buildings/${id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
   deleteBuilding: (id) => axios.delete(`${API_URL}/buildings/${id}`),
 
   getFloorPlans: () => axios.get(`${API_URL}/floor-plans`),
   getFloorPlanById: (id) => axios.get(`${API_URL}/floor-plans/${id}`),
   createFloorPlan: (data) => {
     const formData = new FormData();
-    Object.keys(data).forEach(key => {
+    for (const key in data) {
       formData.append(key, data[key]);
-    });
+    }
+    console.log('Creating floor plan with data:', formData); // Debug log
     return axios.post(`${API_URL}/floor-plans`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -24,9 +39,10 @@ const buildingsAndPlansService = {
   },
   updateFloorPlan: (id, data) => {
     const formData = new FormData();
-    Object.keys(data).forEach(key => {
+    for (const key in data) {
       formData.append(key, data[key]);
-    });
+    }
+    console.log('Updating floor plan with data:', formData); // Debug log
     return axios.put(`${API_URL}/floor-plans/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

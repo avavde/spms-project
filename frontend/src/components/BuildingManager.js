@@ -29,6 +29,7 @@ const BuildingManager = () => {
     try {
       const response = await buildingsAndPlansService.getBuildings();
       setBuildings(response.data);
+      console.log('Buildings loaded:', response.data); // Debug log
     } catch (error) {
       console.error('Ошибка загрузки зданий:', error);
     }
@@ -38,6 +39,7 @@ const BuildingManager = () => {
     try {
       const response = await buildingsAndPlansService.getZones();
       setZones(response.data);
+      console.log('Zones loaded:', response.data); // Debug log
     } catch (error) {
       console.error('Ошибка загрузки зон:', error);
     }
@@ -61,6 +63,7 @@ const BuildingManager = () => {
 
   const handleFileChange = (e) => {
     setUploadedFile(e.target.files[0]);
+    console.log('File selected:', e.target.files[0]); // Debug log
   };
 
   const handleCreateBuilding = async () => {
@@ -74,6 +77,7 @@ const BuildingManager = () => {
       formData.append('zones', JSON.stringify(selectedZones));
       if (uploadedFile) {
         formData.append('file', uploadedFile);
+        console.log('Form data with file:', formData); // Debug log
       }
 
       await buildingsAndPlansService.createBuilding(formData);
@@ -90,6 +94,7 @@ const BuildingManager = () => {
     setNewBuilding(building);
     setSelectedZones(building.zones || []);
     setIsModalOpen(true);
+    console.log('Editing building:', building); // Debug log
   };
 
   const handleUpdateBuilding = async () => {
@@ -103,6 +108,7 @@ const BuildingManager = () => {
       formData.append('zones', JSON.stringify(selectedZones));
       if (uploadedFile) {
         formData.append('file', uploadedFile);
+        console.log('Form data with file:', formData); // Debug log
       }
 
       await buildingsAndPlansService.updateBuilding(currentBuilding.id, formData);
@@ -119,6 +125,7 @@ const BuildingManager = () => {
     try {
       await buildingsAndPlansService.deleteBuilding(id);
       loadBuildings();
+      console.log('Building deleted:', id); // Debug log
     } catch (error) {
       console.error('Ошибка удаления здания:', error);
     }
@@ -127,6 +134,7 @@ const BuildingManager = () => {
   const resetForm = () => {
     setNewBuilding({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
     setSelectedZones([]);
+    setUploadedFile(null);
   };
 
   const toggleModal = () => {
@@ -139,12 +147,14 @@ const BuildingManager = () => {
     setSelectedZones((prev) => 
       checked ? [...prev, parseInt(value)] : prev.filter((id) => id !== parseInt(value))
     );
+    console.log('Zones selected:', selectedZones); // Debug log
   };
 
   const handleViewFloorPlan = (plans) => {
     if (plans && plans.length > 0) {
       setSelectedFloorPlan(plans[0]);
       setIsFloorPlanModalOpen(true);
+      console.log('Floor plan selected:', plans[0]); // Debug log
     } else {
       alert('Планы этажей не прикреплены к этому зданию.');
     }
