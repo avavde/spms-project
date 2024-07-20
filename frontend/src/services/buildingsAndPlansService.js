@@ -9,7 +9,7 @@ const buildingsAndPlansService = {
     console.log('Creating building with data:', data); // Debug log
     return axios.post(`${API_URL}/buildings`, data, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'multipart/form-data'
       }
     });
   },
@@ -17,7 +17,7 @@ const buildingsAndPlansService = {
     console.log('Updating building with data:', data); // Debug log
     return axios.put(`${API_URL}/buildings/${id}`, data, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'multipart/form-data'
       }
     });
   },
