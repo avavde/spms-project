@@ -19,6 +19,7 @@ const BuildingManager = () => {
   const [newFloorPlan, setNewFloorPlan] = useState({ name: '', building_id: '' });
   const [zones, setZones] = useState([]);
   const [selectedZones, setSelectedZones] = useState([]);
+  const [selectedFloorPlans, setSelectedFloorPlans] = useState([]);
   const [selectedFloorPlan, setSelectedFloorPlan] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [unassignedFloorPlans, setUnassignedFloorPlans] = useState([]);
@@ -72,8 +73,10 @@ const BuildingManager = () => {
   const handleCreateBuilding = async () => {
     try {
       const response = await buildingsAndPlansService.createBuilding(newBuilding);
-      if (newFloorPlan.building_id) {
-        await buildingsAndPlansService.updateFloorPlan(newFloorPlan.building_id, { building_id: response.data.id });
+      if (selectedFloorPlans.length > 0) {
+        for (const planId of selectedFloorPlans) {
+          await buildingsAndPlansService.updateFloorPlan(planId, { building_id: response.data.id });
+        }
       }
       loadBuildings();
       setIsBuildingModalOpen(false);
@@ -88,14 +91,17 @@ const BuildingManager = () => {
     setCurrentBuilding(building);
     setNewBuilding(building);
     setSelectedZones(building.zones || []);
+    setSelectedFloorPlans(building.floorPlans ? building.floorPlans.map(plan => plan.id) : []);
     setIsBuildingModalOpen(true);
   };
 
   const handleUpdateBuilding = async () => {
     try {
       await buildingsAndPlansService.updateBuilding(currentBuilding.id, newBuilding);
-      if (newFloorPlan.building_id) {
-        await buildingsAndPlansService.updateFloorPlan(newFloorPlan.building_id, { building_id: currentBuilding.id });
+      if (selectedFloorPlans.length > 0) {
+        for (const planId of selectedFloorPlans) {
+          await buildingsAndPlansService.updateFloorPlan(planId, { building_id: currentBuilding.id });
+        }
       }
       loadBuildings();
       setIsBuildingModalOpen(false);
@@ -164,6 +170,7 @@ const BuildingManager = () => {
     setNewBuilding({ name: '', gps_coordinates: { lat: '', lng: '' }, dimensions: { width: '', height: '' } });
     setNewFloorPlan({ name: '', building_id: '' });
     setSelectedZones([]);
+    setSelectedFloorPlans([]);
     setUploadedFile(null);
   };
 
@@ -184,6 +191,13 @@ const BuildingManager = () => {
     );
   };
 
+  const handleFloorPlanSelection = (e) => {
+    const { value, checked } = e.target;
+    setSelectedFloorPlans((prev) => 
+      checked ? [...prev, parseInt(value)] : prev.filter((id) => id !== parseInt(value))
+    );
+  };
+
   const handleViewFloorPlan = (plans) => {
     if (plans && plans.length > 0) {
       setSelectedFloorPlan(plans[0]);
@@ -200,7 +214,10 @@ const BuildingManager = () => {
           <CCard>
             <CCardHeader className="d-flex justify-content-between align-items-center">
               <span>Управление зданиями</span>
-              <CButton color="primary" onClick={toggleBuildingModal}>Добавить здание</CButton>
+              <div>
+                <CButton color="primary" className="me-2" onClick={toggleBuildingModal}>Добавить здание</CButton>
+                <CButton color="secondary" onClick={toggleFloorPlanModal}>Добавить план этажа</CButton>
+              </div>
             </CCardHeader>
             <CCardBody>
               <CListGroup>
@@ -255,12 +272,16 @@ const BuildingManager = () => {
             <CRow className="mb-3">
               <CCol>
                 <CFormLabel htmlFor="floorPlans">Привязать план этажа</CFormLabel>
-                <CFormSelect id="floorPlans" onChange={(e) => setNewFloorPlan((prev) => ({ ...prev, building_id: e.target.value }))}>
-                  <option value="">Выберите план</option>
-                  {unassignedFloorPlans.map((plan) => (
-                    <option key={plan.id} value={plan.id}>{plan.name}</option>
-                  ))}
-                </CFormSelect>
+                {unassignedFloorPlans.map((plan) => (
+                  <CFormCheck 
+                    key={plan.id} 
+                    id={`plan-${plan.id}`} 
+                    value={plan.id} 
+                    label={plan.name} 
+                    checked={selectedFloorPlans.includes(plan.id)}
+                    onChange={handleFloorPlanSelection}
+                  />
+                ))}
               </CCol>
             </CRow>
             <CRow className="mb-3">
@@ -307,12 +328,16 @@ const BuildingManager = () => {
             <CRow className="mb-3">
               <CCol>
                 <CFormLabel htmlFor="building">Привязать к зданию</CFormLabel>
-                <CFormSelect id="building" onChange={(e) => setNewFloorPlan((prev) => ({ ...prev, building_id: e.target.value }))}>
-                  <option value="">Выберите здание</option>
-                  {buildings.map((building) => (
-                    <option key={building.id} value={building.id}>{building.name}</option>
-                  ))}
-                </CFormSelect>
+                {buildings.map((building) => (
+                  <CFormCheck 
+                    key={building.id} 
+                    id={`building-${building.id}`} 
+                    value={building.id} 
+                    label={building.name} 
+                    checked={newFloorPlan.building_id == building.id}
+                    onChange={(e) => setNewFloorPlan((prev) => ({ ...prev, building_id: e.target.value }))}
+                  />
+                ))}
               </CCol>
             </CRow>
           </CForm>
