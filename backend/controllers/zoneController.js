@@ -74,9 +74,16 @@ exports.deleteZone = async (req, res) => {
     const relatedBeacons = await Beacon.findAll({ where: { zone_id: req.params.id } });
     console.log(`Маяки, связанные с зоной: ${JSON.stringify(relatedBeacons)}`);
 
-    // Удаление связанных данных, если необходимо
+    const relatedAssignments = await EmployeeZoneAssignment.findAll({ where: { zone_id: req.params.id } });
+    console.log(`Назначения сотрудников, связанные с зоной: ${JSON.stringify(relatedAssignments)}`);
+
+    // Удаление связанных данных
     for (let beacon of relatedBeacons) {
       await beacon.destroy();
+    }
+
+    for (let assignment of relatedAssignments) {
+      await assignment.destroy();
     }
 
     await zone.destroy();
