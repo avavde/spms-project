@@ -1,5 +1,5 @@
-
 const { Zone, Department, Beacon } = require('../models');
+
 exports.getAllZones = async (req, res) => {
   try {
     const zones = await Zone.findAll();
@@ -84,6 +84,7 @@ exports.deleteZone = async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.error('Ошибка при удалении зоны:', error);
+    console.error('Детали ошибки:', error.message, error.stack);
     res.status(500).json({ error: 'Ошибка при удалении зоны' });
   }
 };
