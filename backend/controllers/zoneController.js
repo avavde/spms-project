@@ -64,9 +64,9 @@ exports.updateZone = async (req, res) => {
 
     console.log('Перед обновлением зоны:', zone);
 
-    await zone.update({ name, coordinates, type, department_id, beacons });
+    const updateResult = await zone.update({ name, coordinates, type, department_id, beacons });
 
-    console.log('После обновления зоны:', zone);
+    console.log('Результат обновления зоны:', updateResult);
 
     if (beacons && beacons.length > 0) {
       console.log('Удаление старых ассоциаций маяков с зоной');
@@ -76,12 +76,15 @@ exports.updateZone = async (req, res) => {
       await Beacon.update({ zone_id: zone.id }, { where: { id: beacons } });
     }
 
-    res.json(zone);
+    res.json(updateResult);
   } catch (error) {
     console.error('Ошибка при обновлении зоны:', error);
     res.status(500).json({ error: 'Ошибка при обновлении зоны' });
   }
 };
+
+
+
 exports.deleteZone = async (req, res) => {
   try {
     console.log('Запрос на удаление зоны с ID:', req.params.id);
