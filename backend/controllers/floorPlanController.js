@@ -48,17 +48,12 @@ exports.createFloorPlan = async (req, res) => {
     const { building_id, name } = req.body;
 
     if (!building_id || !name) {
-      console.error('Отсутствуют обязательные поля');
       return res.status(400).json({ error: 'Отсутствуют обязательные поля' });
     }
 
-    const newFloorPlan = await FloorPlan.create({
-      building_id,
-      name,
-    });
+    const newFloorPlan = await FloorPlan.create({ building_id, name });
     res.status(201).json(newFloorPlan);
   } catch (error) {
-    console.error('Ошибка при создании плана этажа:', error);
     res.status(500).json({ error: 'Ошибка при создании плана этажа' });
   }
 };
@@ -66,16 +61,12 @@ exports.createFloorPlan = async (req, res) => {
 exports.uploadFloorPlanImage = async (req, res) => {
   upload.single('file')(req, res, async (err) => {
     if (err) {
-      console.error('Ошибка загрузки файла:', err);
       return res.status(500).json({ error: 'Ошибка загрузки файла' });
     }
-
-    console.log('Uploaded file:', req.file); // Debug log
 
     try {
       const floorPlan = await FloorPlan.findByPk(req.params.id);
       if (!floorPlan) {
-        console.error('Этаж не найден');
         return res.status(404).json({ error: 'Этаж не найден' });
       }
 
@@ -83,10 +74,8 @@ exports.uploadFloorPlanImage = async (req, res) => {
       const file_type = req.file.mimetype;
 
       await floorPlan.update({ file_url, file_type });
-      console.log('Updated floor plan with image:', floorPlan);
       res.json(floorPlan);
     } catch (error) {
-      console.error('Ошибка при обновлении плана этажа с изображением:', error);
       res.status(500).json({ error: 'Ошибка при обновлении плана этажа с изображением' });
     }
   });

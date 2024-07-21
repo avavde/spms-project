@@ -138,6 +138,7 @@ const BuildingManager = () => {
   
   
   
+  
   const handleViewFloorPlan = (plans) => {
     if (plans && plans.length > 0) {
       setSelectedFloorPlan(plans[0]);
