@@ -69,6 +69,16 @@ exports.deleteZone = async (req, res) => {
       console.log('Зона с указанным ID не найдена');
       return res.status(404).json({ error: 'Зона не найдена' });
     }
+
+    // Логирование связанных данных перед удалением
+    const relatedBeacons = await Beacon.findAll({ where: { zone_id: req.params.id } });
+    console.log(`Маяки, связанные с зоной: ${JSON.stringify(relatedBeacons)}`);
+
+    // Удаление связанных данных, если необходимо
+    for (let beacon of relatedBeacons) {
+      await beacon.destroy();
+    }
+
     await zone.destroy();
     console.log('Зона удалена');
     res.status(204).send();
