@@ -1,19 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { generateReport, getReports } = require('../controllers/reportController');
+const reportController = require('../controllers/reportController');
 
-// Генерация отчета
-router.post('/generate', async (req, res) => {
-  try {
-    const { reportType, parameters } = req.body;
-    const report = await generateReport(reportType, parameters);
-    res.json(report);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Получение всех отчетов
-router.get('/', getReports);
+router.get('/generate', reportController.generateReport);
+router.get('/generate-enterprise-summary', reportController.generateEnterpriseSummary);
 
 module.exports = router;

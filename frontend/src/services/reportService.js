@@ -2,25 +2,28 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-const getAllReports = () => {
-  return axios.get(`${API_URL}/reports`);
+const generateReport = async (employeeId, startDate, endDate) => {
+  try {
+    const response = await axios.get(`${API_URL}/reports/generate`, {
+      params: { employeeId, startDate, endDate }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при формировании отчета:', error);
+    throw error;
+  }
 };
 
-const getReportById = (id) => {
-  return axios.get(`${API_URL}/reports/${id}`);
+const generateEnterpriseSummary = async (startDate, endDate) => {
+  try {
+    const response = await axios.get(`${API_URL}/reports/generate-enterprise-summary`, {
+      params: { startDate, endDate }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при формировании сводного отчета:', error);
+    throw error;
+  }
 };
 
-const createReport = (reportData) => {
-  return axios.post(`${API_URL}/reports`, reportData);
-};
-
-const deleteReport = (id) => {
-  return axios.delete(`${API_URL}/reports/${id}`);
-};
-
-export default {
-  getAllReports,
-  getReportById,
-  createReport,
-  deleteReport,
-};
+export default { generateReport, generateEnterpriseSummary };
