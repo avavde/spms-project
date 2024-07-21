@@ -24,7 +24,7 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
     if (zone) {
       setZoneName(zone.name);
       setZoneType(zone.type || '');
-      setSelectedBeacons(zone.beacons);
+      setSelectedBeacons(zone.beacons || []);
     }
   }, [zone]);
 
@@ -68,21 +68,23 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
           </div>
           <div className="mb-3">
             <CFormLabel>Маяки</CFormLabel>
-            {availableBeacons.map((beacon) => (
-              <CFormCheck
-                key={beacon.id}
-                id={`beacon-${beacon.id}`}
-                label={`ID: ${beacon.beacon_mac || 'Неизвестный MAC'}`}
-                checked={selectedBeacons.includes(beacon.id)}
-                onChange={() => handleBeaconChange(beacon.id)}
-              />
-            ))}
+            {availableBeacons && availableBeacons.length > 0 ? (
+              availableBeacons.map((beacon) => (
+                <CFormCheck
+                  key={beacon.id}
+                  id={`beacon-${beacon.id}`}
+                  label={`ID: ${beacon.beacon_mac || 'Неизвестный MAC'}`}
+                  checked={selectedBeacons.includes(beacon.id)}
+                  onChange={() => handleBeaconChange(beacon.id)}
+                />
+              ))
+            ) : (
+              <div>Нет доступных маяков</div>
+            )}
           </div>
         </CForm>
-
       </CModalBody>
       <CModalFooter>
-
         <CButton color="primary" onClick={handleSave}>Сохранить</CButton>
         <CButton color="danger" onClick={() => onDelete(zone.id)}>Удалить</CButton>
         <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
