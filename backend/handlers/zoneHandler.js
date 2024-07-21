@@ -6,6 +6,7 @@ const Employee = require('../models/Employee');
 const ZoneEvent = require('../models/ZoneEvent');
 const ZoneViolation = require('../models/ZoneViolation');
 const EmployeeZoneAssignment = require('../models/EmployeeZoneAssignment');
+const Movement = require('../models/Movement');
 const { broadcast } = require('../websocketServer');
 const { Op, Sequelize } = require('sequelize');
 const CICDecimator = require('../utils/CICDecimator'); // Импорт CIC-фильтра
@@ -133,6 +134,15 @@ const handleZonePositionMessage = async (deviceId, payload) => {
             console.error('Employee not found for device:', deviceId);
             continue;
           }
+
+          await Movement.create({
+            device_id: deviceId,
+            employee_id: employee.id,
+            timestamp: new Date(ts * 1000),
+            zone_id: zoneId,
+            beacon_mac: bInst,
+            map_coordinates: beacon.map_coordinates,
+          });
 
           const existingEnterEvent = await ZoneEvent.findOne({
             where: {
