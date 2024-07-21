@@ -27,7 +27,7 @@ Movement.init({
       model: Zone,
       key: 'id'
     },
-    allowNull: false,
+    allowNull: true,
     onDelete: 'CASCADE',
   },
   to_zone_id: {
@@ -36,7 +36,7 @@ Movement.init({
       model: Zone,
       key: 'id'
     },
-    allowNull: false,
+    allowNull: true,
     onDelete: 'CASCADE',
   },
   from_gps_coordinates: {
