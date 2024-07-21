@@ -244,7 +244,7 @@ const BuildingManager = () => {
             </CRow>
             <CRow className="mb-3">
               <CCol>
-                <CFormLabel htmlFor="planFile">Загрузить файл плана (JSON или SVG)</CFormLabel>
+                <CFormLabel htmlFor="planFile">Загрузить файл плана (PNG или JPG)</CFormLabel>
                 <input type="file" id="planFile" onChange={handleFileChange} />
               </CCol>
             </CRow>

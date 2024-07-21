@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+//const bodyParser = require('body-parser');
 const cors = require('cors');
 const sequelize = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
@@ -42,8 +42,8 @@ app.use(cors());
 app.use(morgan('combined'));
 
 // Настройки body-parser
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({ extended: true }));
 
 // Настройка статической директории для загрузки файлов
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
