@@ -38,7 +38,7 @@ const LocationMap = () => {
     fetchZones();
   }, []);
 
-  useEffect(() => {
+  useEffect(() => {f
     const fetchBeacons = async () => {
       try {
         const data = await beaconService.getAllBeacons();  // Загрузка маяков
@@ -126,9 +126,6 @@ const LocationMap = () => {
             <Tooltip direction="center" permanent>
               {zone.name}: {zone.employees ? zone.employees.length : 0} сотрудников
             </Tooltip>
-            <Popup>
-              {zone.name}: {zone.employees ? zone.employees.length : 0} сотрудников
-            </Popup>
           </Polygon>
         ))}
         {realTimeData.map((data) => {
