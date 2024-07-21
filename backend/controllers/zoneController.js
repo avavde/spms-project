@@ -82,7 +82,6 @@ exports.updateZone = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при обновлении зоны' });
   }
 };
-
 exports.deleteZone = async (req, res) => {
   try {
     console.log('Запрос на удаление зоны с ID:', req.params.id);
