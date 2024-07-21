@@ -44,12 +44,8 @@ exports.getFloorPlanById = async (req, res) => {
 };
 
 exports.createFloorPlan = async (req, res) => {
-  // Логирование `req` перед загрузкой файла
-  console.log('Request headers before multer:', JSON.stringify(req.headers));
-  console.log('Request body before multer:', JSON.stringify(req.body));
-  Object.keys(req).forEach(key => {
-    console.log(`req.${key}: ${JSON.stringify(req[key])}`);
-  });
+  // Логирование `req.body` перед загрузкой файла
+  console.log('Request body before multer:', req.body);
 
   upload.single('file')(req, res, async (err) => {
     if (err) {
@@ -58,12 +54,8 @@ exports.createFloorPlan = async (req, res) => {
     }
 
     // Логирование после обработки multer
-    console.log('Request headers after multer:', JSON.stringify(req.headers));
-    console.log('Request body after multer:', JSON.stringify(req.body)); // Debug log
+    console.log('Request body after multer:', req.body); // Debug log
     console.log('Uploaded file:', req.file); // Debug log
-    Object.keys(req).forEach(key => {
-      console.log(`req.${key}: ${JSON.stringify(req[key])}`);
-    });
 
     const { building_id, name } = req.body;
 
@@ -99,7 +91,7 @@ exports.updateFloorPlan = async (req, res) => {
       console.error('Ошибка загрузки файла:', err);
       return res.status(500).json({ error: 'Ошибка загрузки файла' });
     }
-    console.log('Request body:', JSON.stringify(req.body)); // Debug log
+    console.log('Request body:', req.body); // Debug log
     console.log('Uploaded file:', req.file); // Debug log
 
     try {
