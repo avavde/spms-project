@@ -104,12 +104,20 @@ const BuildingManager = () => {
 
   const handleCreateFloorPlan = async () => {
     try {
-      const formData = new FormData();
-      formData.append('name', newFloorPlan.name);
-      formData.append('building_id', newFloorPlan.building_id);
+      const floorPlanData = {
+        name: newFloorPlan.name,
+        building_id: newFloorPlan.building_id
+      };
   
+      // Создаем план этажа без файла
+      const response = await buildingsAndPlansService.createFloorPlan(floorPlanData);
+      console.log('Floor plan created:', response.data);
+  
+      // Загружаем файл после создания плана этажа
+      const floorPlanId = response.data.id;
       const file = newFloorPlan.file;
       if (file) {
+        const formData = new FormData();
         formData.append('file', file);
   
         // Логирование всех пар FormData для проверки
@@ -117,25 +125,17 @@ const BuildingManager = () => {
           console.log(`${pair[0]}: ${pair[1]}`);
         }
   
-        try {
-          const response = await buildingsAndPlansService.createFloorPlan(formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          });
-          console.log('Floor plan created:', response.data);
-          loadUnassignedFloorPlans();
-          setIsFloorPlanModalOpen(false);
-        } catch (error) {
-          console.error('Ошибка создания плана этажа:', error);
-        }
-      } else {
-        console.error('Файл не выбран');
+        await buildingsAndPlansService.uploadFloorPlanImage(floorPlanId, formData);
+        console.log('Floor plan image uploaded');
       }
+  
+      loadUnassignedFloorPlans();
+      setIsFloorPlanModalOpen(false);
     } catch (error) {
       console.error('Ошибка создания плана этажа:', error);
     }
   };
+  
   
   
   const handleViewFloorPlan = (plans) => {

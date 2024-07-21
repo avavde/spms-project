@@ -11,42 +11,13 @@ const buildingsAndPlansService = {
 
   getFloorPlans: () => axios.get(`${API_URL}/floor-plans`),
   getFloorPlanById: (id) => axios.get(`${API_URL}/floor-plans/${id}`),
-  createFloorPlan: (data) => {
-    const formData = new FormData();
-    for (const key in data) {
-      formData.append(key, data[key]);
+  createFloorPlan: (data) => axios.post(`${API_URL}/floor-plans`, data),
+  uploadFloorPlanImage: (id, formData) => axios.post(`${API_URL}/floor-plans/${id}/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
     }
-
-    // Логирование данных перед отправкой
-    console.log('Data object:', data);
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
-
-    return axios.post(`${API_URL}/floor-plans`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-  },
-  updateFloorPlan: (id, data) => {
-    const formData = new FormData();
-    for (const key in data) {
-      formData.append(key, data[key]);
-    }
-
-    // Логирование данных перед отправкой
-    console.log('Data object:', data);
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
-
-    return axios.put(`${API_URL}/floor-plans/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-  },
+  }),
+  updateFloorPlan: (id, data) => axios.put(`${API_URL}/floor-plans/${id}`, data),
   deleteFloorPlan: (id) => axios.delete(`${API_URL}/floor-plans/${id}`),
 
   getUnassignedFloorPlans: () => axios.get(`${API_URL}/floor-plans/unassigned`),

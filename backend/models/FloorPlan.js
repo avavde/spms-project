@@ -36,11 +36,11 @@ FloorPlan.init({
   },
   file_url: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   file_type: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 }, {
   sequelize,
