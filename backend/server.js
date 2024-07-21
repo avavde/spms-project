@@ -50,6 +50,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Логирование всех запросов
 app.use((req, res, next) => {
   console.log(`Method: ${req.method}, URL: ${req.url}, Headers: ${JSON.stringify(req.headers)}, Body: ${JSON.stringify(req.body)}`);
+  Object.keys(req).forEach(key => {
+    console.log(`req.${key}: ${JSON.stringify(req[key])}`);
+  });
   next();
 });
 
