@@ -37,8 +37,11 @@ exports.createZone = async (req, res) => {
     console.log('Создание новой зоны с данными:', { name, coordinates, beacons, type, department_id });
 
     const newZone = await Zone.create({ name, coordinates, type, department_id });
+    console.log(`Созданная зона: ${JSON.stringify(newZone)}`);
+    
     if (beacons && beacons.length > 0) {
-      await Beacon.update({ zone_id: newZone.id }, { where: { id: beacons } });
+      const updateResult = await Beacon.update({ zone_id: newZone.id }, { where: { id: beacons } });
+      console.log(`Результат обновления маяков: ${JSON.stringify(updateResult)}`);
     }
     res.status(201).json(newZone);
   } catch (error) {
@@ -57,13 +60,16 @@ exports.updateZone = async (req, res) => {
       console.log(`Зона с ID ${req.params.id} не найдена`);
       return res.status(404).json({ error: 'Зона не найдена' });
     }
-    await zone.update({ name, coordinates, type, department_id });
+    const updateResult = await zone.update({ name, coordinates, type, department_id });
+    console.log(`Результат обновления зоны: ${JSON.stringify(updateResult)}`);
 
     if (beacons && beacons.length > 0) {
       // Удаление старых ассоциаций
-      await Beacon.update({ zone_id: null }, { where: { zone_id: zone.id } });
+      const resetResult = await Beacon.update({ zone_id: null }, { where: { zone_id: zone.id } });
+      console.log(`Результат сброса маяков: ${JSON.stringify(resetResult)}`);
       // Добавление новых ассоциаций
-      await Beacon.update({ zone_id: zone.id }, { where: { id: beacons } });
+      const newAssocResult = await Beacon.update({ zone_id: zone.id }, { where: { id: beacons } });
+      console.log(`Результат обновления маяков: ${JSON.stringify(newAssocResult)}`);
     }
 
     res.json(zone);
