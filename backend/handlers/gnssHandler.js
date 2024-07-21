@@ -1,6 +1,7 @@
 const Device = require('../models/Device');
 const GNSSPosition = require('../models/GNSSPosition');
 const Employee = require('../models/Employee');
+const Movement = require('../models/Movement');
 const { broadcast } = require('../websocketServer');
 
 async function handleGNSSPositionMessage(deviceId, payload) {
@@ -38,6 +39,16 @@ async function handleGNSSPositionMessage(deviceId, payload) {
         console.error('Employee not found for device:', deviceId);
         return;
       }
+
+      // Запись данных в таблицу Movement
+      await Movement.create({
+        device_id: deviceId,
+        employee_id: employee.id,
+        timestamp: new Date(ts * 1000),
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        height: coordinates.height
+      });
 
       // Подготовка данных для отправки через WebSocket
       const updatedData = {
