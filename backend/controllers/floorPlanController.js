@@ -46,7 +46,7 @@ exports.getFloorPlanById = async (req, res) => {
 
 exports.createFloorPlan = async (req, res) => {
   // Логирование `req.body` перед загрузкой файла
-  console.log('Request body before multer:', req.body, req);
+  console.log('Request body before multer:', req.body, req.file);
 
   upload.single('file')(req, res, async (err) => {
     if (err) {
