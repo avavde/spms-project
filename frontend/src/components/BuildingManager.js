@@ -109,6 +109,12 @@ const BuildingManager = () => {
       formData.append('file', newFloorPlan.file);
       formData.append('building_id', newFloorPlan.building_id);
   
+      console.log('Form data before sending:', {
+        name: newFloorPlan.name,
+        file: newFloorPlan.file,
+        building_id: newFloorPlan.building_id
+      });
+  
       const response = await buildingsAndPlansService.createFloorPlan(formData);
       console.log('Floor plan created:', response.data);
       loadUnassignedFloorPlans();
@@ -118,6 +124,7 @@ const BuildingManager = () => {
     }
   };
   
+
 
   const handleViewFloorPlan = (plans) => {
     if (plans && plans.length > 0) {

@@ -16,6 +16,7 @@ const buildingsAndPlansService = {
     for (const key in data) {
       formData.append(key, data[key]);
     }
+    console.log('Form data to be sent:', ...formData.entries()); // Log form data
     return axios.post(`${API_URL}/floor-plans`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

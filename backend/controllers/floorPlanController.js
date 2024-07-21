@@ -52,6 +52,13 @@ exports.createFloorPlan = async (req, res) => {
     console.log('Uploaded file:', req.file); // Debug log
 
     const { building_id, name } = req.body;
+    
+    // Логирование значений полей
+    console.log('Received fields:');
+    console.log('building_id:', building_id);
+    console.log('name:', name);
+    console.log('file:', req.file);
+
     if (!building_id || !name || !req.file) {
       console.error('Отсутствуют обязательные поля');
       return res.status(400).json({ error: 'Отсутствуют обязательные поля' });
