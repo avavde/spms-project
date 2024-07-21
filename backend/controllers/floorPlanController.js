@@ -18,9 +18,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-
-const upload = multer({ storage: storage });
-
 exports.getAllFloorPlans = async (req, res) => {
   try {
     const floorPlans = await FloorPlan.findAll();
@@ -88,7 +85,6 @@ exports.createFloorPlan = async (req, res) => {
   });
 };
 
-
 exports.updateFloorPlan = async (req, res) => {
   upload.single('file')(req, res, async function (err) {
     if (err) {
@@ -117,7 +113,6 @@ exports.updateFloorPlan = async (req, res) => {
     }
   });
 };
-
 
 exports.deleteFloorPlan = async (req, res) => {
   try {
