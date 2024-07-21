@@ -4,6 +4,7 @@ const multer = require('multer');
 
 // Настройка хранения файлов с помощью multer
 const storage = multer.diskStorage({
+
   destination: function (req, file, cb) {
     console.log('Setting destination for file upload');
     console.log('Request body in destination:', req.body); // Debug log
@@ -45,7 +46,7 @@ exports.getFloorPlanById = async (req, res) => {
 
 exports.createFloorPlan = async (req, res) => {
   // Логирование `req.body` перед загрузкой файла
-  console.log('Request body before multer:', req.body);
+  console.log('Request body before multer:', req.body, req);
 
   upload.single('file')(req, res, async (err) => {
     if (err) {
