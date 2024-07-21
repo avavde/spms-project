@@ -49,17 +49,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Логирование всех запросов
-app.use((req, res, next) => {
-  console.log(`Method: ${req.method}, URL: ${req.url}, Headers: ${JSON.stringify(req.headers)}, Body: ${JSON.stringify(req.body)}`);
-  Object.keys(req).forEach(key => {
-    try {
-      console.log(`req.${key}: ${util.inspect(req[key], { depth: null })}`);
-    } catch (err) {
-      console.log(`req.${key}: [Circular]`);
-    }
-  });
-  next();
-});
+
 
 // Настройка маршрутов
 app.use('/api/cancel-sos', cancelSosRoutes);
