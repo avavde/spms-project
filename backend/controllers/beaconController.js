@@ -18,6 +18,16 @@ exports.getAvailableBeacons = async (req, res) => {
   }
 };
 
+exports.getAllBeacons = async (req, res) => {
+  try {
+    const beacons = await Beacon.findAll();
+    res.json(beacons);
+  } catch (error) {
+    res.status(500).json({ error: 'Ошибка при получении всех маяков' });
+  }
+};
+
+
 exports.updateBeaconCoordinates = async (req, res) => {
   console.log('Received request to update beacon coordinates');
   try {

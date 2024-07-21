@@ -1,4 +1,3 @@
-// src/components/LocationMap.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { MapContainer, ImageOverlay, Polygon, Popup, Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
@@ -7,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import plan from 'src/assets/brand/plan.jpg';
 import employeeIconUrl from 'src/assets/images/employee.png';
 import zonesService from 'src/services/zonesService';
+import beaconService from 'src/services/beaconService';  // Импортируем сервис маяков
 import { useWebSocket } from 'src/context/WebSocketContext';  // Импортируем WebSocketContext
 
 const imageBounds = [[0, 0], [1000, 1000]];
@@ -22,20 +22,32 @@ const LocationMap = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
   const [zones, setZones] = useState([]);
-  const notifications = useWebSocket();  // Используем WebSocketContext
+  const [beacons, setBeacons] = useState([]);  // Состояние для маяков
+  const notifications = useWebSocket();
   const [realTimeData, setRealTimeData] = useState([]);
 
   useEffect(() => {
     const fetchZones = async () => {
       try {
         const data = await zonesService.getAllZones();
-        console.log('Fetched zones:', data); // Лог для проверки данных
         setZones(data || []);
       } catch (error) {
         console.error('Ошибка при получении зон:', error);
       }
     };
     fetchZones();
+  }, []);
+
+  useEffect(() => {
+    const fetchBeacons = async () => {
+      try {
+        const data = await beaconService.getAllBeacons();  // Загрузка маяков
+        setBeacons(data || []);
+      } catch (error) {
+        console.error('Ошибка при получении маяков:', error);
+      }
+    };
+    fetchBeacons();
   }, []);
 
   useEffect(() => {
@@ -54,7 +66,6 @@ const LocationMap = () => {
   }, [notifications]);
 
   const handleOpenModal = useCallback((zone) => {
-    console.log('Открытие модального окна для зоны:', zone); // Лог для проверки данных зоны
     setSelectedZone(zone);
     setModalVisible(true);
   }, []);
@@ -84,7 +95,6 @@ const LocationMap = () => {
       const employees = realTimeData.filter(data => data.zone_id === zone.id).map(data => data.employee);
       return { ...zone, employees };
     });
-    console.log('Updated zones with employees:', newZones); // Лог для проверки обновленных данных
     return newZones;
   }, [zones, realTimeData]);
 
@@ -124,7 +134,7 @@ const LocationMap = () => {
         {realTimeData.map((data) => {
           const zone = updatedZones.find(zone => zone.id === data.zone_id);
           if (zone) {
-            const beacon = data.beacon_id && zones.find(zone => zone.beacons.includes(data.beacon_id));
+            const beacon = beacons.find(beacon => beacon.beacon_mac === data.beacon_id);  // Определение маяка по MAC
             return (
               <Marker
                 key={data.employee_id}
