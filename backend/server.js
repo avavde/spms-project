@@ -29,6 +29,7 @@ const floorPlanRoutes = require('./routes/floorPlanRoutes');
 const beaconFloorPlanRoutes = require('./routes/beaconFloorPlanRoutes');
 const path = require('path');
 const morgan = require('morgan');
+const util = require('util');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -49,9 +50,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Логирование всех запросов
 app.use((req, res, next) => {
-  console.log(`Method: ${req.method}, URL: ${req.url}, \nHeaders: ${JSON.stringify(req.headers)}, \nBody: ${JSON.stringify(req.body)}`);
+  console.log(`Method: ${req.method}, URL: ${req.url}, Headers: ${JSON.stringify(req.headers)}, Body: ${JSON.stringify(req.body)}`);
   Object.keys(req).forEach(key => {
-    console.log(`req.${key}: ${JSON.stringify(req[key])}`);
+    try {
+      console.log(`req.${key}: ${util.inspect(req[key], { depth: null })}`);
+    } catch (err) {
+      console.log(`req.${key}: [Circular]`);
+    }
   });
   next();
 });
