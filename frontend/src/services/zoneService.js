@@ -2,7 +2,18 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-// Fetch all zones
+const getBeaconIdsByMacs = async (beaconMacs) => {
+  try {
+    const response = await axios.get(`${API_URL}/beacons/ids`, {
+      params: { beacon_macs: beaconMacs }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при получении beacon IDs по MAC адресам:', error);
+    throw error;
+  }
+};
+
 const getAllZones = async () => {
   try {
     const response = await axios.get(`${API_URL}/zones`);
@@ -13,7 +24,6 @@ const getAllZones = async () => {
   }
 };
 
-// Create a new zone
 const createZone = async (zone) => {
   try {
     const beaconIds = await getBeaconIdsByMacs(zone.beacons);
@@ -26,7 +36,6 @@ const createZone = async (zone) => {
   }
 };
 
-// Update an existing zone
 const updateZone = async (id, zone) => {
   try {
     const beaconIds = await getBeaconIdsByMacs(zone.beacons);
@@ -39,7 +48,6 @@ const updateZone = async (id, zone) => {
   }
 };
 
-// Delete a zone
 const deleteZone = async (id) => {
   try {
     await axios.delete(`${API_URL}/zones/${id}`);
@@ -49,26 +57,12 @@ const deleteZone = async (id) => {
   }
 };
 
-// Get the current zone for a specific employee
 const getCurrentZone = async (employeeId) => {
   try {
     const response = await axios.get(`${API_URL}/zones/current/${employeeId}`);
     return response.data;
   } catch (error) {
     console.error(`Ошибка при получении текущей зоны для employeeId: ${employeeId}`, error);
-    throw error;
-  }
-};
-
-// New function to get beacon IDs by their MAC addresses
-const getBeaconIdsByMacs = async (beaconMacs) => {
-  try {
-    const response = await axios.get(`${API_URL}/beacons`, {
-      params: { beacon_macs: beaconMacs }
-    });
-    return response.data.map(beacon => beacon.id);
-  } catch (error) {
-    console.error('Ошибка при получении beacon IDs по MAC адресам:', error);
     throw error;
   }
 };
