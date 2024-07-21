@@ -146,13 +146,6 @@ const ZoneForm = ({ employeeId, onSave }) => {
           ))}
         </CFormSelect>
         <br />
-        {zones.map((zone) => {
-          if (zone.id.toString() === selectedZone) {
-            return <CBadge key={zone.id} color={getZoneBadgeColor(zone.type)}>{zone.type}</CBadge>;
-          }
-          return null;
-        })}
-        <br />
         <CButton type="submit" color="primary">Сохранить</CButton>
       </CForm>
     </CContainer>
@@ -165,16 +158,3 @@ ZoneForm.propTypes = {
 };
 
 export default ZoneForm;
-
-const getZoneBadgeColor = (zoneType) => {
-  switch (zoneType) {
-    case 'control':
-      return 'warning';
-    case 'warning':
-      return 'danger';
-    case 'danger':
-      return 'dark';
-    default:
-      return 'secondary';
-  }
-};

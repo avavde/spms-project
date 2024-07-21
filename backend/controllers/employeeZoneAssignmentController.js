@@ -37,10 +37,19 @@ exports.getAssignmentByEmployeeId = async (req, res) => {
 // Создать новое назначение зоны для сотрудника
 exports.createAssignment = async (req, res) => {
   try {
-    const existingAssignment = await EmployeeZoneAssignment.findOne({ where: { employee_id: req.body.employee_id, zone_id: req.body.zone_id } });
+    const { employee_id, zone_id, assignment_type } = req.body;
+
+    // Проверка наличия всех необходимых полей
+    if (!employee_id || !zone_id || !assignment_type) {
+      return res.status(400).json({ error: 'Необходимые данные отсутствуют' });
+    }
+
+    // Проверка существования назначения
+    const existingAssignment = await EmployeeZoneAssignment.findOne({ where: { employee_id, zone_id } });
     if (existingAssignment) {
       return res.status(400).json({ error: 'Assignment already exists' });
     }
+
     const assignment = await EmployeeZoneAssignment.create(req.body);
     res.status(201).json(assignment);
   } catch (error) {
@@ -51,9 +60,17 @@ exports.createAssignment = async (req, res) => {
 // Обновить назначение зоны для сотрудника
 exports.updateAssignment = async (req, res) => {
   try {
+    const { employee_id, zone_id, assignment_type } = req.body;
+
+    // Проверка наличия всех необходимых полей
+    if (!employee_id || !zone_id || !assignment_type) {
+      return res.status(400).json({ error: 'Необходимые данные отсутствуют' });
+    }
+
     const [updated] = await EmployeeZoneAssignment.update(req.body, {
       where: { id: req.params.id }
     });
+
     if (updated) {
       const updatedAssignment = await EmployeeZoneAssignment.findByPk(req.params.id, { include: [Employee, Zone] });
       res.json(updatedAssignment);
