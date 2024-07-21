@@ -1,7 +1,5 @@
-// Beacon.js
-
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // Убедитесь, что путь к config/db правильный
+const sequelize = require('../config/db');
 
 class Beacon extends Model {}
 
@@ -14,7 +12,7 @@ Beacon.init({
   floor_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'FloorPlans', // имя модели должно совпадать с именем таблицы в базе данных
+      model: 'FloorPlans',
       key: 'id',
     },
     allowNull: true,
@@ -23,7 +21,7 @@ Beacon.init({
   zone_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'Zones', // имя модели должно совпадать с именем таблицы в базе данных
+      model: 'Zones',
       key: 'id',
     },
     allowNull: true,

@@ -1,5 +1,3 @@
-// associations.js
-
 const Beacon = require('./Beacon');
 const BeaconFloorPlan = require('./BeaconFloorPlan');
 const Building = require('./Building');
@@ -25,23 +23,23 @@ const ZoneViolation = require('./ZoneViolation');
 
 // Define associations
 Beacon.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
-Beacon.belongsTo(Zone, { foreignKey: 'zone_id' });
+Beacon.belongsTo(Zone, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 BeaconFloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
 
 Building.hasMany(FloorPlan, { foreignKey: 'building_id', onDelete: 'CASCADE' });
 
 DepartmentZone.belongsTo(Department, { foreignKey: 'department_id' });
-DepartmentZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+DepartmentZone.belongsTo(Zone, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 Employee.belongsTo(Department, { foreignKey: 'department_id' });
 Employee.belongsTo(Device, { foreignKey: 'beaconid', targetKey: 'id' });
 
 EmployeeZone.belongsTo(Employee, { foreignKey: 'employee_id' });
-EmployeeZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+EmployeeZone.belongsTo(Zone, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 EmployeeZoneAssignment.belongsTo(Employee, { foreignKey: 'employee_id' });
-EmployeeZoneAssignment.belongsTo(Zone, { foreignKey: 'zone_id' });
+EmployeeZoneAssignment.belongsTo(Zone, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 FloorPlan.belongsTo(Building, { foreignKey: 'building_id' });
 
@@ -50,7 +48,7 @@ Zone.belongsTo(FloorPlan, { foreignKey: 'floor_id' });
 Zone.hasMany(Beacon, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 ZoneEvent.belongsTo(Employee, { foreignKey: 'employee_id' });
-ZoneEvent.belongsTo(Zone, { foreignKey: 'zone_id' });
+ZoneEvent.belongsTo(Zone, { foreignKey: 'zone_id', onDelete: 'CASCADE' });
 
 ZoneViolation.belongsTo(Employee, { foreignKey: 'employee_id' });
 
@@ -78,5 +76,5 @@ module.exports = {
   UserAction,
   Zone,
   ZoneEvent,
-  ZoneViolation
+  ZoneViolation,
 };
