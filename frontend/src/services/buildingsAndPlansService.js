@@ -11,7 +11,6 @@ const buildingsAndPlansService = {
 
   getFloorPlans: () => axios.get(`${API_URL}/floor-plans`),
   getFloorPlanById: (id) => axios.get(`${API_URL}/floor-plans/${id}`),
-  getUnassignedFloorPlans: () => axios.get(`${API_URL}/floor-plans/unassigned`),
   createFloorPlan: (data) => {
     const formData = new FormData();
     for (const key in data) {
@@ -36,11 +35,7 @@ const buildingsAndPlansService = {
   },
   deleteFloorPlan: (id) => axios.delete(`${API_URL}/floor-plans/${id}`),
 
-  getBeaconFloorPlans: () => axios.get(`${API_URL}/beacon-floor-plans`),
-  getBeaconFloorPlanById: (id) => axios.get(`${API_URL}/beacon-floor-plans/${id}`),
-  createBeaconFloorPlan: (data) => axios.post(`${API_URL}/beacon-floor-plans`, data),
-  updateBeaconFloorPlan: (id, data) => axios.put(`${API_URL}/beacon-floor-plans/${id}`, data),
-  deleteBeaconFloorPlan: (id) => axios.delete(`${API_URL}/beacon-floor-plans/${id}`)
+  getUnassignedFloorPlans: () => axios.get(`${API_URL}/floor-plans/unassigned`),
 };
 
 export default buildingsAndPlansService;
