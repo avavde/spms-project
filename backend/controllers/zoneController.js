@@ -65,7 +65,6 @@ exports.updateZone = async (req, res) => {
     console.log('Перед обновлением зоны:', zone);
 
     const updateResult = await zone.update({ name, coordinates, type, department_id, beacons });
-
     console.log('Результат обновления зоны:', updateResult);
 
     if (beacons && beacons.length > 0) {
@@ -82,7 +81,6 @@ exports.updateZone = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при обновлении зоны' });
   }
 };
-
 
 
 exports.deleteZone = async (req, res) => {
