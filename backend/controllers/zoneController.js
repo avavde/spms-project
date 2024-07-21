@@ -60,18 +60,27 @@ exports.updateZone = async (req, res) => {
       console.log(`Зона с ID ${req.params.id} не найдена`);
       return res.status(404).json({ error: 'Зона не найдена' });
     }
+
     await zone.update({ name, coordinates, type, department_id, beacons });
     console.log(`Зона обновлена: ${JSON.stringify(zone)}`);
 
-    // Обновление маяков
+    // Логирование маяков перед обновлением
+    const currentBeacons = await Beacon.findAll({ where: { zone_id: zone.id } });
+    console.log(`Текущие маяки в зоне: ${JSON.stringify(currentBeacons)}`);
+
     if (beacons && beacons.length > 0) {
       // Удаление старых ассоциаций
       await Beacon.update({ zone_id: null }, { where: { zone_id: zone.id } });
       console.log('Старые ассоциации маяков удалены.');
+
       // Добавление новых ассоциаций
       await Beacon.update({ zone_id: zone.id }, { where: { id: beacons } });
       console.log('Новые ассоциации маяков добавлены.');
     }
+
+    // Логирование маяков после обновления
+    const updatedBeacons = await Beacon.findAll({ where: { zone_id: zone.id } });
+    console.log(`Обновленные маяки в зоне: ${JSON.stringify(updatedBeacons)}`);
 
     res.json(zone);
   } catch (error) {
