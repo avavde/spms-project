@@ -1,5 +1,3 @@
-// Zone.js
-
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -39,6 +37,10 @@ Zone.init({
     },
     allowNull: true,
     onDelete: 'SET NULL',
+  },
+  beacons: {
+    type: DataTypes.JSON, // Используем JSON для хранения массива beacons
+    allowNull: true,
   },
 }, {
   sequelize,
