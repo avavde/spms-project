@@ -1,4 +1,4 @@
-const { Zone, Department, Beacon } = require('../models');
+const { Zone, Department, Beacon, EmployeeZoneAssignment } = require('../models');
 
 exports.getAllZones = async (req, res) => {
   try {
@@ -74,14 +74,16 @@ exports.deleteZone = async (req, res) => {
     const relatedBeacons = await Beacon.findAll({ where: { zone_id: req.params.id } });
     console.log(`Маяки, связанные с зоной: ${JSON.stringify(relatedBeacons)}`);
 
-    const relatedAssignments = await EmployeeZoneAssignment.findAll({ where: { zone_id: req.params.id } });
-    console.log(`Назначения сотрудников, связанные с зоной: ${JSON.stringify(relatedAssignments)}`);
-
-    // Удаление связанных данных
+    // Удаление связанных данных, если необходимо
     for (let beacon of relatedBeacons) {
       await beacon.destroy();
     }
 
+    // Логирование связанных назначений сотрудников перед удалением
+    const relatedAssignments = await EmployeeZoneAssignment.findAll({ where: { zone_id: req.params.id } });
+    console.log(`Назначения сотрудников, связанные с зоной: ${JSON.stringify(relatedAssignments)}`);
+
+    // Удаление связанных назначений сотрудников
     for (let assignment of relatedAssignments) {
       await assignment.destroy();
     }
@@ -91,7 +93,6 @@ exports.deleteZone = async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.error('Ошибка при удалении зоны:', error);
-    console.error('Детали ошибки:', error.message, error.stack);
     res.status(500).json({ error: 'Ошибка при удалении зоны' });
   }
 };
