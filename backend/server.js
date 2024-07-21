@@ -42,6 +42,7 @@ app.use(morgan('combined'));
 
 // Настройки body-parser
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Настройка статической директории для загрузки файлов
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

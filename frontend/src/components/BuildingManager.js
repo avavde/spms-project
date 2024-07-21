@@ -106,7 +106,7 @@ const BuildingManager = () => {
     try {
       const formData = new FormData();
       formData.append('name', newFloorPlan.name);
-      formData.append('file', newFloorPlan.file);
+      formData.append('file', newFloorPlan.file, newFloorPlan.file.name); // Явно указываем имя файла
       formData.append('building_id', newFloorPlan.building_id);
   
       console.log('Form data before sending:', {
@@ -124,7 +124,6 @@ const BuildingManager = () => {
     }
   };
   
-
 
   const handleViewFloorPlan = (plans) => {
     if (plans && plans.length > 0) {
