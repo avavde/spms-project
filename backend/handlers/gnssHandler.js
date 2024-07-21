@@ -7,6 +7,10 @@ const { broadcast } = require('../websocketServer');
 async function handleGNSSPositionMessage(deviceId, payload) {
   if (payload.message && payload.message.coordinates) {
     const { ts, coordinates, sat_quantity, HDOP, VDOP } = payload.message;
+    
+    // Проверка корректности значения height
+    const height = isNaN(coordinates.height) || coordinates.height === null ? 0 : coordinates.height;
+
     try {
       await Device.upsert({
         id: deviceId,
@@ -20,7 +24,7 @@ async function handleGNSSPositionMessage(deviceId, payload) {
         timestamp: new Date(ts * 1000),
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
-        height: coordinates.height,
+        height: height, 
         sat_quantity: sat_quantity,
         hdop: HDOP,
         vdop: VDOP,
@@ -47,7 +51,7 @@ async function handleGNSSPositionMessage(deviceId, payload) {
         timestamp: new Date(ts * 1000),
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
-        height: coordinates.height
+        height: height  
       });
 
       // Подготовка данных для отправки через WebSocket
@@ -59,7 +63,7 @@ async function handleGNSSPositionMessage(deviceId, payload) {
           coordinates: {
             latitude: coordinates.latitude,
             longitude: coordinates.longitude,
-            height: coordinates.height
+            height: height 
           },
           sat_quantity: sat_quantity,
           hdop: HDOP,
