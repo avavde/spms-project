@@ -230,7 +230,19 @@ const generateEnterpriseSummary = async (req, res) => {
       'Общее время в зонах (минуты)', 
       'Общее количество нарушений', 
       'Общее количество событий', 
-      'Количество событий входа', 
+      'Количество событий входа': enterEvents,
+      'Количество событий выхода': exitEvents,
+      'Время в запрещенных зонах (минуты)': zoneTime.forbidden,
+      'Время в рабочих зонах (минуты)': zoneTime.working,
+      'Время в опасных зонах (минуты)': zoneTime.dangerous,
+      'Время в контрольных зонах (минуты)': zoneTime.control,
+      'Время в обычных зонах (минуты)': zoneTime.regular
+    };
+    
+    const fields = [
+      'Общее время в зонах (минуты)', 
+      'Общее количество нарушений', 
+      'Общее количество событий', 
       'Количество событий выхода', 
       'Время в запрещенных зонах (минуты)', 
       'Время в рабочих зонах (минуты)', 
@@ -238,17 +250,18 @@ const generateEnterpriseSummary = async (req, res) => {
       'Время в контрольных зонах (минуты)', 
       'Время в обычных зонах (минуты)'
     ];
+    
     const csv = parse([enterpriseSummary], { fields });
-
+    
     const filePath = path.join(__dirname, '..', 'reports', `enterprise_summary_${Date.now()}.csv`);
     fs.writeFileSync(filePath, csv);
-
+    
     res.json({ link: `/reports/${path.basename(filePath)}` });
-
-  } catch (error) {
-    console.error('Error generating enterprise summary:', error);
-    res.status(500).json({ error: 'Ошибка при формировании сводного отчета' });
-  }
-};
-
-module.exports = { generateReport, generateEnterpriseSummary };
+    
+    } catch (error) {
+      console.error('Error generating enterprise summary:', error);
+      res.status(500).json({ error: 'Ошибка при формировании сводного отчета' });
+    }
+    };
+    
+    module.exports = { generateReport, generateEnterpriseSummary };
