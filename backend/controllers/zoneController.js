@@ -116,14 +116,20 @@ exports.deleteZone = async (req, res) => {
 };
 
 // Новый метод для получения идентификаторов маяков по их MAC-адресам
-const getBeaconIdsByMacs = async (beaconMacs) => {
+exports.getBeaconIdsByMacs = async (req, res) => {
   try {
-    const response = await axios.get(`${API_URL}/beacons`, {
-      params: { beacon_macs: beaconMacs }
-    });
-    return response.data.map(beacon => beacon.id);
+    const { beacon_macs } = req.query;
+
+    if (!beacon_macs || !Array.isArray(beacon_macs)) {
+      return res.status(400).json({ error: 'Invalid request: beacon_macs must be an array' });
+    }
+
+    const beacons = await Beacon.findAll({ where: { beacon_mac: beacon_macs } });
+    const beaconIds = beacons.map(beacon => beacon.id);
+
+    res.json(beaconIds);
   } catch (error) {
     console.error('Ошибка при получении beacon IDs по MAC адресам:', error);
-    throw error;
+    res.status(500).json({ error: 'Ошибка при получении beacon IDs по MAC адресам' });
   }
 };

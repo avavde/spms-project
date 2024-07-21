@@ -27,11 +27,11 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
     }
   }, [zone]);
 
-  const handleBeaconChange = (beaconMac) => {
+  const handleBeaconChange = (beaconId) => {
     setSelectedBeacons((prevSelected) =>
-      prevSelected.includes(beaconMac)
-        ? prevSelected.filter((mac) => mac !== beaconMac)
-        : [...prevSelected, beaconMac]
+      prevSelected.includes(beaconId)
+        ? prevSelected.filter((id) => id !== beaconId)
+        : [...prevSelected, beaconId]
     );
   };
 
@@ -73,8 +73,8 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
                   key={beacon.id}
                   id={`beacon-${beacon.id}`}
                   label={`MAC: ${beacon.beacon_mac || 'Неизвестный MAC'}`}
-                  checked={selectedBeacons.includes(beacon.beacon_mac)}
-                  onChange={() => handleBeaconChange(beacon.beacon_mac)}
+                  checked={selectedBeacons.includes(beacon.id)}
+                  onChange={() => handleBeaconChange(beacon.id)}
                 />
               ))
             ) : (

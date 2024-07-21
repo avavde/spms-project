@@ -73,3 +73,21 @@ exports.deleteBeacon = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при удалении координат маяка', details: error.message });
   }
 };
+
+exports.getBeaconIdsByMacs = async (req, res) => {
+  try {
+    const { beacon_macs } = req.query;
+
+    if (!beacon_macs || !Array.isArray(beacon_macs)) {
+      return res.status(400).json({ error: 'Invalid request: beacon_macs must be an array' });
+    }
+
+    const beacons = await Beacon.findAll({ where: { beacon_mac: beacon_macs } });
+    const beaconIds = beacons.map(beacon => beacon.id);
+
+    res.json(beaconIds);
+  } catch (error) {
+    console.error('Ошибка при получении beacon IDs по MAC адресам:', error);
+    res.status(500).json({ error: 'Ошибка при получении beacon IDs по MAC адресам' });
+  }
+};

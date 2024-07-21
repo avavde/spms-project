@@ -26,7 +26,7 @@ const getBeaconByMacs = async (beaconMacs) => {
 
 const getAvailableBeacons = async () => {
   try {
-    const response = await axios.get(`${API_URL}/beacons/available`);
+    const response = await axios.get(`${API_URL}/beacons/available/beacons`);
     return response.data;
   } catch (error) {
     console.error('Ошибка при получении доступных маяков:', error);
