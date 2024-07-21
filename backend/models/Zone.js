@@ -47,6 +47,7 @@ Zone.init({
   modelName: 'Zone',
   tableName: 'zones',
   timestamps: false,
+  
 });
 
 module.exports = Zone;
