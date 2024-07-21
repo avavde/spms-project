@@ -39,7 +39,7 @@ Zone.init({
     onDelete: 'SET NULL',
   },
   beacons: {
-    type: DataTypes.ARRAY(DataTypes.INTEGER), // Обновленный тип данных для хранения массива идентификаторов маяков
+    type: DataTypes.ARRAY(DataTypes.INTEGER), // Используем массив строк для хранения MAC-адресов
     allowNull: true,
   },
 }, {
