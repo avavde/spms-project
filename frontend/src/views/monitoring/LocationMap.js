@@ -38,7 +38,7 @@ const LocationMap = () => {
     fetchZones();
   }, []);
 
-  useEffect(() => {f
+  useEffect(() => {
     const fetchBeacons = async () => {
       try {
         const data = await beaconService.getAllBeacons();  // Загрузка маяков
