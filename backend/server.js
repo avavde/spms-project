@@ -49,7 +49,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Логирование всех запросов
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  console.log(` ${req.method} ${req.url} ${req.body}`);
   next();
 });
 

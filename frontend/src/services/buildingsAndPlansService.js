@@ -16,7 +16,13 @@ const buildingsAndPlansService = {
     for (const key in data) {
       formData.append(key, data[key]);
     }
-    console.log('Form data to be sent:', ...formData.entries()); // Log form data
+
+    // Логирование данных перед отправкой
+    console.log('Data object:', data);
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
     return axios.post(`${API_URL}/floor-plans`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -28,6 +34,13 @@ const buildingsAndPlansService = {
     for (const key in data) {
       formData.append(key, data[key]);
     }
+
+    // Логирование данных перед отправкой
+    console.log('Data object:', data);
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
     return axios.put(`${API_URL}/floor-plans/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
