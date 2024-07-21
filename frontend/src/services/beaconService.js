@@ -24,6 +24,16 @@ const getBeaconByMacs = async (beaconMacs) => {
   }
 };
 
+const getAvailableBeacons = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/beacons/available`);
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при получении доступных маяков:', error);
+    throw error;
+  }
+};
+
 const createBeacon = async (beacon) => {
   try {
     const response = await axios.post(`${API_URL}/beacons`, beacon);
@@ -34,12 +44,12 @@ const createBeacon = async (beacon) => {
   }
 };
 
-const updateBeacon = async (beacon_mac, beacon) => {
+const updateBeaconCoordinates = async (beacon_mac, map_coordinates) => {
   try {
-    const response = await axios.put(`${API_URL}/beacons/${beacon_mac}`, beacon);
+    const response = await axios.put(`${API_URL}/beacons/${beacon_mac}`, { map_coordinates });
     return response.data;
   } catch (error) {
-    console.error(`Ошибка при обновлении маяка с MAC: ${beacon_mac}`, error);
+    console.error(`Ошибка при обновлении координат маяка с MAC: ${beacon_mac}`, error);
     throw error;
   }
 };
@@ -56,7 +66,8 @@ const deleteBeacon = async (beacon_mac) => {
 export default {
   getAllBeacons,
   getBeaconByMacs,
+  getAvailableBeacons,
   createBeacon,
-  updateBeacon,
+  updateBeaconCoordinates,
   deleteBeacon,
 };

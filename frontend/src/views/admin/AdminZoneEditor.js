@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import zonesService from 'src/services/zonesService';
-import { getAvailableBeacons, updateBeaconCoordinates, deleteBeacon } from 'src/services/beaconService';
+import beaconService from 'src/services/beaconService'; // Импортируем как объект
 import MapComponent from './components/MapComponent';
 import ZoneFormModal from './components/ZoneFormModal';
 import BeaconFormModal from './components/BeaconFormModal';
@@ -36,7 +36,7 @@ const AdminZoneEditor = () => {
 
   const fetchBeacons = async () => {
     try {
-      const data = await getAvailableBeacons();
+      const data = await beaconService.getAvailableBeacons(); // Используем методы объекта beaconService
       setAvailableBeacons(data);
       console.log('Маяки загружены:', data); // Лог загруженных маяков
     } catch (error) {
@@ -118,7 +118,7 @@ const AdminZoneEditor = () => {
     try {
       const formattedCoords = [coords.lat, coords.lng];
       console.log(`Updating beacon coordinates for beacon_mac: ${beacon_mac} with coordinates: ${JSON.stringify(formattedCoords)}`);
-      await updateBeaconCoordinates(beacon_mac, formattedCoords);
+      await beaconService.updateBeaconCoordinates(beacon_mac, formattedCoords); // Используем методы объекта beaconService
       fetchBeacons(); // обновляем список маяков после изменения координат
     } catch (error) {
       console.error('Ошибка при обновлении координат маяка:', error);
@@ -128,7 +128,7 @@ const AdminZoneEditor = () => {
   const handleDeleteBeacon = async (beacon_mac) => {
     try {
       console.log(`Deleting beacon with beacon_mac: ${beacon_mac}`);
-      await deleteBeacon(beacon_mac);
+      await beaconService.deleteBeacon(beacon_mac); // Используем методы объекта beaconService
       fetchBeacons(); // обновляем список маяков после удаления
     } catch (error) {
       console.error('Ошибка при удалении маяка:', error);
@@ -141,7 +141,7 @@ const AdminZoneEditor = () => {
       const formattedCoords = [lat, lng];
       try {
         console.log(`Updating beacon coordinates for beacon_mac: ${beacon_mac} with coordinates: ${JSON.stringify(formattedCoords)}`);
-        await updateBeaconCoordinates(beacon_mac, formattedCoords); // Corrected format сука
+        await beaconService.updateBeaconCoordinates(beacon_mac, formattedCoords); // Corrected format
         fetchBeacons(); // обновляем список маяков после изменения координат
       } catch (error) {
         console.error('Ошибка при обновлении координат маяка:', error);
