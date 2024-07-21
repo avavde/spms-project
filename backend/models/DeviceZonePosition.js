@@ -1,5 +1,3 @@
-// DeviceZonePosition.js
-
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -9,16 +7,16 @@ DeviceZonePosition.init({
   device_id: {
     type: DataTypes.STRING,
     allowNull: false,
-    primaryKey: true
+    primaryKey: true,
   },
   zone_id: {
     type: DataTypes.INTEGER,
-    allowNull: true,  // Разрешить NULL
+    allowNull: true,
   },
   timestamp: {
     type: DataTypes.DATE,
     allowNull: false,
-    primaryKey: true
+    primaryKey: true,
   },
   rssi: {
     type: DataTypes.FLOAT,
@@ -35,18 +33,22 @@ DeviceZonePosition.init({
   createdat: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW
+    defaultValue: DataTypes.NOW,
   },
   updatedat: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW
-  }
+    defaultValue: DataTypes.NOW,
+  },
 }, {
   sequelize,
   modelName: 'DeviceZonePosition',
-  timestamps: false,
-  tableName: 'device_zone_positions'
+  indexes: [
+    {
+      unique: true,
+      fields: ['device_id', 'zone_id', 'timestamp']
+    }
+  ]
 });
 
 module.exports = DeviceZonePosition;
