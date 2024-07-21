@@ -56,10 +56,19 @@ exports.updateZone = async (req, res) => {
       return res.status(404).json({ error: 'Зона не найдена' });
     }
     await zone.update({ name, coordinates, type, department_id });
+
     if (beacons && beacons.length > 0) {
-      await Beacon.update({ zone_id: null }, { where: { zone_id: zone.id } }); // Удаление старых связей
-      await Beacon.update({ zone_id: zone.id }, { where: { id: beacons } }); // Добавление новых связей
+      // Retrieve beacons by their MAC addresses
+      const beaconInstances = await Beacon.findAll({ where: { beacon_mac: beacons } });
+      const beaconIds = beaconInstances.map(beacon => beacon.id);
+      
+      // Remove old associations
+      await Beacon.update({ zone_id: null }, { where: { zone_id: zone.id } });
+      
+      // Add new associations
+      await Beacon.update({ zone_id: zone.id }, { where: { id: beaconIds } });
     }
+
     res.json(zone);
   } catch (error) {
     console.error('Ошибка при обновлении зоны:', error);

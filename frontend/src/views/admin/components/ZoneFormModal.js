@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-
 import {
   CModal,
   CModalHeader,
@@ -28,11 +27,11 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
     }
   }, [zone]);
 
-  const handleBeaconChange = (beaconId) => {
+  const handleBeaconChange = (beaconMac) => {
     setSelectedBeacons((prevSelected) =>
-      prevSelected.includes(beaconId)
-        ? prevSelected.filter((id) => id !== beaconId)
-        : [...prevSelected, beaconId]
+      prevSelected.includes(beaconMac)
+        ? prevSelected.filter((mac) => mac !== beaconMac)
+        : [...prevSelected, beaconMac]
     );
   };
 
@@ -73,9 +72,9 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
                 <CFormCheck
                   key={beacon.id}
                   id={`beacon-${beacon.id}`}
-                  label={`ID: ${beacon.beacon_mac || 'Неизвестный MAC'}`}
-                  checked={selectedBeacons.includes(beacon.id)}
-                  onChange={() => handleBeaconChange(beacon.id)}
+                  label={`MAC: ${beacon.beacon_mac || 'Неизвестный MAC'}`}
+                  checked={selectedBeacons.includes(beacon.beacon_mac)}
+                  onChange={() => handleBeaconChange(beacon.beacon_mac)}
                 />
               ))
             ) : (

@@ -24,7 +24,15 @@ const createZone = async (zone) => {
 
 const updateZone = async (id, zone) => {
   try {
-    const response = await axios.put(`${API_URL}/zones/${id}`, zone);
+    // Fetch beacons by MAC addresses to get their IDs
+    const beaconsResponse = await axios.get(`${API_URL}/beacons`, {
+      params: { beacon_macs: zone.beacons }
+    });
+    const beaconIds = beaconsResponse.data.map(beacon => beacon.id);
+    
+    // Update the zone with the beacon IDs
+    const updatedZone = { ...zone, beacons: beaconIds };
+    const response = await axios.put(`${API_URL}/zones/${id}`, updatedZone);
     return response.data;
   } catch (error) {
     console.error(`Ошибка при обновлении зоны с ID: ${id}`, error);
