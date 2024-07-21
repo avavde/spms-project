@@ -19,7 +19,6 @@ const exitTimeouts = {};
 // Создание экземпляра CIC-фильтра
 const cicDecimator = new CICDecimator(3, 10); // Пример: 3-ый порядок, коэффициент децимации 10
 
-
 const handleZonePositionMessage = async (deviceId, payload) => {
   if (!deviceId) {
     console.error('deviceId is null or undefined:', deviceId);
@@ -47,7 +46,6 @@ const handleZonePositionMessage = async (deviceId, payload) => {
           // Недостаточно данных для фильтрации
           continue;
         }
-
 
         let beaconDevice;
         try {
@@ -118,7 +116,7 @@ const handleZonePositionMessage = async (deviceId, payload) => {
             device_id: deviceId,
             zone_id: zoneId,
             timestamp: new Date(ts * 1000),
-            rssi: rssi,
+            rssi: filteredRssi,
             temperature: T,
             pressure: P,
             createdat: new Date(),
@@ -128,7 +126,8 @@ const handleZonePositionMessage = async (deviceId, payload) => {
           });
 
           console.log('Zone position saved successfully');
- let employee = await Employee.findOne({ where: { beaconid: deviceId } });
+
+          let employee = await Employee.findOne({ where: { beaconid: deviceId } });
 
           if (!employee) {
             console.error('Employee not found for device:', deviceId);
