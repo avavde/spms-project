@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
+// Fetch all zones
 const getAllZones = async () => {
   try {
     const response = await axios.get(`${API_URL}/zones`);
@@ -12,9 +13,12 @@ const getAllZones = async () => {
   }
 };
 
+// Create a new zone
 const createZone = async (zone) => {
   try {
-    const response = await axios.post(`${API_URL}/zones`, zone);
+    const beaconIds = await getBeaconIdsByMacs(zone.beacons);
+    const newZone = { ...zone, beacons: beaconIds };
+    const response = await axios.post(`${API_URL}/zones`, newZone);
     return response.data;
   } catch (error) {
     console.error('Ошибка при создании зоны:', error);
@@ -22,15 +26,10 @@ const createZone = async (zone) => {
   }
 };
 
+// Update an existing zone
 const updateZone = async (id, zone) => {
   try {
-    // Fetch beacons by MAC addresses to get their IDs
-    const beaconsResponse = await axios.get(`${API_URL}/beacons`, {
-      params: { beacon_macs: zone.beacons }
-    });
-    const beaconIds = beaconsResponse.data.map(beacon => beacon.id);
-    
-    // Update the zone with the beacon IDs
+    const beaconIds = await getBeaconIdsByMacs(zone.beacons);
     const updatedZone = { ...zone, beacons: beaconIds };
     const response = await axios.put(`${API_URL}/zones/${id}`, updatedZone);
     return response.data;
@@ -40,6 +39,7 @@ const updateZone = async (id, zone) => {
   }
 };
 
+// Delete a zone
 const deleteZone = async (id) => {
   try {
     await axios.delete(`${API_URL}/zones/${id}`);
@@ -49,6 +49,7 @@ const deleteZone = async (id) => {
   }
 };
 
+// Get the current zone for a specific employee
 const getCurrentZone = async (employeeId) => {
   try {
     const response = await axios.get(`${API_URL}/zones/current/${employeeId}`);
@@ -59,10 +60,24 @@ const getCurrentZone = async (employeeId) => {
   }
 };
 
+// New function to get beacon IDs by their MAC addresses
+const getBeaconIdsByMacs = async (beaconMacs) => {
+  try {
+    const response = await axios.get(`${API_URL}/beacons`, {
+      params: { beacon_macs: beaconMacs }
+    });
+    return response.data.map(beacon => beacon.id);
+  } catch (error) {
+    console.error('Ошибка при получении beacon IDs по MAC адресам:', error);
+    throw error;
+  }
+};
+
 export default {
   getAllZones,
   getCurrentZone,
   createZone,
   updateZone,
   deleteZone,
+  getBeaconIdsByMacs
 };

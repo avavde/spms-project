@@ -35,9 +35,13 @@ exports.createZone = async (req, res) => {
   try {
     const { name, coordinates, beacons, type, department_id } = req.body;
     console.log('Создание новой зоны с данными:', { name, coordinates, beacons, type, department_id });
+
+    // Получение идентификаторов маяков по их MAC-адресам
+    const beaconIds = await getBeaconIdsByMacs(beacons);
+
     const newZone = await Zone.create({ name, coordinates, type, department_id });
-    if (beacons && beacons.length > 0) {
-      await Beacon.update({ zone_id: newZone.id }, { where: { id: beacons } });
+    if (beaconIds && beaconIds.length > 0) {
+      await Beacon.update({ zone_id: newZone.id }, { where: { id: beaconIds } });
     }
     res.status(201).json(newZone);
   } catch (error) {
@@ -50,6 +54,10 @@ exports.updateZone = async (req, res) => {
   try {
     const { name, coordinates, beacons, type, department_id } = req.body;
     console.log(`Запрос на обновление зоны с ID ${req.params.id} данными:`, { name, coordinates, beacons, type, department_id });
+
+    // Получение идентификаторов маяков по их MAC-адресам
+    const beaconIds = await getBeaconIdsByMacs(beacons);
+
     const zone = await Zone.findByPk(req.params.id);
     if (!zone) {
       console.log(`Зона с ID ${req.params.id} не найдена`);
@@ -57,15 +65,10 @@ exports.updateZone = async (req, res) => {
     }
     await zone.update({ name, coordinates, type, department_id });
 
-    if (beacons && beacons.length > 0) {
-      // Retrieve beacons by their MAC addresses
-      const beaconInstances = await Beacon.findAll({ where: { beacon_mac: beacons } });
-      const beaconIds = beaconInstances.map(beacon => beacon.id);
-      
-      // Remove old associations
+    if (beaconIds && beaconIds.length > 0) {
+      // Удаление старых ассоциаций
       await Beacon.update({ zone_id: null }, { where: { zone_id: zone.id } });
-      
-      // Add new associations
+      // Добавление новых ассоциаций
       await Beacon.update({ zone_id: zone.id }, { where: { id: beaconIds } });
     }
 
@@ -109,5 +112,18 @@ exports.deleteZone = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при удалении зоны:', error);
     res.status(500).json({ error: 'Ошибка при удалении зоны' });
+  }
+};
+
+// Новый метод для получения идентификаторов маяков по их MAC-адресам
+const getBeaconIdsByMacs = async (beaconMacs) => {
+  try {
+    const response = await axios.get(`${API_URL}/beacons`, {
+      params: { beacon_macs: beaconMacs }
+    });
+    return response.data.map(beacon => beacon.id);
+  } catch (error) {
+    console.error('Ошибка при получении beacon IDs по MAC адресам:', error);
+    throw error;
   }
 };
