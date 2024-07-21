@@ -6,13 +6,18 @@ const multer = require('multer');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     console.log('Setting destination for file upload');
+    console.log('Request body in destination:', req.body); // Debug log
     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
     console.log('Setting filename for file upload');
+    console.log('Request body in filename:', req.body); // Debug log
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
+
+const upload = multer({ storage: storage });
+
 
 const upload = multer({ storage: storage });
 
@@ -42,17 +47,21 @@ exports.getFloorPlanById = async (req, res) => {
 };
 
 exports.createFloorPlan = async (req, res) => {
+  // Логирование `req.body` перед загрузкой файла
+  console.log('Request body before multer:', req.body);
+
   upload.single('file')(req, res, async (err) => {
     if (err) {
       console.error('Ошибка загрузки файла:', err);
       return res.status(500).json({ error: 'Ошибка загрузки файла' });
     }
 
-    console.log('Request body:', req.body); // Debug log
+    // Логирование после обработки multer
+    console.log('Request body after multer:', req.body); // Debug log
     console.log('Uploaded file:', req.file); // Debug log
 
     const { building_id, name } = req.body;
-    
+
     // Логирование значений полей
     console.log('Received fields:');
     console.log('building_id:', building_id);
@@ -78,6 +87,7 @@ exports.createFloorPlan = async (req, res) => {
     }
   });
 };
+
 
 exports.updateFloorPlan = async (req, res) => {
   upload.single('file')(req, res, async function (err) {
@@ -143,6 +153,13 @@ exports.getUnassignedFloorPlans = async (req, res) => {
         building_id: null
       }
     });
+    
+    // Если в базе данных нет незакрепленных планов этажей, отправляем пустой массив
+    if (!unassignedFloorPlans.length) {
+      console.log('No unassigned floor plans found.');
+      return res.json([]);
+    }
+
     console.log('Unassigned floor plans:', unassignedFloorPlans);
     res.json(unassignedFloorPlans);
   } catch (error) {

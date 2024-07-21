@@ -108,13 +108,11 @@ const BuildingManager = () => {
       formData.append('name', newFloorPlan.name);
       formData.append('file', newFloorPlan.file, newFloorPlan.file.name); // Явно указываем имя файла
       formData.append('building_id', newFloorPlan.building_id);
-  
-      console.log('Form data before sending:', {
-        name: newFloorPlan.name,
-        file: newFloorPlan.file,
-        building_id: newFloorPlan.building_id
-      });
-  
+
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
       const response = await buildingsAndPlansService.createFloorPlan(formData);
       console.log('Floor plan created:', response.data);
       loadUnassignedFloorPlans();
@@ -123,7 +121,6 @@ const BuildingManager = () => {
       console.error('Ошибка создания плана этажа:', error);
     }
   };
-  
 
   const handleViewFloorPlan = (plans) => {
     if (plans && plans.length > 0) {
@@ -212,7 +209,6 @@ const BuildingManager = () => {
         <CModalFooter>
           <CButton color="secondary" onClick={() => setIsBuildingModalOpen(false)}>Отмена</CButton>
           <CButton color="primary" onClick={currentBuilding ? handleUpdateBuilding : handleCreateBuilding}>
-           ```javascript
             {currentBuilding ? 'Сохранить изменения' : 'Добавить'}
           </CButton>
         </CModalFooter>
