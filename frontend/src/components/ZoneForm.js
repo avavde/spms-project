@@ -84,16 +84,22 @@ const ZoneForm = ({ employeeId, onSave }) => {
 
     try {
       const promises = [];
+
+      // Обновление или создание новых назначений
       newAssignments.forEach(assignment => {
         if (existingAssignments[assignment.zone_id]) {
-          promises.push(employeeZoneAssignmentService.updateAssignment(existingAssignments[assignment.zone_id].id, assignment));
+          // Проверка, нужно ли обновлять назначение
+          if (existingAssignments[assignment.zone_id].assignment_type !== assignment.assignment_type) {
+            promises.push(employeeZoneAssignmentService.updateAssignment(existingAssignments[assignment.zone_id].id, assignment));
+          }
         } else {
           promises.push(employeeZoneAssignmentService.createAssignment(assignment));
         }
       });
 
+      // Удаление назначений, которые больше не нужны
       assignments.forEach(assignment => {
-        if (!newAssignments.some(a => a.zone_id === assignment.zone_id && a.assignment_type === assignment.assignment_type)) {
+        if (!newAssignments.some(a => a.zone_id === assignment.zone_id)) {
           promises.push(employeeZoneAssignmentService.deleteAssignment(assignment.id));
         }
       });

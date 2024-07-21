@@ -35,7 +35,10 @@ exports.createZone = async (req, res) => {
   try {
     const { name, coordinates, beacons, type, department_id } = req.body;
     console.log('Создание новой зоны с данными:', { name, coordinates, beacons, type, department_id });
-    const newZone = await Zone.create({ name, coordinates, beacons, type, department_id });
+    const newZone = await Zone.create({ name, coordinates, type, department_id });
+    if (beacons && beacons.length > 0) {
+      await Beacon.update({ zone_id: newZone.id }, { where: { id: beacons } });
+    }
     res.status(201).json(newZone);
   } catch (error) {
     console.error('Ошибка при создании зоны:', error);
@@ -52,8 +55,11 @@ exports.updateZone = async (req, res) => {
       console.log(`Зона с ID ${req.params.id} не найдена`);
       return res.status(404).json({ error: 'Зона не найдена' });
     }
-    await zone.update({ name, coordinates, beacons, type, department_id });
-    console.log(`Обновленная зона: ${JSON.stringify(zone)}`);
+    await zone.update({ name, coordinates, type, department_id });
+    if (beacons && beacons.length > 0) {
+      await Beacon.update({ zone_id: null }, { where: { zone_id: zone.id } }); // Удаление старых связей
+      await Beacon.update({ zone_id: zone.id }, { where: { id: beacons } }); // Добавление новых связей
+    }
     res.json(zone);
   } catch (error) {
     console.error('Ошибка при обновлении зоны:', error);

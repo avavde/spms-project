@@ -141,7 +141,7 @@ const AdminZoneEditor = () => {
       const formattedCoords = [lat, lng];
       try {
         console.log(`Updating beacon coordinates for beacon_mac: ${beacon_mac} with coordinates: ${JSON.stringify(formattedCoords)}`);
-        await updateBeaconCoordinates(beacon_mac, formattedCoords); // Corrected format
+        await updateBeaconCoordinates(beacon_mac, formattedCoords); // Corrected format сука
         fetchBeacons(); // обновляем список маяков после изменения координат
       } catch (error) {
         console.error('Ошибка при обновлении координат маяка:', error);

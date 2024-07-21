@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { CModal, CModalHeader, CModalBody, CModalFooter, CButton } from '@coreui/react';
 import employeeService from 'src/services/employeeService';
@@ -29,7 +29,7 @@ const EmployeeFormModal = ({ show, onClose, employee, onSave, onSaveZones }) => 
 
   useEffect(() => {
     if (employee) {
-      console.log('Employee data received:', employee); // Добавлено для отладки
+      console.log('Employee data received:', employee);
       setFormState({
         id: employee.id || null,
         first_name: employee.first_name || '',
@@ -69,7 +69,7 @@ const EmployeeFormModal = ({ show, onClose, employee, onSave, onSaveZones }) => 
     try {
       const response = await deviceService.getAvailableBadges();
       setBeacons(response.data);
-      console.log('Beacons:', response.data); // Добавлено для отладки
+      console.log('Beacons:', response.data);
     } catch (error) {
       console.error('Ошибка при получении меток:', error);
     }
@@ -84,18 +84,18 @@ const EmployeeFormModal = ({ show, onClose, employee, onSave, onSaveZones }) => 
 
       let savedEmployee;
       if (employeeData.id !== null && employeeData.id !== undefined) {
-        console.log('Updating employee:', employeeData.id, employeeData); // Добавлено для отладки
+        console.log('Updating employee:', employeeData.id, employeeData);
         await employeeService.updateEmployee(employeeData.id, employeeData);
         savedEmployee = employeeData;
       } else {
-        console.log('Creating new employee:', employeeData); // Добавлено для отладки
+        console.log('Creating new employee:', employeeData);
         const response = await employeeService.createEmployee(employeeData);
         savedEmployee = response.data;
       }
 
       onSave();
       onClose();
-      if (onSaveZones) {
+      if (onSaveZones && savedEmployee.id) {
         onSaveZones(savedEmployee.id);
       }
     } catch (error) {

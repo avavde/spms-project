@@ -25,7 +25,7 @@ Beacon.init({
       key: 'id',
     },
     allowNull: true,
-    onDelete: 'CASCADE',
+    onDelete: 'CASCADE', // Убедитесь, что каскадное удаление включено
   },
   beacon_mac: {
     type: DataTypes.STRING,
