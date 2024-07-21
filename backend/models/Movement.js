@@ -1,4 +1,5 @@
 // Movement.js
+
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Device = require('./Device');
@@ -27,6 +28,7 @@ Movement.init({
       key: 'id'
     },
     allowNull: false,
+    onDelete: 'CASCADE',
   },
   to_zone_id: {
     type: DataTypes.INTEGER,
@@ -35,6 +37,7 @@ Movement.init({
       key: 'id'
     },
     allowNull: false,
+    onDelete: 'CASCADE',
   },
   from_gps_coordinates: {
     type: DataTypes.JSON,
@@ -72,5 +75,9 @@ Movement.init({
   tableName: 'movements',
   timestamps: false,
 });
+
+Movement.belongsTo(Device, { foreignKey: 'device_id' });
+Movement.belongsTo(Zone, { foreignKey: 'from_zone_id', onDelete: 'CASCADE' });
+Movement.belongsTo(Zone, { foreignKey: 'to_zone_id', onDelete: 'CASCADE' });
 
 module.exports = Movement;
