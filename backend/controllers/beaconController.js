@@ -101,3 +101,25 @@ exports.getBeaconIdsByMacs = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении beacon IDs по MAC адресам' });
   }
 };
+
+exports.getBeaconCoordinates = async (req, res) => {
+  try {
+    const { beacon_mac } = req.params;
+    const beacon = await Beacon.findOne({ where: { beacon_mac } });
+
+    if (!beacon) {
+      return res.status(404).json({ error: 'Маяк не найден' });
+    }
+
+    const zone = beacon.zone_id ? await Zone.findByPk(beacon.zone_id) : null;
+
+    res.json({
+      beacon_mac: beacon.beacon_mac,
+      map_coordinates: beacon.map_coordinates,
+      zone: zone ? { id: zone.id, name: zone.name } : null
+    });
+  } catch (error) {
+    console.error('Ошибка при получении координат маяка:', error);
+    res.status(500).json({ error: 'Ошибка при получении координат маяка' });
+  }
+};
