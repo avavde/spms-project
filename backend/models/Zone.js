@@ -39,7 +39,7 @@ Zone.init({
     onDelete: 'SET NULL',
   },
   beacons: {
-    type: DataTypes.JSON, // Используем JSON для хранения массива beacons
+    type: DataTypes.ARRAY(DataTypes.INTEGER), // Обновленный тип данных для хранения массива идентификаторов маяков
     allowNull: true,
   },
 }, {
