@@ -25,4 +25,8 @@ router.get('/:id/location', employeeController.getEmployeeLocation);
 
 router.get('/:id/movements', employeeController.getEmployeeMovements);
 
+router.get('/:id/heatmap', employeeController.getHeatmapData);
+
+router.get('/:id/spaghetti',  employeeController.getHeatmapData);
+
 module.exports = router;

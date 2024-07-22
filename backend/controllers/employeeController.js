@@ -17,37 +17,25 @@ exports.getEmployeeMovements = async (req, res) => {
   const { startDate, endDate } = req.query;
   const { id } = req.params;
 
- 
+  const startDateTime = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
+  const endDateTime = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
+
   try {
-    console.log(`Fetching employee by ID: ${id}`);
     const employee = await Employee.findByPk(id);
     if (!employee) {
-      console.error('Employee not found:', id);
       return res.status(404).json({ error: 'Employee not found' });
     }
-
-    // Добавление одного дня к endDate
-    const endDatePlusOne = new Date(endDate);
-    endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
-
-    console.log('Fetching ZoneEvents for employee:', {
-      id,
-      startDate,
-      endDatePlusOne,
-    });
 
     const events = await ZoneEvent.findAll({
       where: {
         employee_id: id,
         timestamp: {
-          [Op.between]: [new Date(startDate), endDatePlusOne],
+          [Op.between]: [startDateTime, endDateTime],
         },
       },
       include: [Zone],
       order: [['timestamp', 'ASC']],
     });
-
-    console.log('Events fetched:', events.length);
 
     const movements = events.map((event) => ({
       timestamp: event.timestamp,
@@ -57,11 +45,101 @@ exports.getEmployeeMovements = async (req, res) => {
       duration: event.duration,
     }));
 
-    console.log('Movements mapped:', movements.length);
-
     res.json(movements);
   } catch (error) {
     console.error('Error fetching employee movements:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Подготовка данных для спагетти-диаграммы
+exports.getSpaghettiDiagramData = async (req, res) => {
+  const { startDate, endDate } = req.query;
+  const { id } = req.params;
+
+  const startDateTime = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
+  const endDateTime = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
+
+  try {
+    const employee = await Employee.findByPk(id);
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    const events = await ZoneEvent.findAll({
+      where: {
+        employee_id: id,
+        timestamp: {
+          [Op.between]: [startDateTime, endDateTime],
+        },
+      },
+      include: [Zone],
+      order: [['timestamp', 'ASC']],
+    });
+
+    const movements = events.map((event) => ({
+      timestamp: event.timestamp,
+      zoneName: event.Zone ? event.Zone.name : 'Zone not found',
+      eventType: event.event_type,
+      duration: event.duration,
+    }));
+
+    const uniqueZones = [...new Set(movements.map(m => m.zoneName))];
+    const zoneData = uniqueZones.map(zoneName => {
+      const zoneEvents = movements.filter(m => m.zoneName === zoneName);
+      const totalDuration = zoneEvents.reduce((acc, curr) => acc + (curr.duration || 0), 0);
+      return { zoneName, totalDuration, events: zoneEvents };
+    });
+
+    res.json(zoneData);
+  } catch (error) {
+    console.error('Error fetching spaghetti diagram data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Подготовка данных для тепловой карты
+exports.getHeatmapData = async (req, res) => {
+  const { startDate, endDate } = req.query;
+  const { id } = req.params;
+
+  const startDateTime = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
+  const endDateTime = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
+
+  try {
+    const employee = await Employee.findByPk(id);
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    const events = await ZoneEvent.findAll({
+      where: {
+        employee_id: id,
+        timestamp: {
+          [Op.between]: [startDateTime, endDateTime],
+        },
+      },
+      include: [Zone],
+      order: [['timestamp', 'ASC']],
+    });
+
+    const movements = events.map((event) => ({
+      timestamp: event.timestamp,
+      zoneName: event.Zone ? event.Zone.name : 'Zone not found',
+      duration: event.duration,
+    }));
+
+    const heatmapData = movements.reduce((acc, curr) => {
+      if (!acc[curr.zoneName]) {
+        acc[curr.zoneName] = { totalDuration: 0, coordinates: curr.Zone ? curr.Zone.map_coordinates : [0, 0] };
+      }
+      acc[curr.zoneName].totalDuration += curr.duration || 0;
+      return acc;
+    }, {});
+
+    res.json(heatmapData);
+  } catch (error) {
+    console.error('Error fetching heatmap data:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
