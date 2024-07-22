@@ -192,6 +192,7 @@ const generateReport = async (req, res) => {
     res.json({ link: reportLink });
 
   } catch (error) {
+    console.log(error.message);
     console.error('Error generating report:', error);
     res.status(500).json({ error: 'Ошибка при формировании отчета', details: error.message });
   }
@@ -292,6 +293,7 @@ const generateEnterpriseSummary = async (req, res) => {
 
   } catch (error) {
     console.error('Error generating enterprise summary:', error);
+    console.log(error.message);
     res.status(500).json({ error: 'Ошибка при формировании сводного отчета', details: error.message });
   }
 };
