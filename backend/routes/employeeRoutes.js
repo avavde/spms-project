@@ -23,6 +23,6 @@ router.put('/:id/assign-beacon', employeeController.assignBeacon);
 // Маршрут для отображения позиции сотрудника
 router.get('/:id/location', employeeController.getEmployeeLocation);
 
-router.get('/employee-movements', employeeController.getEmployeeMovements)
+router.get('/:id/movements', employeeController.getEmployeeMovements);
 
 module.exports = router;

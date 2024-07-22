@@ -12,9 +12,9 @@ exports.getAllEmployees = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении сотрудников' });
   }
 };
-
 exports.getEmployeeMovements = async (req, res) => {
-  const { employeeId, startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query;
+  const { employeeId } = req.params;
 
   if (!employeeId || !startDate || !endDate) {
     console.error('Missing parameters:', { employeeId, startDate, endDate });
@@ -54,8 +54,8 @@ exports.getEmployeeMovements = async (req, res) => {
 
     const movements = events.map((event) => ({
       timestamp: event.timestamp,
-      zoneName: event.Zone.name,
-      zoneType: event.Zone.type,
+      zoneName: event.Zone ? event.Zone.name : 'Zone not found',
+      zoneType: event.Zone ? event.Zone.type : 'Zone not found',
       eventType: event.event_type,
       duration: event.duration,
     }));

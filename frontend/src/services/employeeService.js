@@ -39,7 +39,7 @@ const assignBeacon = (employeeId, beaconid) => {
 };
 
 const getEmployeeMovements = async (employeeId, startDate, endDate) => {
-  const response = await axios.get(`${API_URL}/employees/employee-movements`, {
+  const response = await axios.get(`${API_URL}/employees/${employeeId}/employee-movements`, {
     params: { employeeId, startDate, endDate }
   });
   return response.data;
