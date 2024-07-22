@@ -1,4 +1,3 @@
-// src/components/AllNotifications.js
 import React, { useEffect, useState } from 'react';
 import { CListGroup, CListGroupItem, CAlert, CButton } from '@coreui/react';
 import PropTypes from 'prop-types';
@@ -9,18 +8,32 @@ import EmployeeLocationModal from './EmployeeLocationModal';
 
 const AllNotifications = () => {
   const notifications = useWebSocket();
+  const [limitedNotifications, setLimitedNotifications] = useState([]);
   const [logs, setLogs] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   useEffect(() => {
-    setLogs((prevLogs) => [
-      ...prevLogs,
-      ...notifications.map((notification) => ({
-        timestamp: new Date().toLocaleString(),
-        message: JSON.stringify(notification),
-      }))
-    ]);
+    setLimitedNotifications((prevNotifications) => {
+      const newNotifications = [
+        ...prevNotifications,
+        ...notifications
+      ];
+      // Ограничиваем количество уведомлений до 20
+      return newNotifications.slice(-20);
+    });
+
+    setLogs((prevLogs) => {
+      const newLogs = [
+        ...prevLogs,
+        ...notifications.map((notification) => ({
+          timestamp: new Date().toLocaleString(),
+          message: JSON.stringify(notification),
+        }))
+      ];
+      // Ограничиваем количество логов до 20
+      return newLogs.slice(-20);
+    });
   }, [notifications]);
 
   const getAlertColor = (eventType) => {
@@ -126,13 +139,13 @@ const AllNotifications = () => {
 
   return (
     <>
-      {notifications.length === 0 && (
+      {limitedNotifications.length === 0 && (
         <CAlert color="info">
           Нет доступных уведомлений
         </CAlert>
       )}
       <CListGroup className="drop-down-custom">
-        {notifications.map((notification, index) => (
+        {limitedNotifications.map((notification, index) => (
           <CListGroupItem key={index} className="d-flex">
             {renderNotificationContent(notification)}
           </CListGroupItem>

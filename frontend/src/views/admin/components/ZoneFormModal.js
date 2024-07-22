@@ -23,7 +23,7 @@ const ZoneFormModal = ({ visible, zone, availableBeacons, onSave, onDelete, onCl
     if (zone) {
       setZoneName(zone.name);
       setZoneType(zone.type || '');
-      setSelectedBeacons(zone.beacons || []);
+      setSelectedBeacons(zone.beacons ? zone.beacons.map(beacon => beacon.id) : []);
     }
   }, [zone]);
 
@@ -99,11 +99,13 @@ ZoneFormModal.propTypes = {
     name: PropTypes.string,
     coordinates: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
     type: PropTypes.string,
-    beacons: PropTypes.arrayOf(PropTypes.string),
+    beacons: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.number,
+      beacon_mac: PropTypes.string,
+    })),
   }),
   availableBeacons: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    map_coordinates: PropTypes.arrayOf(PropTypes.number),
+    id: PropTypes.number.isRequired,
     beacon_mac: PropTypes.string,
   })).isRequired,
   onSave: PropTypes.func.isRequired,

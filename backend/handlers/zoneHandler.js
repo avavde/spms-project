@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const Device = require('../models/Device');
 const Beacon = require('../models/Beacon');
 const DeviceZonePosition = require('../models/DeviceZonePosition');
@@ -20,6 +22,15 @@ const exitTimeouts = {};
 // Создание экземпляра CIC-фильтра
 const cicDecimator = new CICDecimator(1, 2); // Пример: 3-ый порядок, коэффициент децимации 10
 
+// Чтение конфигурационного файла
+const configPath = path.resolve(__dirname, '../config/beacon_config.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+
+const getRssiThreshold = (beaconId) => {
+  const beaconConfig = config.beacons.find(beacon => beacon.id === beaconId);
+  return beaconConfig ? beaconConfig.rssi_threshold : -90;
+};
+
 const handleZonePositionMessage = async (deviceId, payload) => {
   if (!deviceId) {
     console.error('deviceId is null or undefined:', deviceId);
@@ -37,7 +48,8 @@ const handleZonePositionMessage = async (deviceId, payload) => {
           continue;
         }
 
-        if (rssi <= -90) {
+        const rssiThreshold = getRssiThreshold(bInst);
+        if (rssi <= rssiThreshold) {
           continue;
         }
 
@@ -275,7 +287,7 @@ const handleZonePositionMessage = async (deviceId, payload) => {
             } catch (error) {
               console.error('Error creating exit event:', error);
             }
-             }, EXIT_TIMEOUT);
+          }, EXIT_TIMEOUT);
 
           const updatedData = {
             type: 'zone_event',

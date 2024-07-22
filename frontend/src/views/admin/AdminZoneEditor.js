@@ -13,7 +13,7 @@ import L from 'leaflet'; // Импортируем L из библиотеки l
 
 const AdminZoneEditor = () => {
   const [zones, setZones] = useState([]);
-  const [availableBeacons, setAvailableBeacons] = useState([]);
+  const [beacons, setBeacons] = useState([]);
   const [zoneModalVisible, setZoneModalVisible] = useState(false);
   const [beaconModalVisible, setBeaconModalVisible] = useState(false);
   const [currentZone, setCurrentZone] = useState(null);
@@ -36,8 +36,8 @@ const AdminZoneEditor = () => {
 
   const fetchBeacons = async () => {
     try {
-      const data = await beaconService.getAvailableBeacons(); // Используем методы объекта beaconService
-      setAvailableBeacons(data);
+      const data = await beaconService.getAllBeacons(); // Используем методы объекта beaconService
+      setBeacons(data);
       console.log('Маяки загружены:', data); // Лог загруженных маяков
     } catch (error) {
       console.error('Ошибка при получении маяков:', error);
@@ -84,6 +84,7 @@ const AdminZoneEditor = () => {
         console.log(`Удаление зоны с ID: ${zoneId}`);
         await zonesService.deleteZone(zoneId);
         setZones((prevZones) => prevZones.filter((zone) => zone.id !== zoneId));
+        fetchBeacons(); // обновляем список маяков после удаления зоны
       } catch (error) {
         console.error('Ошибка при удалении зоны:', error);
       }
@@ -102,6 +103,7 @@ const AdminZoneEditor = () => {
         console.log(`Созданная зона: ${JSON.stringify(newZone)}`);
         setZones((prevZones) => [...prevZones, newZone]);
       }
+      fetchBeacons(); // обновляем список маяков после изменения зоны
     } catch (error) {
       console.error('Ошибка при сохранении зоны:', error);
     }
@@ -158,7 +160,7 @@ const AdminZoneEditor = () => {
         <CCardBody>
           <MapComponent
             zones={zones}
-            availableBeacons={availableBeacons}
+            availableBeacons={beacons}
             onCreateZone={handleCreateZone}
             onEditZone={handleEditZone}
             onDeleteZone={handleDeleteZone}
@@ -172,7 +174,7 @@ const AdminZoneEditor = () => {
         <ZoneFormModal
           visible={zoneModalVisible}
           zone={currentZone}
-          availableBeacons={availableBeacons}
+          availableBeacons={beacons}
           onSave={handleSaveZone}
           onDelete={(zoneId) => handleDeleteZone(new L.LayerGroup([L.polygon(currentZone.coordinates, { id: zoneId })]))}
           onClose={() => setZoneModalVisible(false)}
@@ -181,7 +183,7 @@ const AdminZoneEditor = () => {
       {beaconModalVisible && (
         <BeaconFormModal
           visible={beaconModalVisible}
-          availableBeacons={availableBeacons}
+          availableBeacons={beacons}
           onSave={handleSaveBeacon}
           onClose={() => setBeaconModalVisible(false)}
         />

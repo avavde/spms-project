@@ -1,0 +1,81 @@
+{
+    "beacons": [
+      {
+        "id": "dcda0ca14c78",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e8338baa3c",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "ecda3bbce114",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "ecda3bbc74e4",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "ecda3bbb5d10",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e8338dee54",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e833880cd8",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e8338adc30",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e83388ca90",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "dcda0ca14ba8",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e8338dc4a0",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e83388a184",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "ecda3bbc7424",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e833874c80",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e8338dd5ac",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e8338cc460",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e83385bea4",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e83388cca8",
+        "rssi_threshold": -90
+      },
+      {
+        "id": "64e83387e024",
+        "rssi_threshold": -90
+      }
+    ]
+  }
+  
