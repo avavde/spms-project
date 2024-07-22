@@ -1,11 +1,15 @@
 const { Op } = require('sequelize');
-const { Employee, ZoneEvent, ZoneViolation, DeviceEvent, Device, Zone } = require('../models');
+const { Employee, ZoneEvent, ZoneViolation, DeviceEvent, Device, Zone, Report } = require('../models');
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('json2csv');
 
 const generateReport = async (req, res) => {
   const { employeeId, startDate, endDate } = req.query;
+
+  if (!startDate || !endDate || isNaN(new Date(startDate)) || isNaN(new Date(endDate))) {
+    return res.status(400).json({ error: 'Некорректные значения дат' });
+  }
 
   const whereClause = {
     timestamp: {
@@ -18,18 +22,9 @@ const generateReport = async (req, res) => {
   }
 
   try {
-    console.log('Starting to fetch zone events');
     const zoneEvents = await ZoneEvent.findAll({ where: whereClause });
-    console.log('Zone events fetched:', zoneEvents.length);
-
-    console.log('Starting to fetch zone violations');
     const zoneViolations = await ZoneViolation.findAll({ where: whereClause });
-    console.log('Zone violations fetched:', zoneViolations.length);
-
-    console.log('Starting to fetch zones');
     const zones = await Zone.findAll();
-    console.log('Zones fetched:', zones.length);
-
     const zonesMap = zones.reduce((acc, zone) => {
       acc[zone.id] = zone.type;
       return acc;
@@ -37,12 +32,8 @@ const generateReport = async (req, res) => {
 
     let deviceEvents = [];
     if (employeeId) {
-      console.log('Starting to fetch devices');
       const devices = await Device.findAll({ where: { devicetype: 'badge' } });
-      console.log('Devices fetched:', devices.length);
-
       const deviceIds = devices.map(device => device.id);
-      console.log('Starting to fetch device events');
       deviceEvents = await DeviceEvent.findAll({
         where: {
           device_id: { [Op.in]: deviceIds },
@@ -51,10 +42,8 @@ const generateReport = async (req, res) => {
           }
         }
       });
-      console.log('Device events fetched:', deviceEvents.length);
     }
 
-    // Аналитика по сотруднику
     const employeeSummaries = {};
 
     zoneEvents.forEach(event => {
@@ -129,7 +118,7 @@ const generateReport = async (req, res) => {
       employeeEvents.forEach(event => {
         const violation = zoneViolations.find(v => v.employee_id === event.employee_id && v.timestamp === event.timestamp);
         const deviceEvent = deviceEvents.find(d => d.device_id === event.device_id && d.timestamp === event.timestamp);
-
+  
         reportData.push({
           'ID сотрудника': event.employee_id,
           'ID зоны': event.zone_id,
@@ -170,7 +159,15 @@ const generateReport = async (req, res) => {
     const filePath = path.join(__dirname, '..', 'reports', `report_${Date.now()}.csv`);
     fs.writeFileSync(filePath, csv);
 
-    res.json({ link: `/reports/${path.basename(filePath)}` });
+    // Сохранение ссылки на отчет в базе данных
+    const reportLink = `/reports/${path.basename(filePath)}`;
+    await Report.create({
+      report_type: 'employee', // Тип отчета
+      parameters: JSON.stringify(req.query), // Параметры запроса
+      link: reportLink // Ссылка на отчет
+    });
+
+    res.json({ link: reportLink });
 
   } catch (error) {
     console.error('Error generating report:', error);
@@ -180,6 +177,10 @@ const generateReport = async (req, res) => {
 
 const generateEnterpriseSummary = async (req, res) => {
   const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate || isNaN(new Date(startDate)) || isNaN(new Date(endDate))) {
+    return res.status(400).json({ error: 'Некорректные значения дат' });
+  }
 
   const whereClause = {
     timestamp: {
@@ -226,44 +227,50 @@ const generateEnterpriseSummary = async (req, res) => {
       zoneTime[zoneType] = zoneTime[zoneType] / 60; // Преобразование в минуты
     }
 
-   
-      const enterpriseSummary = {
-        'Общее время в зонах (минуты)': totalTimeInZones,
-        'Общее количество нарушений': totalViolations,
-        'Общее количество событий': totalEvents,
-        'Количество событий входа': enterEvents,
-        'Количество событий выхода': exitEvents,
-        'Время в запрещенных зонах (минуты)': zoneTime.forbidden,
-        'Время в рабочих зонах (минуты)': zoneTime.working,
-        'Время в опасных зонах (минуты)': zoneTime.dangerous,
-        'Время в контрольных зонах (минуты)': zoneTime.control,
-        'Время в обычных зонах (минуты)': zoneTime.regular
-      };
-      
-      const fields = [
-        'Общее время в зонах (минуты)',
-        'Общее количество нарушений',
-        'Общее количество событий',
-        'Количество событий входа',
-        'Количество событий выхода',
-        'Время в запрещенных зонах (минуты)',
-        'Время в рабочих зонах (минуты)',
-        'Время в опасных зонах (минуты)',
-        'Время в контрольных зонах (минуты)',
-        'Время в обычных зонах (минуты)'
-      ];
-      const csv = parse([enterpriseSummary], { fields });
-      
-      const filePath = path.join(__dirname, '..', 'reports', `enterprise_summary_${Date.now()}.csv`);
-      fs.writeFileSync(filePath, csv);
-      
-      res.json({ link: `/reports/${path.basename(filePath)}` });
-      
-      } catch (error) {
-      console.error('Error generating enterprise summary:', error);
-      res.status(500).json({ error: 'Ошибка при формировании сводного отчета' });
-      }
-      };
-      
-      module.exports = { generateReport, generateEnterpriseSummary };
-      
+    const enterpriseSummary = {
+      'Общее время в зонах (минуты)': totalTimeInZones,
+      'Общее количество нарушений': totalViolations,
+      'Общее количество событий': totalEvents,
+      'Количество событий входа': enterEvents,
+      'Количество событий выхода': exitEvents,
+      'Время в запрещенных зонах (минуты)': zoneTime.forbidden,
+      'Время в рабочих зонах (минуты)': zoneTime.working,
+      'Время в опасных зонах (минуты)': zoneTime.dangerous,
+      'Время в контрольных зонах (минуты)': zoneTime.control,
+      'Время в обычных зонах (минуты)': zoneTime.regular
+    };
+
+    const fields = [
+      'Общее время в зонах (минуты)', 
+      'Общее количество нарушений', 
+      'Общее количество событий', 
+      'Количество событий входа', 
+      'Количество событий выхода', 
+      'Время в запрещенных зонах (минуты)', 
+      'Время в рабочих зонах (минуты)', 
+      'Время в опасных зонах (минуты)', 
+      'Время в контрольных зонах (минуты)', 
+      'Время в обычных зонах (минуты)'
+    ];
+    const csv = parse([enterpriseSummary], { fields });
+
+    const filePath = path.join(__dirname, '..', 'reports', `enterprise_summary_${Date.now()}.csv`);
+    fs.writeFileSync(filePath, csv);
+
+    // Сохранение ссылки на отчет в базе данных
+    const reportLink = `/reports/${path.basename(filePath)}`;
+    await Report.create({
+      report_type: 'enterprise', // Тип отчета
+      parameters: JSON.stringify(req.query), // Параметры запроса
+      link: reportLink // Ссылка на отчет
+    });
+
+    res.json({ link: reportLink });
+
+  } catch (error) {
+    console.error('Error generating enterprise summary:', error);
+    res.status(500).json({ error: 'Ошибка при формировании сводного отчета' });
+  }
+};
+
+module.exports = { generateReport, generateEnterpriseSummary };
