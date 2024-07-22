@@ -25,14 +25,8 @@ const generateReport = async (req, res) => {
     const zoneEvents = await ZoneEvent.findAll({ where: whereClause });
     const zoneViolations = await ZoneViolation.findAll({ where: whereClause });
     const zones = await Zone.findAll();
-    const employees = await Employee.findAll();
     const zonesMap = zones.reduce((acc, zone) => {
       acc[zone.id] = zone.type;
-      return acc;
-    }, {});
-
-    const employeesMap = employees.reduce((acc, employee) => {
-      acc[employee.id] = `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`;
       return acc;
     }, {});
 
@@ -104,9 +98,8 @@ const generateReport = async (req, res) => {
     const reportData = [];
     for (const employeeId in employeeSummaries) {
       const summary = employeeSummaries[employeeId];
-      const employeeName = employeesMap[employeeId] || `Сотрудник ID ${employeeId}`;
       reportData.push({
-        'ФИО сотрудника': employeeName,
+        'ID сотрудника': employeeId,
         'Общее время в зонах (минуты)': summary.totalTimeInZones,
         'Общее количество нарушений': summary.totalViolations,
         'Общее количество событий': summary.totalEvents,
@@ -127,7 +120,7 @@ const generateReport = async (req, res) => {
         const deviceEvent = deviceEvents.find(d => d.device_id === event.device_id && d.timestamp === event.timestamp);
   
         reportData.push({
-          'ФИО сотрудника': employeeName,
+          'ID сотрудника': event.employee_id,
           'ID зоны': event.zone_id,
           'Тип события': event.event_type,
           'Время': event.timestamp,
@@ -139,23 +132,8 @@ const generateReport = async (req, res) => {
       });
     }
 
-    // Добавление сводных данных
-    const enterpriseSummary = {
-      'Общее время в зонах (минуты)': totalTimeInZones,
-      'Общее количество нарушений': totalViolations,
-      'Общее количество событий': totalEvents,
-      'Количество событий входа': enterEvents,
-      'Количество событий выхода': exitEvents,
-      'Время в запрещенных зонах (минуты)': zoneTime.forbidden,
-      'Время в рабочих зонах (минуты)': zoneTime.working,
-      'Время в опасных зонах (минуты)': zoneTime.dangerous,
-      'Время в контрольных зонах (минуты)': zoneTime.control,
-      'Время в обычных зонах (минуты)': zoneTime.regular
-    };
-    reportData.push({ ...enterpriseSummary, 'ФИО сотрудника': 'Сводные данные' });
-
     const fields = [
-      'ФИО сотрудника', 
+      'ID сотрудника', 
       'Общее время в зонах (минуты)', 
       'Общее количество нарушений', 
       'Общее количество событий', 
@@ -178,10 +156,11 @@ const generateReport = async (req, res) => {
     ];
     const csv = parse(reportData, { fields });
 
+    // const filePath = path.join(__dirname, '/home/spms-project/frontend/public', 'reports', `report_${Date.now()}.csv`);
     const filePath = path.join(__dirname, '../../frontend/public', 'reports', `report_${Date.now()}.csv`);
-    fs.writeFileSync(filePath, csv, 'utf8'); // Добавлена кодировка utf8
+    fs.writeFileSync(filePath, csv);
 
-   // Сохранение ссылки на отчет в базе данных
+    // Сохранение ссылки на отчет в базе данных
     const reportLink = `/reports/${path.basename(filePath)}`;
     await Report.create({
       report_type: 'employee', // Тип отчета
@@ -192,12 +171,10 @@ const generateReport = async (req, res) => {
     res.json({ link: reportLink });
 
   } catch (error) {
-    console.log(error.message);
     console.error('Error generating report:', error);
-    res.status(500).json({ error: 'Ошибка при формировании отчета', details: error.message });
+    res.status(500).json({ error: 'Ошибка при формировании отчета' });
   }
 };
-
 
 const generateEnterpriseSummary = async (req, res) => {
   const { startDate, endDate } = req.query;
@@ -278,8 +255,8 @@ const generateEnterpriseSummary = async (req, res) => {
     ];
     const csv = parse([enterpriseSummary], { fields });
 
-    const filePath = path.join(__dirname, '../../frontend/public', 'reports', `enterprise_summary_${Date.now()}.csv`);
-    fs.writeFileSync(filePath, csv, 'utf8'); // Добавлена кодировка utf8
+    const filePath = path.join(__dirname, '..', 'reports', `enterprise_summary_${Date.now()}.csv`);
+    fs.writeFileSync(filePath, csv);
 
     // Сохранение ссылки на отчет в базе данных
     const reportLink = `/reports/${path.basename(filePath)}`;
@@ -293,20 +270,8 @@ const generateEnterpriseSummary = async (req, res) => {
 
   } catch (error) {
     console.error('Error generating enterprise summary:', error);
-    console.log(error.message);
-    res.status(500).json({ error: 'Ошибка при формировании сводного отчета', details: error.message });
+    res.status(500).json({ error: 'Ошибка при формировании сводного отчета' });
   }
 };
 
-const getReports = async (req, res) => {
-  try {
-    const reports = await Report.findAll();
-    res.json(reports);
-  } catch (error) {
-    console.error('Error fetching reports:', error);
-    res.status(500).json({ error: 'Ошибка при получении отчетов' });
-  }
-};
-
-module.exports = { generateReport, generateEnterpriseSummary, getReports };
-
+module.exports = { generateReport, generateEnterpriseSummary };
