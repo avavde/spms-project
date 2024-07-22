@@ -17,12 +17,15 @@ exports.getEmployeeMovements = async (req, res) => {
   const { employeeId, startDate, endDate } = req.query;
 
   if (!employeeId || !startDate || !endDate) {
+    console.error('Missing parameters:', { employeeId, startDate, endDate });
     return res.status(400).json({ error: 'employeeId, startDate, and endDate are required' });
   }
 
   try {
+    console.log(`Fetching employee by ID: ${employeeId}`);
     const employee = await Employee.findByPk(employeeId);
     if (!employee) {
+      console.error('Employee not found:', employeeId);
       return res.status(404).json({ error: 'Employee not found' });
     }
 
@@ -30,24 +33,34 @@ exports.getEmployeeMovements = async (req, res) => {
     const endDatePlusOne = new Date(endDate);
     endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
 
+    console.log('Fetching ZoneEvents for employee:', {
+      employeeId,
+      startDate,
+      endDatePlusOne,
+    });
+
     const events = await ZoneEvent.findAll({
       where: {
         employee_id: employeeId,
         timestamp: {
-          [Op.between]: [new Date(startDate), endDatePlusOne]
-        }
+          [Op.between]: [new Date(startDate), endDatePlusOne],
+        },
       },
       include: [Zone],
-      order: [['timestamp', 'ASC']]
+      order: [['timestamp', 'ASC']],
     });
 
-    const movements = events.map(event => ({
+    console.log('Events fetched:', events.length);
+
+    const movements = events.map((event) => ({
       timestamp: event.timestamp,
       zoneName: event.Zone.name,
       zoneType: event.Zone.type,
       eventType: event.event_type,
-      duration: event.duration
+      duration: event.duration,
     }));
+
+    console.log('Movements mapped:', movements.length);
 
     res.json(movements);
   } catch (error) {

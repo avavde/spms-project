@@ -19,6 +19,7 @@ import {
 } from '@coreui/react';
 import reportService from 'src/services/reportService';
 import employeeService from 'src/services/employeeService';
+import SpaghettiDiagramModal from 'src/components/SpaghettiDiagramModal'; // Импортируем компонент модального окна
 
 const ReportGenerator = () => {
   const [employees, setEmployees] = useState([]);
@@ -26,6 +27,8 @@ const ReportGenerator = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reports, setReports] = useState([]);
+  const [spaghettiModalVisible, setSpaghettiModalVisible] = useState(false); // Состояние для отображения модального окна
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null); // Состояние для выбранного сотрудника
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -80,6 +83,11 @@ const ReportGenerator = () => {
     );
   };
 
+  const handleOpenSpaghettiDiagram = (employeeId) => {
+    setSelectedEmployeeId(employeeId);
+    setSpaghettiModalVisible(true);
+  };
+
   const getEmployeeNameById = (id) => {
     const employee = employees.find(emp => emp.id === id);
     return employee ? `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}` : id;
@@ -124,6 +132,7 @@ const ReportGenerator = () => {
                         <CTableHeaderCell>Фамилия И.О.</CTableHeaderCell>
                         <CTableHeaderCell>Отдел</CTableHeaderCell>
                         <CTableHeaderCell>Должность</CTableHeaderCell>
+                        <CTableHeaderCell>Действия</CTableHeaderCell> {/* Добавлено */}
                       </CTableRow>
                     </CTableHead>
                     <CTableBody>
@@ -138,6 +147,11 @@ const ReportGenerator = () => {
                           <CTableDataCell>{`${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`}</CTableDataCell>
                           <CTableDataCell>{employee.department}</CTableDataCell>
                           <CTableDataCell>{employee.position}</CTableDataCell>
+                          <CTableDataCell>
+                            <CButton color="info" onClick={() => handleOpenSpaghettiDiagram(employee.id)}>
+                              Спагетти-диаграмма
+                            </CButton>
+                          </CTableDataCell>
                         </CTableRow>
                       ))}
                     </CTableBody>
@@ -190,11 +204,18 @@ const ReportGenerator = () => {
                     <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
                   </CTableRow>
                 ))}
-              </CTableBody>
+                         </CTableBody>
             </CTable>
           </CCardBody>
         </CCard>
       </CCol>
+      {selectedEmployeeId && (
+        <SpaghettiDiagramModal
+          visible={spaghettiModalVisible}
+          employeeId={selectedEmployeeId}
+          onClose={() => setSpaghettiModalVisible(false)}
+        />
+      )}
     </CRow>
   );
 };
