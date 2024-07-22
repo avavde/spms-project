@@ -17,7 +17,7 @@ exports.getEmployeeMovements = async (req, res) => {
   const { startDate, endDate } = req.query;
   const { id } = req.params;
 
-  if (!id || !startDate || !endDate) {
+  if ( !startDate || !endDate) {
     console.error('Missing parameters:', {  startDate, endDate });
     return res.status(400).json({ error: 'employeeId, startDate, and endDate are required' });
   }
