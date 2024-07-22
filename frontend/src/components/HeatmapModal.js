@@ -5,6 +5,7 @@ import 'leaflet.heat';
 import 'leaflet/dist/leaflet.css';
 import plan from 'src/assets/brand/plan.jpg';
 import zonesService from 'src/services/zonesService';
+import employeeService from 'src/services/employeeService';
 import {
   CModal,
   CModalHeader,
@@ -42,8 +43,8 @@ const HeatmapLayer = ({ movements }) => {
       const heatData = movements.map(movement => {
         const { zoneName, duration } = movement;
         const coordinates = zoneCoordinates[zoneName];
-        return [...coordinates, duration];
-      });
+        return coordinates ? [...coordinates, duration] : null;
+      }).filter(d => d !== null);
 
       const heat = L.heatLayer(heatData, { radius: 25, blur: 15 }).addTo(map);
 
@@ -56,7 +57,24 @@ const HeatmapLayer = ({ movements }) => {
   return null;
 };
 
-const HeatmapModal = ({ visible, onClose, movements }) => {
+const HeatmapModal = ({ visible, onClose, employeeId, startDate, endDate }) => {
+  const [movements, setMovements] = useState([]);
+
+  useEffect(() => {
+    const fetchMovements = async () => {
+      try {
+        const data = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
+        setMovements(data);
+      } catch (error) {
+        console.error('Ошибка при получении перемещений сотрудника:', error);
+      }
+    };
+
+    if (visible) {
+      fetchMovements();
+    }
+  }, [employeeId, startDate, endDate, visible]);
+
   return (
     <CModal visible={visible} onClose={onClose} size="lg">
       <CModalHeader>

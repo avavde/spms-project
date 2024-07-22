@@ -17,9 +17,13 @@ import {
   CTableHeaderCell,
   CTableRow,
 } from '@coreui/react';
+import { CIcon } from '@coreui/icons-react';
+import { cilWalk, cilFire, cilMediaPlay } from '@coreui/icons';
+
 import reportService from 'src/services/reportService';
 import employeeService from 'src/services/employeeService';
 import SpaghettiDiagramModal from 'src/components/SpaghettiDiagramModal';
+import HeatmapModal from 'src/components/HeatmapModal';
 
 const ReportGenerator = () => {
   const [employees, setEmployees] = useState([]);
@@ -29,6 +33,7 @@ const ReportGenerator = () => {
   const [reports, setReports] = useState([]);
   const [movements, setMovements] = useState([]);
   const [showDiagram, setShowDiagram] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -93,6 +98,10 @@ const ReportGenerator = () => {
     }
   };
 
+  const handleViewHeatmap = (employeeId) => {
+    setShowHeatmap({ employeeId, startDate, endDate });
+  };
+
   const getEmployeeNameById = (id) => {
     const employee = employees.find(emp => emp.id === id);
     return employee ? `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}` : id;
@@ -140,87 +149,106 @@ const ReportGenerator = () => {
                         <CTableHeaderCell>Действия</CTableHeaderCell>
                       </CTableRow>
                     </CTableHead>
-                                    <CTableBody>
-                    {employees.map((employee) => (
-                      <CTableRow key={employee.id}>
-                        <CTableDataCell>
-                          <CFormCheck
-                            checked={selectedEmployees.includes(employee.id)}
-                            onChange={() => handleSelectEmployee(employee.id)}
-                          />
-                        </CTableDataCell>
-                        <CTableDataCell>{`${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`}</CTableDataCell>
-                        <CTableDataCell>{employee.department}</CTableDataCell>
-                        <CTableDataCell>{employee.position}</CTableDataCell>
-                        <CTableDataCell>
-                          <CButton color="primary" onClick={() => handleViewMovements(employee.id)}>
-                            Посмотреть перемещения
-                          </CButton>
-                        </CTableDataCell>
-                      </CTableRow>
-                    ))}
-                  </CTableBody>
-                </CTable>
-              </CCol>
-            </CRow>
-            <CRow className="mt-3">
-              <CCol xs={12}>
-                <CButton color="primary" onClick={handleGenerateReport}>Сформировать отчет</CButton>
-              </CCol>
-            </CRow>
-            <CRow className="mt-3">
-              <CCol xs={12}>
-                <CButton color="secondary" onClick={handleGenerateEnterpriseSummary}>Сформировать сводный отчет</CButton>
-              </CCol>
-            </CRow>
-          </CForm>
-          <hr />
-          <h5>История отчетов</h5>
-          <CTable hover>
-            <CTableHead>
-              <CTableRow>
-                <CTableHeaderCell>ID</CTableHeaderCell>
-                <CTableHeaderCell>Тип отчета</CTableHeaderCell>
-                <CTableHeaderCell>Параметры</CTableHeaderCell>
-                <CTableHeaderCell>Ссылки</CTableHeaderCell>
-                <CTableHeaderCell>Дата создания</CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            <CTableBody>
-              {reports.map((report, index) => (
-                <CTableRow key={index}>
-                  <CTableDataCell>{index + 1}</CTableDataCell>
-                  <CTableDataCell>{report.report_type}</CTableDataCell>
-                  <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
-                  <CTableDataCell>
-                    {report.report_type === 'employee_resume' || report.report_type === 'employee_zone_movements' ? (
-                      <>
-                        {report.report_type === 'employee_resume' && (
-                          <a href={report.link} download>Резюме</a>
-                        )}
-                        {report.report_type === 'employee_zone_movements' && (
-                          <a href={report.link} download>Перемещения</a>
-                        )}
-                      </>
-                    ) : (
-                      <a href={report.link} download>Скачать</a>
-                    )}
-                  </CTableDataCell>
-                  <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
+                    <CTableBody>
+                      {employees.map((employee) => (
+                        <CTableRow key={employee.id}>
+                          <CTableDataCell>
+                            <CFormCheck
+                              checked={selectedEmployees.includes(employee.id)}
+                              onChange={() => handleSelectEmployee(employee.id)}
+                            />
+                          </CTableDataCell>
+                          <CTableDataCell>{`${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`}</CTableDataCell>
+                          <CTableDataCell>{employee.department}</CTableDataCell>
+                          <CTableDataCell>{employee.position}</CTableDataCell>
+                          <CTableDataCell>
+                            <CButton color="primary"  shape="rounded-pill" size="sm" onClick={() => handleViewMovements(employee.id)}>
+                            <CIcon icon={cilWalk} className="me-2" />
+                             Спагетти
+                            </CButton>
+                            <CButton color="secondary"  shape="rounded-pill" size="sm" onClick={() => handleViewHeatmap(employee.id)}>
+                            <CIcon icon={cilFire} className="me-2" />
+                              Теплокарта
+                            </CButton>
+                            <CButton color="secondary"  shape="rounded-pill" size="sm" onClick={() => handleViewHeatmap(employee.id)}>
+                            <CIcon icon={cilMediaPlay} className="me-2" />
+                              Трек
+                            </CButton>
+                          </CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                </CCol>
+              </CRow>
+              <CRow className="mt-3">
+                <CCol xs={12}>
+                  <CButton color="primary" onClick={handleGenerateReport}>Сформировать отчет</CButton>
+                </CCol>
+              </CRow>
+              <CRow className="mt-3">
+                <CCol xs={12}>
+                  <CButton color="secondary" onClick={handleGenerateEnterpriseSummary}>Сформировать сводный отчет</CButton>
+                </CCol>
+              </CRow>
+            </CForm>
+            <hr />
+            <h5>История отчетов</h5>
+            <CTable hover>
+              <CTableHead>
+                <CTableRow>
+                  <CTableHeaderCell>ID</CTableHeaderCell>
+                  <CTableHeaderCell>Тип отчета</CTableHeaderCell>
+                  <CTableHeaderCell>Параметры</CTableHeaderCell>
+                  <CTableHeaderCell>Ссылки</CTableHeaderCell>
+                  <CTableHeaderCell>Дата создания</CTableHeaderCell>
                 </CTableRow>
-              ))}
-            </CTableBody>
-          </CTable>
-        </CCardBody>
-      </CCard>
-    </CCol>
-    <SpaghettiDiagramModal
-      visible={showDiagram}
-      onClose={() => setShowDiagram(false)}
-      movements={movements}
-    />
-  </CRow>
-);
+              </CTableHead>
+              <CTableBody>
+                {reports.map((report, index) => (
+                  <CTableRow key={index}>
+                    <CTableDataCell>{index + 1}</CTableDataCell>
+                    <CTableDataCell>{report.report_type}</CTableDataCell>
+                    <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
+                    <CTableDataCell>
+                      {report.report_type === 'employee_resume' || report.report_type === 'employee_zone_movements' ? (
+                        <>
+                          {report.report_type === 'employee_resume' && (
+                            <a href={report.link} download>Резюме</a>
+                          )}
+                          {report.report_type === 'employee_zone_movements' && (
+                            <a href={report.link} download>Перемещения</a>
+                          )}
+                        </>
+                      ) : (
+                        <a href={report.link} download>Скачать</a>
+                      )}
+                    </CTableDataCell>
+                    <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
+                  </CTableRow>
+                ))}
+              </CTableBody>
+            </CTable>
+          </CCardBody>
+        </CCard>
+      </CCol>
+      <SpaghettiDiagramModal
+        visible={showDiagram}
+        onClose={() => setShowDiagram(false)}
+        movements={movements}
+      />
+      <HeatmapModal
+        visible={Boolean(showHeatmap)}
+        onClose={() => setShowHeatmap(false)}
+        employeeId={showHeatmap ? showHeatmap.employeeId : null}
+        startDate={startDate}
+        endDate={endDate}
+      />
+    </CRow>
+  );
 };
 
 export default ReportGenerator;
+
+
+
