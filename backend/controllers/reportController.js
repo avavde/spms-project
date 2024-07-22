@@ -274,4 +274,15 @@ const generateEnterpriseSummary = async (req, res) => {
   }
 };
 
-module.exports = { generateReport, generateEnterpriseSummary };
+const getReports = async (req, res) => {
+  try {
+    const reports = await Report.findAll();
+    res.json(reports);
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    res.status(500).json({ error: 'Ошибка при получении отчетов' });
+  }
+};
+
+
+module.exports = { generateReport, generateEnterpriseSummary, getReports };
