@@ -25,8 +25,7 @@ const ReportGenerator = () => {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [reportLink, setReportLink] = useState('');
-  const [enterpriseReportLink, setEnterpriseReportLink] = useState('');
+  const [reports, setReports] = useState([]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -40,10 +39,22 @@ const ReportGenerator = () => {
     fetchEmployees();
   }, []);
 
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await reportService.getReports();
+        setReports(response);
+      } catch (error) {
+        console.error('Ошибка при получении списка отчетов:', error);
+      }
+    };
+    fetchReports();
+  }, []);
+
   const handleGenerateReport = async () => {
     try {
       const { link } = await reportService.generateReport(selectedEmployees, startDate, endDate);
-      setReportLink(link);
+      setReports([...reports, { link, created_at: new Date().toISOString(), report_type: 'employee', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) }]);
     } catch (error) {
       console.error('Ошибка при формировании отчета:', error);
     }
@@ -52,7 +63,7 @@ const ReportGenerator = () => {
   const handleGenerateEnterpriseSummary = async () => {
     try {
       const { link } = await reportService.generateEnterpriseSummary(startDate, endDate);
-      setEnterpriseReportLink(link);
+      setReports([...reports, { link, created_at: new Date().toISOString(), report_type: 'enterprise', parameters: JSON.stringify({ startDate, endDate }) }]);
     } catch (error) {
       console.error('Ошибка при формировании сводного отчета:', error);
     }
@@ -64,6 +75,14 @@ const ReportGenerator = () => {
         ? prevSelected.filter(id => id !== employeeId)
         : [...prevSelected, employeeId]
     );
+  };
+
+  const parseParameters = (parameters) => {
+    const params = JSON.parse(parameters);
+    if (params.employeeId) {
+      return `Сотрудники: ${params.employeeId.join(', ')}; Период: ${params.startDate} - ${params.endDate}`;
+    }
+    return `Период: ${params.startDate} - ${params.endDate}`;
   };
 
   return (
@@ -121,26 +140,36 @@ const ReportGenerator = () => {
                   <CButton color="primary" onClick={handleGenerateReport}>Сформировать отчет</CButton>
                 </CCol>
               </CRow>
-              {reportLink && (
-                <CRow className="mt-3">
-                  <CCol xs={12}>
-                    <a href={reportLink} download>Скачать отчет</a>
-                  </CCol>
-                </CRow>
-              )}
               <CRow className="mt-3">
                 <CCol xs={12}>
                   <CButton color="secondary" onClick={handleGenerateEnterpriseSummary}>Сформировать сводный отчет</CButton>
                 </CCol>
               </CRow>
-              {enterpriseReportLink && (
-                <CRow className="mt-3">
-                  <CCol xs={12}>
-                    <a href={enterpriseReportLink} download>Скачать сводный отчет</a>
-                  </CCol>
-                </CRow>
-              )}
             </CForm>
+            <hr />
+            <h5>Список отчетов</h5>
+            <CTable hover>
+              <CTableHead>
+                <CTableRow>
+                  <CTableHeaderCell>ID</CTableHeaderCell>
+                  <CTableHeaderCell>Тип отчета</CTableHeaderCell>
+                  <CTableHeaderCell>Параметры</CTableHeaderCell>
+                  <CTableHeaderCell>Ссылка</CTableHeaderCell>
+                  <CTableHeaderCell>Дата создания</CTableHeaderCell>
+                </CTableRow>
+              </CTableHead>
+              <CTableBody>
+                {reports.map((report) => (
+                  <CTableRow key={report.id}>
+                    <CTableDataCell>{report.id}</CTableDataCell>
+                    <CTableDataCell>{report.report_type}</CTableDataCell>
+                    <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
+                    <CTableDataCell><a href={report.link} download>Скачать</a></CTableDataCell>
+                    <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
+                  </CTableRow>
+                ))}
+              </CTableBody>
+            </CTable>
           </CCardBody>
         </CCard>
       </CCol>

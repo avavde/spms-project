@@ -26,4 +26,14 @@ const generateEnterpriseSummary = async (startDate, endDate) => {
   }
 };
 
-export default { generateReport, generateEnterpriseSummary };
+const getReports = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/reports/list`);
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при получении списка отчетов:', error);
+    throw error;
+  }
+};
+
+export default { generateReport, generateEnterpriseSummary, getReports };
