@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "iconv-lite": "^0.6.3",
+    "papaparse": "^5.4.1",
+    "util": "^0.12.5",
+    "xlsx": "^0.18.5"
+  }
+}

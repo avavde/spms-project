@@ -178,3 +178,4 @@ AllNotifications.propTypes = {
 };
 
 export default AllNotifications;
+

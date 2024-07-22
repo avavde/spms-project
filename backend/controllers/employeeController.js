@@ -1,5 +1,5 @@
 const { Employee, Beacon, GNSSPosition, DeviceZonePosition, Zone, Department } = require('../models');
-
+const { Op } = require('sequelize');
 
 
 exports.getAllEmployees = async (req, res) => {
@@ -9,6 +9,52 @@ exports.getAllEmployees = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при получении сотрудников:', error.message, error.stack);
     res.status(500).json({ error: 'Ошибка при получении сотрудников' });
+  }
+};
+
+const { Op } = require('sequelize');
+const { Employee, ZoneEvent, Zone } = require('../models');
+
+exports.getEmployeeMovements = async (req, res) => {
+  const { employeeId, startDate, endDate } = req.query;
+
+  if (!employeeId || !startDate || !endDate) {
+    return res.status(400).json({ error: 'employeeId, startDate, and endDate are required' });
+  }
+
+  try {
+    const employee = await Employee.findByPk(employeeId);
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    // Добавление одного дня к endDate
+    const endDatePlusOne = new Date(endDate);
+    endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
+
+    const events = await ZoneEvent.findAll({
+      where: {
+        employee_id: employeeId,
+        timestamp: {
+          [Op.between]: [new Date(startDate), endDatePlusOne]
+        }
+      },
+      include: [Zone],
+      order: [['timestamp', 'ASC']]
+    });
+
+    const movements = events.map(event => ({
+      timestamp: event.timestamp,
+      zoneName: event.Zone.name,
+      zoneType: event.Zone.type,
+      eventType: event.event_type,
+      duration: event.duration
+    }));
+
+    res.json(movements);
+  } catch (error) {
+    console.error('Error fetching employee movements:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 

@@ -31,7 +31,7 @@ const generateReport = async (req, res) => {
     const zones = await Zone.findAll();
     const employees = await Employee.findAll();
     const zonesMap = zones.reduce((acc, zone) => {
-      acc[zone.id] = zone.type;
+      acc[zone.id] = { type: zone.type, name: zone.name };
       return acc;
     }, {});
 
@@ -84,7 +84,7 @@ const generateReport = async (req, res) => {
       if (violation) summary.totalViolations++;
       if (event.duration) {
         summary.totalTimeInZones += event.duration;
-        const zoneType = zonesMap[event.zone_id] || 'regular';
+        const zoneType = zonesMap[event.zone_id] ? zonesMap[event.zone_id].type : 'regular';
         summary.zoneTime[zoneType] += event.duration;
       }
     });
@@ -135,6 +135,7 @@ const generateReport = async (req, res) => {
         detailData.push({
           'ФИО сотрудника': employeeName,
           'ID зоны': event.zone_id,
+          'Название зоны': zonesMap[event.zone_id] ? zonesMap[event.zone_id].name : 'Неизвестная зона',
           'Тип события': event.event_type,
           'Время': event.timestamp,
           'Продолжительность': event.duration,
@@ -164,6 +165,7 @@ const generateReport = async (req, res) => {
     const detailFields = [
       'ФИО сотрудника', 
       'ID зоны', 
+      'Название зоны',
       'Тип события', 
       'Время', 
       'Продолжительность', 
@@ -212,8 +214,6 @@ const generateReport = async (req, res) => {
   }
 };
 
-
-
 const generateEnterpriseSummary = async (req, res) => {
   const { startDate, endDate } = req.query;
 
@@ -236,7 +236,7 @@ const generateEnterpriseSummary = async (req, res) => {
     const zoneViolations = await ZoneViolation.findAll({ where: whereClause });
     const zones = await Zone.findAll();
     const zonesMap = zones.reduce((acc, zone) => {
-      acc[zone.id] = zone.type;
+      acc[zone.id] = { type: zone.type, name: zone.name };
       return acc;
     }, {});
 
@@ -260,7 +260,7 @@ const generateEnterpriseSummary = async (req, res) => {
       if (violation) totalViolations++;
       if (event.duration) {
         totalTimeInZones += event.duration;
-        const zoneType = zonesMap[event.zone_id] || 'regular';
+        const zoneType = zonesMap[event.zone_id] ? zonesMap[event.zone_id].type : 'regular';
         zoneTime[zoneType] += event.duration;
       }
     });

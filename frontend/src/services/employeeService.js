@@ -38,6 +38,13 @@ const assignBeacon = (employeeId, beaconid) => {
   return axios.put(`${API_URL}/employees/${employeeId}/assign-beacon`, { beaconid });
 };
 
+const getEmployeeMovements = async (employeeId, startDate, endDate) => {
+  const response = await axios.get(`${API_URL}/employees/employee-movements`, {
+    params: { employeeId, startDate, endDate }
+  });
+  return response.data;
+};
+
 export default {
   getAllEmployees,
   getEmployeeById,
@@ -47,4 +54,5 @@ export default {
   assignBeacon,
   getDeviceStatus,
   getZoneAssignments,
+  getEmployeeMovements,
 };
