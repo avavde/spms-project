@@ -95,9 +95,9 @@ const generateReport = async (req, res) => {
 
     for (const key in employeeSummaries) {
       const summary = employeeSummaries[key];
-      summary.totalTimeInZones = summary.totalTimeInZones / 60000; // Преобразование в минуты
+      summary.totalTimeInZones = summary.totalTimeInZones / 60; // Преобразование в минуты
       for (const zoneType in summary.zoneTime) {
-        summary.zoneTime[zoneType] = summary.zoneTime[zoneType] / 60000; // Преобразование в минуты
+        summary.zoneTime[zoneType] = summary.zoneTime[zoneType] / 60; // Преобразование в минуты
       }
     }
 
