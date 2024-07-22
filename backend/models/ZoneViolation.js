@@ -1,5 +1,3 @@
-// ZoneViolation.js
-
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Employee = require('./Employee');
@@ -38,6 +36,11 @@ ZoneViolation.init({
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 0
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   },
   last_updated: {
     type: DataTypes.DATE,
