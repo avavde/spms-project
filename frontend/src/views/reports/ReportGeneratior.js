@@ -77,10 +77,16 @@ const ReportGenerator = () => {
     );
   };
 
+  const getEmployeeNameById = (id) => {
+    const employee = employees.find(emp => emp.id === id);
+    return employee ? `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}` : id;
+  };
+
   const parseParameters = (parameters) => {
     const params = JSON.parse(parameters);
     if (params.employeeId) {
-      return `Сотрудники: ${params.employeeId.join(', ')}; Период: ${params.startDate} - ${params.endDate}`;
+      const employeeNames = params.employeeId.map(id => getEmployeeNameById(parseInt(id)));
+      return `Сотрудники: ${employeeNames.join(', ')}; Период: ${params.startDate} - ${params.endDate}`;
     }
     return `Период: ${params.startDate} - ${params.endDate}`;
   };
@@ -147,7 +153,7 @@ const ReportGenerator = () => {
               </CRow>
             </CForm>
             <hr />
-            <h5>Список отчетов</h5>
+            <h5>История отчетов</h5>
             <CTable hover>
               <CTableHead>
                 <CTableRow>
