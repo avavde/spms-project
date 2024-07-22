@@ -18,7 +18,7 @@ const EXIT_TIMEOUT = 5 * 60 * 1000;
 const exitTimeouts = {};
 
 // Создание экземпляра CIC-фильтра
-const cicDecimator = new CICDecimator(3, 10); // Пример: 3-ый порядок, коэффициент децимации 10
+const cicDecimator = new CICDecimator(1, 2); // Пример: 3-ый порядок, коэффициент децимации 10
 
 const handleZonePositionMessage = async (deviceId, payload) => {
   if (!deviceId) {
