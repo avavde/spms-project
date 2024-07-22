@@ -153,45 +153,78 @@ const handleZonePositionMessage = async (deviceId, payload) => {
             }
           });
 
-          if (!existingEnterEvent) {
-            if (zoneId) {
+          if (existingEnterEvent) {
+            // Если существует незакрытое событие 'enter', закрываем его перед созданием нового
+            const duration = Math.floor((new Date(ts * 1000) - new Date(existingEnterEvent.timestamp)) / 1000); // Измерение в секундах
+            await existingEnterEvent.update({ duration });
+
+            await ZoneEvent.create({
+              employee_id: employee.id,
+              zone_id: zoneId,
+              event_type: 'exit',
+              timestamp: new Date(ts * 1000)
+            });
+          } else {
+            // Проверка и закрытие незакрытых событий в других зонах
+            const otherZoneEnterEvents = await ZoneEvent.findAll({
+              where: {
+                employee_id: employee.id,
+                zone_id: { [Op.ne]: zoneId },
+                event_type: 'enter',
+                duration: { [Op.is]: null }
+              }
+            });
+
+            for (const event of otherZoneEnterEvents) {
+              const duration = Math.floor((new Date(ts * 1000) - new Date(event.timestamp)) / 1000); // Измерение в секундах
+              await event.update({ duration });
+
               await ZoneEvent.create({
                 employee_id: employee.id,
+                zone_id: event.zone_id,
+                event_type: 'exit',
+                timestamp: new Date(ts * 1000)
+              });
+            }
+          }
+
+          if (zoneId) {
+            await ZoneEvent.create({
+              employee_id: employee.id,
+              zone_id: zoneId,
+              event_type: 'enter',
+              timestamp: new Date(ts * 1000)
+            });
+
+            const forbiddenZoneAssignment = await EmployeeZoneAssignment.findOne({
+              where: {
+                employee_id: employee.id,
                 zone_id: zoneId,
-                event_type: 'enter',
+                assignment_type: 'forbidden'
+              }
+            });
+
+            if (forbiddenZoneAssignment) {
+              await ZoneViolation.create({
+                employee_id: employee.id,
+                zone_id: zoneId,
+                zone_type: 'forbidden',
                 timestamp: new Date(ts * 1000)
               });
 
-              const forbiddenZoneAssignment = await EmployeeZoneAssignment.findOne({
-                where: {
+              broadcast({
+                type: 'zone_violation',
+                data: {
                   employee_id: employee.id,
+                  employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
                   zone_id: zoneId,
-                  assignment_type: 'forbidden'
+                  zone_name: `Зона ${zoneId}`,
+                  beacon_id: bInst,
+                  event_type: 'вошел в запрещенную зону',
+                  timestamp: new Date(ts * 1000).toLocaleString(),
+                  message: 'Сотрудник вошел в запрещенную зону'
                 }
               });
-
-              if (forbiddenZoneAssignment) {
-                await ZoneViolation.create({
-                  employee_id: employee.id,
-                  zone_id: zoneId,
-                  zone_type: 'forbidden',
-                  timestamp: new Date(ts * 1000)
-                });
-
-                broadcast({
-                  type: 'zone_violation',
-                  data: {
-                    employee_id: employee.id,
-                    employee: `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name[0]}.`,
-                    zone_id: zoneId,
-                    zone_name: `Зона ${zoneId}`,
-                    beacon_id: bInst,
-                    event_type: 'вошел в запрещенную зону',
-                    timestamp: new Date(ts * 1000).toLocaleString(),
-                    message: 'Сотрудник вошел в запрещенную зону'
-                  }
-                });
-              }
             }
           }
 
@@ -213,7 +246,7 @@ const handleZonePositionMessage = async (deviceId, payload) => {
               });
 
               if (lastEvent) {
-                const duration = Math.floor((Date.now() - new Date(lastEvent.timestamp).getTime()) / 1000);
+                const duration = Math.floor((Date.now() - new Date(lastEvent.timestamp).getTime()) / 1000); // Измерение в секундах
                 await lastEvent.update({ duration });
 
                 await ZoneEvent.create({
@@ -242,7 +275,7 @@ const handleZonePositionMessage = async (deviceId, payload) => {
             } catch (error) {
               console.error('Error creating exit event:', error);
             }
-          }, EXIT_TIMEOUT);
+             }, EXIT_TIMEOUT);
 
           const updatedData = {
             type: 'zone_event',
@@ -252,7 +285,7 @@ const handleZonePositionMessage = async (deviceId, payload) => {
               zone_id: zoneId,
               zone_name: `Зона ${zoneId}`,
               beacon_id: bInst,
-              event_type: existingEnterEvent ? 'вошел в зону' : 'вышел из зоны',
+              event_type: 'вошел в зону',
               timestamp: new Date(ts * 1000).toLocaleString(),
             }
           };
