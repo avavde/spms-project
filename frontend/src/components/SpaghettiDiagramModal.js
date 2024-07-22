@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Chart, registerables } from 'chart.js';
 import PropTypes from 'prop-types';
 import {
   CModal,
@@ -6,85 +7,87 @@ import {
   CModalTitle,
   CModalBody,
   CModalFooter,
-  CButton,
-  CForm,
-  CFormLabel,
-  CFormInput,
+  CButton
 } from '@coreui/react';
-import employeeService from 'src/services/employeeService';
-import { Line } from 'react-chartjs-2';
 
-const SpaghettiDiagramModal = ({ visible, employeeId, onClose }) => {
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [events, setEvents] = useState([]);
-  const [chartData, setChartData] = useState({});
+// Регистрация необходимых компонентов Chart.js
+Chart.register(...registerables);
+
+const SpaghettiDiagramModal = ({ visible, onClose, movements }) => {
+  const chartRef = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (visible && employeeId && startDate && endDate) {
-      fetchEmployeeMovements();
+    if (visible && canvasRef.current) {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+
+      const ctx = canvasRef.current.getContext('2d');
+
+      const labels = movements.map(movement => new Date(movement.timestamp).toLocaleTimeString());
+      const uniqueZones = [...new Set(movements.map(movement => movement.zoneName))];
+
+      const data = {
+        labels,
+        datasets: uniqueZones.map((zone, index) => ({
+          label: zone,
+          data: movements
+            .filter(movement => movement.zoneName === zone)
+            .map(movement => ({ x: new Date(movement.timestamp).toLocaleTimeString(), y: index })),
+          borderColor: `rgba(${index * 30}, ${index * 60}, ${index * 90}, 0.6)`,
+          fill: false,
+          tension: 0.1,
+        }))
+      };
+
+      chartRef.current = new Chart(ctx, {
+        type: 'line',
+        data,
+        options: {
+          scales: {
+            x: {
+              type: 'category',
+              title: {
+                display: true,
+                text: 'Time'
+              }
+            },
+            y: {
+              type: 'category',
+              labels: uniqueZones,
+              title: {
+                display: true,
+                text: 'Zones'
+              }
+            }
+          },
+          elements: {
+            point: {
+              radius: 5
+            }
+          },
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true
+            }
+          }
+        }
+      });
     }
-  }, [visible, employeeId, startDate, endDate]);
-
-  const fetchEmployeeMovements = async () => {
-    try {
-      const data = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
-      setEvents(data);
-      generateChartData(data);
-    } catch (error) {
-      console.error('Error fetching employee movements:', error);
-    }
-  };
-
-  const generateChartData = (data) => {
-    const labels = data.map(event => new Date(event.timestamp).toLocaleString());
-    const datasets = [
-      {
-        label: 'Перемещения сотрудника',
-        data: data.map(event => event.zone_id),
-        borderColor: 'rgba(75,192,192,1)',
-        fill: false,
-      },
-    ];
-
-    setChartData({ labels, datasets });
-  };
-
-  const handleGenerate = () => {
-    fetchEmployeeMovements();
-  };
+  }, [visible, movements]);
 
   return (
-    <CModal visible={visible} onClose={onClose} size="lg">
+    <CModal visible={visible} onClose={onClose}>
       <CModalHeader>
-        <CModalTitle>Спагетти-диаграмма перемещений сотрудника</CModalTitle>
+        <CModalTitle>Spaghetti Diagram</CModalTitle>
       </CModalHeader>
       <CModalBody>
-        <CForm>
-          <div className="mb-3">
-            <CFormLabel htmlFor="startDate">Начальная дата</CFormLabel>
-            <CFormInput
-              type="date"
-              id="startDate"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <CFormLabel htmlFor="endDate">Конечная дата</CFormLabel>
-            <CFormInput
-              type="date"
-              id="endDate"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
-        </CForm>
-        {events.length > 0 && <Line data={chartData} />}
+        <canvas ref={canvasRef}></canvas>
       </CModalBody>
       <CModalFooter>
-        <CButton color="primary" onClick={handleGenerate}>Сгенерировать</CButton>
-        <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
+        <CButton color="secondary" onClick={onClose}>Close</CButton>
       </CModalFooter>
     </CModal>
   );
@@ -92,8 +95,14 @@ const SpaghettiDiagramModal = ({ visible, employeeId, onClose }) => {
 
 SpaghettiDiagramModal.propTypes = {
   visible: PropTypes.bool.isRequired,
-  employeeId: PropTypes.number.isRequired,
   onClose: PropTypes.func.isRequired,
+  movements: PropTypes.arrayOf(PropTypes.shape({
+    timestamp: PropTypes.string.isRequired,
+    zoneName: PropTypes.string.isRequired,
+    zoneType: PropTypes.string.isRequired,
+    eventType: PropTypes.string.isRequired,
+    duration: PropTypes.number
+  })).isRequired
 };
 
 export default SpaghettiDiagramModal;

@@ -19,7 +19,7 @@ import {
 } from '@coreui/react';
 import reportService from 'src/services/reportService';
 import employeeService from 'src/services/employeeService';
-import SpaghettiDiagramModal from 'src/components/SpaghettiDiagramModal'; // Импортируем компонент модального окна
+import SpaghettiDiagramModal from 'src/components/SpaghettiDiagramModal';
 
 const ReportGenerator = () => {
   const [employees, setEmployees] = useState([]);
@@ -27,8 +27,8 @@ const ReportGenerator = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reports, setReports] = useState([]);
-  const [spaghettiModalVisible, setSpaghettiModalVisible] = useState(false); // Состояние для отображения модального окна
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null); // Состояние для выбранного сотрудника
+  const [movements, setMovements] = useState([]);
+  const [showDiagram, setShowDiagram] = useState(false);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -83,9 +83,14 @@ const ReportGenerator = () => {
     );
   };
 
-  const handleOpenSpaghettiDiagram = (employeeId) => {
-    setSelectedEmployeeId(employeeId);
-    setSpaghettiModalVisible(true);
+  const handleViewMovements = async (employeeId) => {
+    try {
+      const response = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
+      setMovements(response.data);
+      setShowDiagram(true);
+    } catch (error) {
+      console.error('Ошибка при получении перемещений сотрудника:', error);
+    }
   };
 
   const getEmployeeNameById = (id) => {
@@ -132,92 +137,90 @@ const ReportGenerator = () => {
                         <CTableHeaderCell>Фамилия И.О.</CTableHeaderCell>
                         <CTableHeaderCell>Отдел</CTableHeaderCell>
                         <CTableHeaderCell>Должность</CTableHeaderCell>
-                        <CTableHeaderCell>Действия</CTableHeaderCell> {/* Добавлено */}
+                        <CTableHeaderCell>Действия</CTableHeaderCell>
                       </CTableRow>
                     </CTableHead>
-                    <CTableBody>
-                      {employees.map((employee) => (
-                        <CTableRow key={employee.id}>
-                          <CTableDataCell>
-                            <CFormCheck
-                              checked={selectedEmployees.includes(employee.id)}
-                              onChange={() => handleSelectEmployee(employee.id)}
-                            />
-                          </CTableDataCell>
-                          <CTableDataCell>{`${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`}</CTableDataCell>
-                          <CTableDataCell>{employee.department}</CTableDataCell>
-                          <CTableDataCell>{employee.position}</CTableDataCell>
-                          <CTableDataCell>
-                            <CButton color="info" onClick={() => handleOpenSpaghettiDiagram(employee.id)}>
-                              Спагетти-диаграмма
-                            </CButton>
-                          </CTableDataCell>
-                        </CTableRow>
-                      ))}
-                    </CTableBody>
-                  </CTable>
-                </CCol>
-              </CRow>
-              <CRow className="mt-3">
-                <CCol xs={12}>
-                  <CButton color="primary" onClick={handleGenerateReport}>Сформировать отчет</CButton>
-                </CCol>
-              </CRow>
-              <CRow className="mt-3">
-                <CCol xs={12}>
-                  <CButton color="secondary" onClick={handleGenerateEnterpriseSummary}>Сформировать сводный отчет</CButton>
-                </CCol>
-              </CRow>
-            </CForm>
-            <hr />
-            <h5>История отчетов</h5>
-            <CTable hover>
-              <CTableHead>
-                <CTableRow>
-                  <CTableHeaderCell>ID</CTableHeaderCell>
-                  <CTableHeaderCell>Тип отчета</CTableHeaderCell>
-                  <CTableHeaderCell>Параметры</CTableHeaderCell>
-                  <CTableHeaderCell>Ссылки</CTableHeaderCell>
-                  <CTableHeaderCell>Дата создания</CTableHeaderCell>
+                                    <CTableBody>
+                    {employees.map((employee) => (
+                      <CTableRow key={employee.id}>
+                        <CTableDataCell>
+                          <CFormCheck
+                            checked={selectedEmployees.includes(employee.id)}
+                            onChange={() => handleSelectEmployee(employee.id)}
+                          />
+                        </CTableDataCell>
+                        <CTableDataCell>{`${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`}</CTableDataCell>
+                        <CTableDataCell>{employee.department}</CTableDataCell>
+                        <CTableDataCell>{employee.position}</CTableDataCell>
+                        <CTableDataCell>
+                          <CButton color="primary" onClick={() => handleViewMovements(employee.id)}>
+                            Посмотреть перемещения
+                          </CButton>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              </CCol>
+            </CRow>
+            <CRow className="mt-3">
+              <CCol xs={12}>
+                <CButton color="primary" onClick={handleGenerateReport}>Сформировать отчет</CButton>
+              </CCol>
+            </CRow>
+            <CRow className="mt-3">
+              <CCol xs={12}>
+                <CButton color="secondary" onClick={handleGenerateEnterpriseSummary}>Сформировать сводный отчет</CButton>
+              </CCol>
+            </CRow>
+          </CForm>
+          <hr />
+          <h5>История отчетов</h5>
+          <CTable hover>
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell>ID</CTableHeaderCell>
+                <CTableHeaderCell>Тип отчета</CTableHeaderCell>
+                <CTableHeaderCell>Параметры</CTableHeaderCell>
+                <CTableHeaderCell>Ссылки</CTableHeaderCell>
+                <CTableHeaderCell>Дата создания</CTableHeaderCell>
+              </CTableRow>
+            </CTableHead>
+            <CTableBody>
+              {reports.map((report, index) => (
+                <CTableRow key={index}>
+                  <CTableDataCell>{index + 1}</CTableDataCell>
+                  <CTableDataCell>{report.report_type}</CTableDataCell>
+                  <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
+                  <CTableDataCell>
+                    {report.report_type === 'employee_resume' || report.report_type === 'employee_zone_movements' ? (
+                      <>
+                        {report.report_type === 'employee_resume' && (
+                          <a href={report.link} download>Резюме</a>
+                        )}
+                        {report.report_type === 'employee_zone_movements' && (
+                          <a href={report.link} download>Перемещения</a>
+                        )}
+                      </>
+                    ) : (
+                      <a href={report.link} download>Скачать</a>
+                    )}
+                  </CTableDataCell>
+                  <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
                 </CTableRow>
-              </CTableHead>
-              <CTableBody>
-                {reports.map((report, index) => (
-                  <CTableRow key={index}>
-                    <CTableDataCell>{index + 1}</CTableDataCell>
-                    <CTableDataCell>{report.report_type}</CTableDataCell>
-                    <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
-                    <CTableDataCell>
-                      {report.report_type === 'employee_resume' || report.report_type === 'employee_zone_movements' ? (
-                        <>
-                          {report.report_type === 'employee_resume' && (
-                            <a href={report.link} download>Резюме</a>
-                          )}
-                          {report.report_type === 'employee_zone_movements' && (
-                            <a href={report.link} download>Перемещения</a>
-                          )}
-                        </>
-                      ) : (
-                        <a href={report.link} download>Скачать</a>
-                      )}
-                    </CTableDataCell>
-                    <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
-                  </CTableRow>
-                ))}
-                         </CTableBody>
-            </CTable>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      {selectedEmployeeId && (
-        <SpaghettiDiagramModal
-          visible={spaghettiModalVisible}
-          employeeId={selectedEmployeeId}
-          onClose={() => setSpaghettiModalVisible(false)}
-        />
-      )}
-    </CRow>
-  );
+              ))}
+            </CTableBody>
+          </CTable>
+        </CCardBody>
+      </CCard>
+    </CCol>
+    <SpaghettiDiagramModal
+      visible={showDiagram}
+      onClose={() => setShowDiagram(false)}
+      movements={movements}
+    />
+  </CRow>
+);
 };
 
 export default ReportGenerator;
