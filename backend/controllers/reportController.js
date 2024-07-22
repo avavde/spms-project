@@ -183,6 +183,7 @@ const generateReport = async (req, res) => {
 };
 
 
+
 const generateEnterpriseSummary = async (req, res) => {
   const { startDate, endDate } = req.query;
 
