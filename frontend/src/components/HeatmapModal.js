@@ -5,7 +5,14 @@ import 'leaflet.heat';
 import 'leaflet/dist/leaflet.css';
 import plan from 'src/assets/brand/plan.jpg';
 import zonesService from 'src/services/zonesService';
-import employeeService from 'src/services/employeeService';
+import {
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
+  CButton
+} from '@coreui/react';
 
 const imageBounds = [[0, 0], [1000, 1000]];
 
@@ -49,28 +56,23 @@ const HeatmapLayer = ({ movements }) => {
   return null;
 };
 
-const Heatmap = ({ employeeId, startDate, endDate }) => {
-  const [movements, setMovements] = useState([]);
-
-  useEffect(() => {
-    const fetchMovements = async () => {
-      try {
-        const data = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
-        setMovements(data);
-      } catch (error) {
-        console.error('Ошибка при получении перемещений сотрудника:', error);
-      }
-    };
-
-    fetchMovements();
-  }, [employeeId, startDate, endDate]);
-
+const HeatmapModal = ({ visible, onClose, movements }) => {
   return (
-    <MapContainer center={[500, 500]} zoom={2} style={{ height: '100vh', width: '100%' }} crs={L.CRS.Simple}>
-      <ImageOverlay url={plan} bounds={imageBounds} opacity={1} />
-      <HeatmapLayer movements={movements} />
-    </MapContainer>
+    <CModal visible={visible} onClose={onClose} size="lg">
+      <CModalHeader>
+        <CModalTitle>Тепловая карта перемещений</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        <MapContainer center={[500, 500]} zoom={2} style={{ height: '500px', width: '100%' }} crs={L.CRS.Simple}>
+          <ImageOverlay url={plan} bounds={imageBounds} opacity={1} />
+          <HeatmapLayer movements={movements} />
+        </MapContainer>
+      </CModalBody>
+      <CModalFooter>
+        <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
+      </CModalFooter>
+    </CModal>
   );
 };
 
-export default Heatmap;
+export default HeatmapModal;

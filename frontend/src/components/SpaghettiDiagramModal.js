@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import PropTypes from 'prop-types';
 import {
@@ -10,12 +10,10 @@ import {
   CButton
 } from '@coreui/react';
 import zonesService from 'src/services/zonesService';
-import employeeService from 'src/services/employeeService';
 
-const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDate }) => {
+const SpaghettiDiagramModal = ({ visible, onClose, movements }) => {
   const svgRef = useRef(null);
-  const [movements, setMovements] = useState([]);
-  const [zonePositions, setZonePositions] = useState({});
+  const [zoneCoordinates, setZoneCoordinates] = useState({});
 
   useEffect(() => {
     const fetchZones = async () => {
@@ -25,29 +23,17 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
         zones.forEach(zone => {
           positions[zone.name] = zone.map_coordinates;
         });
-        setZonePositions(positions);
+        setZoneCoordinates(positions);
       } catch (error) {
         console.error('Ошибка при получении зон:', error);
       }
     };
 
-    const fetchMovements = async () => {
-      try {
-        const data = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
-        setMovements(data);
-      } catch (error) {
-        console.error('Ошибка при получении перемещений сотрудника:', error);
-      }
-    };
-
-    if (visible) {
-      fetchZones();
-      fetchMovements();
-    }
-  }, [visible, employeeId, startDate, endDate]);
+    fetchZones();
+  }, []);
 
   useEffect(() => {
-    if (visible && svgRef.current && Object.keys(zonePositions).length) {
+    if (visible && svgRef.current) {
       // Очистка предыдущего графика
       d3.select(svgRef.current).selectAll('*').remove();
 
@@ -60,14 +46,14 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
       const centerY = height / 2;
 
       // Получение уникальных зон
-      const uniqueZones = Object.keys(zonePositions);
+      const uniqueZones = Array.from(new Set(movements.map(d => d.zoneName)));
 
       // Распределение зон по кругу
       const angleScale = d3.scalePoint()
         .domain(uniqueZones)
         .range([0, 2 * Math.PI]);
 
-      const positions = uniqueZones.map(zone => ({
+      const zonePositions = uniqueZones.map(zone => ({
         zone,
         x: centerX + radius * Math.cos(angleScale(zone) - Math.PI / 2),
         y: centerY + radius * Math.sin(angleScale(zone) - Math.PI / 2)
@@ -75,7 +61,7 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
 
       // Добавление кругов для зон
       svg.selectAll('.zone')
-        .data(positions)
+        .data(zonePositions)
         .enter().append('circle')
         .attr('cx', d => d.x)
         .attr('cy', d => d.y)
@@ -84,7 +70,7 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
 
       // Добавление подписей для зон
       svg.selectAll('.zone-label')
-        .data(positions)
+        .data(zonePositions)
         .enter().append('text')
         .attr('x', d => d.x)
         .attr('y', d => d.y - 30)
@@ -101,15 +87,11 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
       const links = [];
       for (let i = 0; i < movements.length - 1; i++) {
         if (movements[i].eventType === 'exit' && movements[i + 1].eventType === 'enter') {
-          const fromZone = positions.find(z => z.zone === movements[i].zoneName);
-          const toZone = positions.find(z => z.zone === movements[i + 1].zoneName);
-          if (fromZone && toZone) {
-            links.push([fromZone, toZone]);
-          }
+          const fromZone = zonePositions.find(z => z.zone === movements[i].zoneName);
+          const toZone = zonePositions.find(z => z.zone === movements[i + 1].zoneName);
+          links.push([fromZone, toZone]);
         }
       }
-
-      console.log('links:', links); // Debugging output
 
       svg.selectAll('.link')
         .data(links)
@@ -119,7 +101,7 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
         .attr('stroke', 'black')
         .attr('stroke-width', 1);
     }
-  }, [visible, movements, zonePositions]);
+  }, [visible, movements, zoneCoordinates]);
 
   return (
     <CModal visible={visible} onClose={onClose} size="lg">
@@ -139,9 +121,13 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
 SpaghettiDiagramModal.propTypes = {
   visible: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  employeeId: PropTypes.number.isRequired,
-  startDate: PropTypes.string.isRequired,
-  endDate: PropTypes.string.isRequired
+  movements: PropTypes.arrayOf(PropTypes.shape({
+    timestamp: PropTypes.string.isRequired,
+    zoneName: PropTypes.string.isRequired,
+    zoneType: PropTypes.string.isRequired,
+    eventType: PropTypes.string.isRequired,
+    duration: PropTypes.number
+  })).isRequired
 };
 
 export default SpaghettiDiagramModal;
