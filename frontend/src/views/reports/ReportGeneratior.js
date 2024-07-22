@@ -124,7 +124,7 @@ const ReportGenerator = () => {
               {reportLink && (
                 <CRow className="mt-3">
                   <CCol xs={12}>
-                    <a href={reportLink} target="_blank" rel="noopener noreferrer">Скачать отчет</a>
+                    <a href={reportLink} download>Скачать отчет</a>
                   </CCol>
                 </CRow>
               )}
@@ -136,7 +136,7 @@ const ReportGenerator = () => {
               {enterpriseReportLink && (
                 <CRow className="mt-3">
                   <CCol xs={12}>
-                    <a href={enterpriseReportLink} target="_blank" rel="noopener noreferrer">Скачать сводный отчет</a>
+                    <a href={enterpriseReportLink} download>Скачать сводный отчет</a>
                   </CCol>
                 </CRow>
               )}
