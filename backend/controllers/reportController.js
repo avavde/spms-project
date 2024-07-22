@@ -25,8 +25,14 @@ const generateReport = async (req, res) => {
     const zoneEvents = await ZoneEvent.findAll({ where: whereClause });
     const zoneViolations = await ZoneViolation.findAll({ where: whereClause });
     const zones = await Zone.findAll();
+    const employees = await Employee.findAll();
     const zonesMap = zones.reduce((acc, zone) => {
       acc[zone.id] = zone.type;
+      return acc;
+    }, {});
+
+    const employeesMap = employees.reduce((acc, employee) => {
+      acc[employee.id] = `${employee.last_name} ${employee.first_name[0]}. ${employee.middle_name ? employee.middle_name[0] + '.' : ''}`;
       return acc;
     }, {});
 
@@ -98,8 +104,9 @@ const generateReport = async (req, res) => {
     const reportData = [];
     for (const employeeId in employeeSummaries) {
       const summary = employeeSummaries[employeeId];
+      const employeeName = employeesMap[employeeId] || `Сотрудник ID ${employeeId}`;
       reportData.push({
-        'ID сотрудника': employeeId,
+        'ФИО сотрудника': employeeName,
         'Общее время в зонах (минуты)': summary.totalTimeInZones,
         'Общее количество нарушений': summary.totalViolations,
         'Общее количество событий': summary.totalEvents,
@@ -120,7 +127,7 @@ const generateReport = async (req, res) => {
         const deviceEvent = deviceEvents.find(d => d.device_id === event.device_id && d.timestamp === event.timestamp);
   
         reportData.push({
-          'ID сотрудника': event.employee_id,
+          'ФИО сотрудника': employeeName,
           'ID зоны': event.zone_id,
           'Тип события': event.event_type,
           'Время': event.timestamp,
@@ -132,8 +139,23 @@ const generateReport = async (req, res) => {
       });
     }
 
+    // Добавление сводных данных
+    const enterpriseSummary = {
+      'Общее время в зонах (минуты)': totalTimeInZones,
+      'Общее количество нарушений': totalViolations,
+      'Общее количество событий': totalEvents,
+      'Количество событий входа': enterEvents,
+      'Количество событий выхода': exitEvents,
+      'Время в запрещенных зонах (минуты)': zoneTime.forbidden,
+      'Время в рабочих зонах (минуты)': zoneTime.working,
+      'Время в опасных зонах (минуты)': zoneTime.dangerous,
+      'Время в контрольных зонах (минуты)': zoneTime.control,
+      'Время в обычных зонах (минуты)': zoneTime.regular
+    };
+    reportData.push({ ...enterpriseSummary, 'ФИО сотрудника': 'Сводные данные' });
+
     const fields = [
-      'ID сотрудника', 
+      'ФИО сотрудника', 
       'Общее время в зонах (минуты)', 
       'Общее количество нарушений', 
       'Общее количество событий', 
@@ -156,11 +178,11 @@ const generateReport = async (req, res) => {
     ];
     const csv = parse(reportData, { fields });
 
-    // const filePath = path.join(__dirname, '/home/spms-project/frontend/public', 'reports', `report_${Date.now()}.csv`);
     const filePath = path.join(__dirname, '../../frontend/public', 'reports', `report_${Date.now()}.csv`);
-    fs.writeFileSync(filePath, csv);
+    fs.writeFileSync(filePath, csv, 'utf8'); // Добавлена кодировка utf8
 
-    // Сохранение ссылки на отчет в базе данных
+
+   // Сохранение ссылки на отчет в базе данных
     const reportLink = `/reports/${path.basename(filePath)}`;
     await Report.create({
       report_type: 'employee', // Тип отчета
@@ -255,8 +277,8 @@ const generateEnterpriseSummary = async (req, res) => {
     ];
     const csv = parse([enterpriseSummary], { fields });
 
-    const filePath = path.join(__dirname, '..', 'reports', `enterprise_summary_${Date.now()}.csv`);
-    fs.writeFileSync(filePath, csv);
+    const filePath = path.join(__dirname, '../../frontend/public', 'reports', `enterprise_summary_${Date.now()}.csv`);
+    fs.writeFileSync(filePath, csv, 'utf8'); // Добавлена кодировка utf8
 
     // Сохранение ссылки на отчет в базе данных
     const reportLink = `/reports/${path.basename(filePath)}`;
@@ -283,6 +305,5 @@ const getReports = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении отчетов' });
   }
 };
-
 
 module.exports = { generateReport, generateEnterpriseSummary, getReports };
