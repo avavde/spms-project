@@ -53,8 +53,11 @@ const ReportGenerator = () => {
 
   const handleGenerateReport = async () => {
     try {
-      const { link } = await reportService.generateReport(selectedEmployees, startDate, endDate);
-      setReports([...reports, { link, created_at: new Date().toISOString(), report_type: 'employee', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) }]);
+      const { summaryLink, detailLink } = await reportService.generateReport(selectedEmployees, startDate, endDate);
+      setReports([...reports,
+        { link: summaryLink, created_at: new Date().toISOString(), report_type: 'employee_resume', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) },
+        { link: detailLink, created_at: new Date().toISOString(), report_type: 'employee_zone_movements', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) }
+      ]);
     } catch (error) {
       console.error('Ошибка при формировании отчета:', error);
     }
@@ -160,17 +163,30 @@ const ReportGenerator = () => {
                   <CTableHeaderCell>ID</CTableHeaderCell>
                   <CTableHeaderCell>Тип отчета</CTableHeaderCell>
                   <CTableHeaderCell>Параметры</CTableHeaderCell>
-                  <CTableHeaderCell>Ссылка</CTableHeaderCell>
+                  <CTableHeaderCell>Ссылки</CTableHeaderCell>
                   <CTableHeaderCell>Дата создания</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {reports.map((report) => (
-                  <CTableRow key={report.id}>
-                    <CTableDataCell>{report.id}</CTableDataCell>
+                {reports.map((report, index) => (
+                  <CTableRow key={index}>
+                    <CTableDataCell>{index + 1}</CTableDataCell>
                     <CTableDataCell>{report.report_type}</CTableDataCell>
                     <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
-                    <CTableDataCell><a href={report.link} download>Скачать</a></CTableDataCell>
+                    <CTableDataCell>
+                      {report.report_type === 'employee_resume' || report.report_type === 'employee_zone_movements' ? (
+                        <>
+                          {report.report_type === 'employee_resume' && (
+                            <a href={report.link} download>Резюме</a>
+                          )}
+                          {report.report_type === 'employee_zone_movements' && (
+                            <a href={report.link} download>Перемещения</a>
+                          )}
+                        </>
+                      ) : (
+                        <a href={report.link} download>Скачать</a>
+                      )}
+                    </CTableDataCell>
                     <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
                   </CTableRow>
                 ))}
