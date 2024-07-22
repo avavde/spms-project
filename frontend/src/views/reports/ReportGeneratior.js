@@ -98,8 +98,14 @@ const ReportGenerator = () => {
     }
   };
 
-  const handleViewHeatmap = (employeeId) => {
-    setShowHeatmap({ employeeId, startDate, endDate });
+  const handleViewHeatmap = async (employeeId) => {
+    try {
+      const response = await employeeService.getHeatmapData(employeeId, startDate, endDate);
+      setMovements(response.data);
+      setShowHeatmap(true);
+    } catch (error) {
+      console.error('Ошибка при получении данных для тепловой карты:', error);
+    }
   };
 
   const getEmployeeNameById = (id) => {
@@ -141,7 +147,7 @@ const ReportGenerator = () => {
                 <CCol xs={12}>
                   <CTable hover>
                     <CTableHead>
-                      <CTableRow>
+                    <CTableRow>
                         <CTableHeaderCell>Выбрать</CTableHeaderCell>
                         <CTableHeaderCell>Фамилия И.О.</CTableHeaderCell>
                         <CTableHeaderCell>Отдел</CTableHeaderCell>
@@ -162,16 +168,16 @@ const ReportGenerator = () => {
                           <CTableDataCell>{employee.department}</CTableDataCell>
                           <CTableDataCell>{employee.position}</CTableDataCell>
                           <CTableDataCell>
-                            <CButton color="primary"  shape="rounded-pill" size="sm" onClick={() => handleViewMovements(employee.id)}>
-                            <CIcon icon={cilWalk} className="me-2" />
-                             Спагетти
+                            <CButton color="primary" shape="rounded-pill" size="sm" onClick={() => handleViewMovements(employee.id)}>
+                              <CIcon icon={cilWalk} className="me-2" />
+                              Спагетти
                             </CButton>
-                            <CButton color="secondary"  shape="rounded-pill" size="sm" onClick={() => handleViewHeatmap(employee.id)}>
-                            <CIcon icon={cilFire} className="me-2" />
+                            <CButton color="secondary" shape="rounded-pill" size="sm" onClick={() => handleViewHeatmap(employee.id)}>
+                              <CIcon icon={cilFire} className="me-2" />
                               Теплокарта
                             </CButton>
-                            <CButton color="secondary"  shape="rounded-pill" size="sm" onClick={() => handleViewHeatmap(employee.id)}>
-                            <CIcon icon={cilMediaPlay} className="me-2" />
+                            <CButton color="secondary" shape="rounded-pill" size="sm">
+                              <CIcon icon={cilMediaPlay} className="me-2" />
                               Трек
                             </CButton>
                           </CTableDataCell>
@@ -208,21 +214,10 @@ const ReportGenerator = () => {
                 {reports.map((report, index) => (
                   <CTableRow key={index}>
                     <CTableDataCell>{index + 1}</CTableDataCell>
-                    <CTableDataCell>{report.report_type}</CTableDataCell>
+                    <CTableDataCell>{report.report_type === 'employee_resume' ? 'Резюме сотрудника' : report.report_type === 'employee_zone_movements' ? 'Перемещения сотрудника' : 'Сводный отчет'}</CTableDataCell>
                     <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
                     <CTableDataCell>
-                      {report.report_type === 'employee_resume' || report.report_type === 'employee_zone_movements' ? (
-                        <>
-                          {report.report_type === 'employee_resume' && (
-                            <a href={report.link} download>Резюме</a>
-                          )}
-                          {report.report_type === 'employee_zone_movements' && (
-                            <a href={report.link} download>Перемещения</a>
-                          )}
-                        </>
-                      ) : (
-                        <a href={report.link} download>Скачать</a>
-                      )}
+                      <a href={report.link} target="_blank" rel="noopener noreferrer">Скачать</a>
                     </CTableDataCell>
                     <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
                   </CTableRow>
@@ -232,23 +227,22 @@ const ReportGenerator = () => {
           </CCardBody>
         </CCard>
       </CCol>
-      <SpaghettiDiagramModal
-        visible={showDiagram}
-        onClose={() => setShowDiagram(false)}
-        movements={movements}
-      />
-      <HeatmapModal
-        visible={Boolean(showHeatmap)}
-        onClose={() => setShowHeatmap(false)}
-        employeeId={showHeatmap ? showHeatmap.employeeId : null}
-        startDate={startDate}
-        endDate={endDate}
-      />
+      {showDiagram && (
+        <SpaghettiDiagramModal
+          visible={showDiagram}
+          onClose={() => setShowDiagram(false)}
+          movements={movements}
+        />
+      )}
+      {showHeatmap && (
+        <HeatmapModal
+          visible={showHeatmap}
+          onClose={() => setShowHeatmap(false)}
+          heatmapData={movements}
+        />
+      )}
     </CRow>
   );
 };
 
 export default ReportGenerator;
-
-
-

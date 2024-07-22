@@ -45,15 +45,14 @@ const getEmployeeMovements = async (employeeId, startDate, endDate) => {
   return response.data;
 };
 
-export const getSpaghettiDiagramData = async (employeeId, startDate, endDate) => {
+const getSpaghettiDiagramData = async (employeeId, startDate, endDate) => {
   const response = await axios.get(`${API_URL}/employees/${employeeId}/spaghetti`, {
     params: { startDate, endDate }
   });
   return response.data;
 };
 
-
-export const getHeatmapData = async (employeeId, startDate, endDate) => {
+const getHeatmapData = async (employeeId, startDate, endDate) => {
   const response = await axios.get(`${API_URL}/employees/${employeeId}/heatmap`, {
     params: { startDate, endDate }
   });
@@ -70,4 +69,6 @@ export default {
   getDeviceStatus,
   getZoneAssignments,
   getEmployeeMovements,
+  getSpaghettiDiagramData,
+  getHeatmapData
 };
