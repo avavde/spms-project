@@ -1,3 +1,9 @@
+const { Op } = require('sequelize');
+const { Employee, ZoneEvent, ZoneViolation, DeviceEvent, Device, Zone } = require('../models');
+const fs = require('fs');
+const path = require('path');
+const { parse } = require('json2csv');
+
 const generateReport = async (req, res) => {
   const { employeeId, startDate, endDate } = req.query;
 
