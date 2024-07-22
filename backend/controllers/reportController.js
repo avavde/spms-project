@@ -156,7 +156,8 @@ const generateReport = async (req, res) => {
     ];
     const csv = parse(reportData, { fields });
 
-    const filePath = path.join(__dirname, '/home/spms-project/frontend', 'reports', `report_${Date.now()}.csv`);
+    // const filePath = path.join(__dirname, '/home/spms-project/frontend/public', 'reports', `report_${Date.now()}.csv`);
+    const filePath = path.join(__dirname, '../../frontend/public', 'reports', `report_${Date.now()}.csv`);
     fs.writeFileSync(filePath, csv);
 
     // Сохранение ссылки на отчет в базе данных
