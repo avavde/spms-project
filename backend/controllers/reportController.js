@@ -181,7 +181,6 @@ const generateReport = async (req, res) => {
     const filePath = path.join(__dirname, '../../frontend/public', 'reports', `report_${Date.now()}.csv`);
     fs.writeFileSync(filePath, csv, 'utf8'); // Добавлена кодировка utf8
 
-
    // Сохранение ссылки на отчет в базе данных
     const reportLink = `/reports/${path.basename(filePath)}`;
     await Report.create({
@@ -194,9 +193,10 @@ const generateReport = async (req, res) => {
 
   } catch (error) {
     console.error('Error generating report:', error);
-    res.status(500).json({ error: 'Ошибка при формировании отчета' });
+    res.status(500).json({ error: 'Ошибка при формировании отчета', details: error.message });
   }
 };
+
 
 const generateEnterpriseSummary = async (req, res) => {
   const { startDate, endDate } = req.query;
@@ -292,7 +292,7 @@ const generateEnterpriseSummary = async (req, res) => {
 
   } catch (error) {
     console.error('Error generating enterprise summary:', error);
-    res.status(500).json({ error: 'Ошибка при формировании сводного отчета' });
+    res.status(500).json({ error: 'Ошибка при формировании сводного отчета', details: error.message });
   }
 };
 
@@ -307,3 +307,4 @@ const getReports = async (req, res) => {
 };
 
 module.exports = { generateReport, generateEnterpriseSummary, getReports };
+
