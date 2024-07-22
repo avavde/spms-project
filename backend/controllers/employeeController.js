@@ -12,20 +12,21 @@ exports.getAllEmployees = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении сотрудников' });
   }
 };
+
 exports.getEmployeeMovements = async (req, res) => {
   const { startDate, endDate } = req.query;
-  const { employeeId } = req.params;
+  const { id } = req.params;
 
-  if (!employeeId || !startDate || !endDate) {
-    console.error('Missing parameters:', { employeeId, startDate, endDate });
+  if (!id || !startDate || !endDate) {
+    console.error('Missing parameters:', { id, startDate, endDate });
     return res.status(400).json({ error: 'employeeId, startDate, and endDate are required' });
   }
 
   try {
-    console.log(`Fetching employee by ID: ${employeeId}`);
-    const employee = await Employee.findByPk(employeeId);
+    console.log(`Fetching employee by ID: ${id}`);
+    const employee = await Employee.findByPk(id);
     if (!employee) {
-      console.error('Employee not found:', employeeId);
+      console.error('Employee not found:', id);
       return res.status(404).json({ error: 'Employee not found' });
     }
 
@@ -34,14 +35,14 @@ exports.getEmployeeMovements = async (req, res) => {
     endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
 
     console.log('Fetching ZoneEvents for employee:', {
-      employeeId,
+      id,
       startDate,
       endDatePlusOne,
     });
 
     const events = await ZoneEvent.findAll({
       where: {
-        employee_id: employeeId,
+        employee_id: id,
         timestamp: {
           [Op.between]: [new Date(startDate), endDatePlusOne],
         },
