@@ -1,6 +1,7 @@
-const { Employee, Beacon, GNSSPosition, DeviceZonePosition, Zone, Department } = require('../models');
-const { Op } = require('sequelize');
 
+
+const { Op } = require('sequelize');
+const { Employee, ZoneEvent, Zone } = require('../models');
 
 exports.getAllEmployees = async (req, res) => {
   try {
@@ -11,9 +12,6 @@ exports.getAllEmployees = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении сотрудников' });
   }
 };
-
-const { Op } = require('sequelize');
-const { Employee, ZoneEvent, Zone } = require('../models');
 
 exports.getEmployeeMovements = async (req, res) => {
   const { employeeId, startDate, endDate } = req.query;
