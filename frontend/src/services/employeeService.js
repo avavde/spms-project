@@ -38,23 +38,23 @@ const assignBeacon = (employeeId, beaconid) => {
   return axios.put(`${API_URL}/employees/${employeeId}/assign-beacon`, { beaconid });
 };
 
-const getEmployeeMovements = async (employeeId, startDateTime, endDateTime) => {
+const getEmployeeMovements = async (employeeId, startDate, endDate) => {
   const response = await axios.get(`${API_URL}/employees/${employeeId}/movements`, {
-    params: { startDateTime, endDateTime }
+    params: { startDate, endDate }
   });
   return response.data;
 };
 
-const getSpaghettiDiagramData = async (employeeId, startDateTime, endDateTime) => {
+const getSpaghettiDiagramData = async (employeeId, startDate, endDate) => {
   const response = await axios.get(`${API_URL}/employees/${employeeId}/spaghetti`, {
-    params: { startDateTime, endDateTime }
+    params: { startDate, endDate }
   });
   return response.data;
 };
 
-const getHeatmapData = async (employeeId, startDateTime, endDateTime) => {
+const getHeatmapData = async (employeeId, startDate, endDate) => {
   const response = await axios.get(`${API_URL}/employees/${employeeId}/heatmap`, {
-    params: { startDateTime, endDateTime }
+    params: { startDate, endDate }
   });
   return response.data;
 };

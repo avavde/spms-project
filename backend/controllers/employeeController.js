@@ -1,5 +1,3 @@
-
-
 const { Op } = require('sequelize');
 const { Employee, ZoneEvent, Zone } = require('../models');
 
@@ -17,8 +15,8 @@ exports.getEmployeeMovements = async (req, res) => {
   const { startDate, endDate } = req.query;
   const { id } = req.params;
 
-  const startDateTime = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
-  const endDateTime = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
+  const start = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
+  const end = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
 
   try {
     const employee = await Employee.findByPk(id);
@@ -30,7 +28,7 @@ exports.getEmployeeMovements = async (req, res) => {
       where: {
         employee_id: id,
         timestamp: {
-          [Op.between]: [startDateTime, endDateTime],
+          [Op.between]: [start, end],
         },
       },
       include: [Zone],
@@ -53,13 +51,14 @@ exports.getEmployeeMovements = async (req, res) => {
 };
 
 // Подготовка данных для спагетти-диаграммы
+// Подготовка данных для спагетти-диаграммы
 exports.getSpaghettiDiagramData = async (req, res) => {
   const { startDate, endDate } = req.query;
   const { id } = req.params;
 
-  const startDateTime = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
-  const endDateTime = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
-  console.log(startDate, endDate);
+  const start = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
+  const end = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
+  console.log(start, end);
 
   try {
     const employee = await Employee.findByPk(id);
@@ -71,7 +70,7 @@ exports.getSpaghettiDiagramData = async (req, res) => {
       where: {
         employee_id: id,
         timestamp: {
-          [Op.between]: [startDateTime, endDateTime],
+          [Op.between]: [start, end],
         },
       },
       include: [Zone],
@@ -81,16 +80,19 @@ exports.getSpaghettiDiagramData = async (req, res) => {
     const movements = events.map((event) => ({
       timestamp: event.timestamp,
       zoneName: event.Zone ? event.Zone.name : 'Zone not found',
+      coordinates: event.Zone ? event.Zone.coordinates : [0, 0],
       eventType: event.event_type,
       duration: event.duration,
     }));
 
     const uniqueZones = [...new Set(movements.map(m => m.zoneName))];
-    const zoneData = uniqueZones.map(zoneName => {
+    const zoneData = uniqueZones.reduce((acc, zoneName) => {
       const zoneEvents = movements.filter(m => m.zoneName === zoneName);
       const totalDuration = zoneEvents.reduce((acc, curr) => acc + (curr.duration || 0), 0);
-      return { zoneName, totalDuration, events: zoneEvents };
-    });
+      const coordinates = zoneEvents[0].coordinates;
+      acc[zoneName] = { totalDuration, coordinates };
+      return acc;
+    }, {});
 
     res.json(zoneData);
   } catch (error) {
@@ -99,13 +101,15 @@ exports.getSpaghettiDiagramData = async (req, res) => {
   }
 };
 
+
+
 // Подготовка данных для тепловой карты
 exports.getHeatmapData = async (req, res) => {
   const { startDate, endDate } = req.query;
   const { id } = req.params;
 
-  const startDateTime = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
-  const endDateTime = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
+  const start = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
+  const end = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
 
   try {
     const employee = await Employee.findByPk(id);
@@ -117,7 +121,7 @@ exports.getHeatmapData = async (req, res) => {
       where: {
         employee_id: id,
         timestamp: {
-          [Op.between]: [startDateTime, endDateTime],
+          [Op.between]: [start, end],
         },
       },
       include: [Zone],
@@ -132,7 +136,7 @@ exports.getHeatmapData = async (req, res) => {
 
     const heatmapData = movements.reduce((acc, curr) => {
       if (!acc[curr.zoneName]) {
-        acc[curr.zoneName] = { totalDuration: 0, coordinates: curr.Zone ? curr.Zone.map_coordinates : [0, 0] };
+        acc[curr.zoneName] = { totalDuration: 0, coordinates: curr.Zone ? curr.Zone.coordinates : [0, 0] };
       }
       acc[curr.zoneName].totalDuration += curr.duration || 0;
       return acc;
@@ -229,7 +233,6 @@ exports.updateEmployee = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при обновлении сотрудника' });
   }
 };
-
 
 exports.deleteEmployee = async (req, res) => {
   try {

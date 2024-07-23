@@ -60,6 +60,7 @@ const generateReport = async (req, res) => {
       if (!employeeSummaries[event.employee_id]) {
         employeeSummaries[event.employee_id] = {
           totalTimeInZones: 0,
+          totalTimeMoving: 0, // Время на перемещения между зонами
           totalViolations: 0,
           totalEvents: 0,
           enterEvents: 0,
@@ -72,7 +73,8 @@ const generateReport = async (req, res) => {
             dangerous: 0,
             control: 0,
             regular: 0
-          }
+          },
+          lastEventTimestamp: null // Для расчета времени на перемещения
         };
       }
 
@@ -87,6 +89,12 @@ const generateReport = async (req, res) => {
         const zoneType = zonesMap[event.zone_id] ? zonesMap[event.zone_id].type : 'regular';
         summary.zoneTime[zoneType] += event.duration;
       }
+
+      if (summary.lastEventTimestamp) {
+        const timeMoving = (new Date(event.timestamp) - new Date(summary.lastEventTimestamp)) / 1000 / 60; // Время на перемещение в минутах
+        summary.totalTimeMoving += timeMoving;
+      }
+      summary.lastEventTimestamp = event.timestamp;
     });
 
     deviceEvents.forEach(event => {
@@ -100,6 +108,7 @@ const generateReport = async (req, res) => {
     for (const key in employeeSummaries) {
       const summary = employeeSummaries[key];
       summary.totalTimeInZones = summary.totalTimeInZones / 60; // Преобразование в минуты
+      summary.totalTimeMoving = summary.totalTimeMoving / 60; // Преобразование в минуты
       for (const zoneType in summary.zoneTime) {
         summary.zoneTime[zoneType] = summary.zoneTime[zoneType] / 60; // Преобразование в минуты
       }
@@ -114,6 +123,7 @@ const generateReport = async (req, res) => {
       summaryData.push({
         'ФИО сотрудника': employeeName,
         'Общее время в зонах (минуты)': summary.totalTimeInZones,
+        'Время на перемещения между зонами (минуты)': summary.totalTimeMoving, // Добавлено время на перемещения
         'Общее количество нарушений': summary.totalViolations,
         'Общее количество событий': summary.totalEvents,
         'Количество событий входа': summary.enterEvents,
@@ -149,6 +159,7 @@ const generateReport = async (req, res) => {
     const summaryFields = [
       'ФИО сотрудника', 
       'Общее время в зонах (минуты)', 
+      'Время на перемещения между зонами (минуты)', // Добавлено поле
       'Общее количество нарушений', 
       'Общее количество событий', 
       'Количество событий входа', 
@@ -186,8 +197,7 @@ const generateReport = async (req, res) => {
 
     fs.writeFileSync(summaryFilePath, summaryCsvWithBom);
     fs.writeFileSync(detailFilePath, detailCsvWithBom);
-
-    // Сохранение ссылок на отчеты в базе данных
+ // Сохранение ссылок на отчеты в базе данных
     const summaryReportLink = `/reports/${path.basename(summaryFilePath)}`;
     const detailReportLink = `/reports/${path.basename(detailFilePath)}`;
     

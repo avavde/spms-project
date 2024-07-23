@@ -18,21 +18,21 @@ import {
   CTableRow,
 } from '@coreui/react';
 import { CIcon } from '@coreui/icons-react';
-import { cilWalk, cilFire, cilMediaPlay } from '@coreui/icons';
+import { cilWalk } from '@coreui/icons';
 
 import reportService from 'src/services/reportService';
 import employeeService from 'src/services/employeeService';
 import SpaghettiDiagramModal from 'src/components/SpaghettiDiagramModal';
-import HeatmapModal from 'src/components/HeatmapModal';
+
 
 const ReportGenerator = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [startDateTime, setStartDateTime] = useState('');
-  const [endDateTime, setEndDateTime] = useState('');
+  const [startDate, setstartDate] = useState('');
+  const [endDate, setendDate] = useState('');
   const [reports, setReports] = useState([]);
   const [showDiagram, setShowDiagram] = useState(false);
-  const [showHeatmap, setShowHeatmap] = useState(false);
+
   const [currentEmployeeId, setCurrentEmployeeId] = useState(null);
 
   useEffect(() => {
@@ -40,8 +40,8 @@ const ReportGenerator = () => {
     const start = new Date(today.setHours(0, 0, 0, 0)).toISOString().slice(0, -5);
     const end = new Date(today.setHours(23, 59, 59, 999)).toISOString().slice(0, -5);
 
-    setStartDateTime(start);
-    setEndDateTime(end);
+    setstartDate(start);
+    setendDate(end);
   }, []);
 
   useEffect(() => {
@@ -70,10 +70,10 @@ const ReportGenerator = () => {
 
   const handleGenerateReport = async () => {
     try {
-      const { summaryLink, detailLink } = await reportService.generateReport(selectedEmployees, startDateTime, endDateTime);
+      const { summaryLink, detailLink } = await reportService.generateReport(selectedEmployees, startDate, endDate);
       setReports([...reports,
-        { link: summaryLink, created_at: new Date().toISOString(), report_type: 'employee_resume', parameters: JSON.stringify({ employeeId: selectedEmployees, startDateTime, endDateTime }) },
-        { link: detailLink, created_at: new Date().toISOString(), report_type: 'employee_zone_movements', parameters: JSON.stringify({ employeeId: selectedEmployees, startDateTime, endDateTime }) }
+        { link: summaryLink, created_at: new Date().toISOString(), report_type: 'employee_resume', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) },
+        { link: detailLink, created_at: new Date().toISOString(), report_type: 'employee_zone_movements', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) }
       ]);
     } catch (error) {
       console.error('Ошибка при формировании отчета:', error);
@@ -82,8 +82,8 @@ const ReportGenerator = () => {
 
   const handleGenerateEnterpriseSummary = async () => {
     try {
-      const { link } = await reportService.generateEnterpriseSummary(startDateTime, endDateTime);
-      setReports([...reports, { link, created_at: new Date().toISOString(), report_type: 'enterprise', parameters: JSON.stringify({ startDateTime, endDateTime }) }]);
+      const { link } = await reportService.generateEnterpriseSummary(startDate, endDate);
+      setReports([...reports, { link, created_at: new Date().toISOString(), report_type: 'enterprise', parameters: JSON.stringify({ startDate, endDate }) }]);
     } catch (error) {
       console.error('Ошибка при формировании сводного отчета:', error);
     }
@@ -108,10 +108,6 @@ const ReportGenerator = () => {
     }
   }, [currentEmployeeId]);
 
-  const handleViewHeatmap = (employeeId) => {
-    setCurrentEmployeeId(employeeId);
-    setShowHeatmap(true);
-  };
 
   const getEmployeeNameById = (id) => {
     const employee = employees.find(emp => emp.id === id);
@@ -122,9 +118,9 @@ const ReportGenerator = () => {
     const params = JSON.parse(parameters);
     if (params.employeeId) {
       const employeeNames = params.employeeId.map(id => getEmployeeNameById(parseInt(id)));
-      return `Сотрудники: ${employeeNames.join(', ')}; Период: ${params.startDateTime} - ${params.endDateTime}`;
+      return `Сотрудники: ${employeeNames.join(', ')}; Период: ${params.startDate} - ${params.endDate}`;
     }
-    return `Период: ${params.startDateTime} - ${params.endDateTime}`;
+    return `Период: ${params.startDate} - ${params.endDate}`;
   };
 
   return (
@@ -137,15 +133,15 @@ const ReportGenerator = () => {
           <CCardBody>
             <CForm>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="startDateTime" className="col-sm-2 col-form-label">Начальная дата и время</CFormLabel>
+                <CFormLabel htmlFor="startDate" className="col-sm-2 col-form-label">Начальная дата и время</CFormLabel>
                 <CCol sm={10}>
-                  <CFormInput type="datetime-local" id="startDateTime" value={startDateTime} onChange={(e) => setStartDateTime(e.target.value)} />
+                  <CFormInput type="datetime-local" id="startDate" value={startDate} onChange={(e) => setstartDate(e.target.value)} />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="endDateTime" className="col-sm-2 col-form-label">Конечная дата и время</CFormLabel>
+                <CFormLabel htmlFor="endDate" className="col-sm-2 col-form-label">Конечная дата и время</CFormLabel>
                 <CCol sm={10}>
-                  <CFormInput type="datetime-local" id="endDateTime" value={endDateTime} onChange={(e) => setEndDateTime(e.target.value)} />
+                  <CFormInput type="datetime-local" id="endDate" value={endDate} onChange={(e) => setendDate(e.target.value)} />
                 </CCol>
               </CRow>
               <CRow>
@@ -175,15 +171,7 @@ const ReportGenerator = () => {
                           <CTableDataCell>
                             <CButton color="primary" shape="rounded-pill" size="sm" onClick={() => handleViewSpaghetti(employee.id)}>
                               <CIcon icon={cilWalk} className="me-2" />
-                              Спагетти
-                            </CButton>
-                            <CButton color="secondary" shape="rounded-pill" size="sm" onClick={() => handleViewHeatmap(employee.id)}>
-                              <CIcon icon={cilFire} className="me-2" />
-                              Теплокарта
-                            </CButton>
-                            <CButton color="secondary" shape="rounded-pill" size="sm">
-                              <CIcon icon={cilMediaPlay} className="me-2" />
-                              Трек
+                              Перемещения сотрудника
                             </CButton>
                           </CTableDataCell>
                         </CTableRow>
@@ -242,19 +230,11 @@ const ReportGenerator = () => {
     visible={showDiagram}
     onClose={() => setShowDiagram(false)}
     employeeId={currentEmployeeId}
-    startDateTime={startDateTime}
-    endDateTime={endDateTime}
+    startDate={startDate}
+    endDate={endDate}
   />
 )}
-{showHeatmap && (
-  <HeatmapModal
-    visible={showHeatmap}
-    onClose={() => setShowHeatmap(false)}
-    employeeId={currentEmployeeId}
-    startDateTime={startDateTime}
-    endDateTime={endDateTime}
-  />
-)}
+
 </CRow>
 );
 };
