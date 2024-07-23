@@ -4,7 +4,7 @@
 set -e
 
 # Переход в директорию проекта (замените на вашу директорию)
-cd /home/spms-project
+cd /home/spms-project/frontend
 
 # Запуск проекта
 /root/.nvm/versions/node/v20.15.1/bin/npm start
