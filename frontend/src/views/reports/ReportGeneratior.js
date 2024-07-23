@@ -28,12 +28,21 @@ import HeatmapModal from 'src/components/HeatmapModal';
 const ReportGenerator = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDateTime, setStartDateTime] = useState('');
+  const [endDateTime, setEndDateTime] = useState('');
   const [reports, setReports] = useState([]);
-  const [movements, setMovements] = useState([]);
   const [showDiagram, setShowDiagram] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [currentEmployeeId, setCurrentEmployeeId] = useState(null);
+
+  useEffect(() => {
+    const today = new Date();
+    const start = new Date(today.setHours(0, 0, 0, 0)).toISOString().slice(0, -5);
+    const end = new Date(today.setHours(23, 59, 59, 999)).toISOString().slice(0, -5);
+
+    setStartDateTime(start);
+    setEndDateTime(end);
+  }, []);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -61,10 +70,10 @@ const ReportGenerator = () => {
 
   const handleGenerateReport = async () => {
     try {
-      const { summaryLink, detailLink } = await reportService.generateReport(selectedEmployees, startDate, endDate);
+      const { summaryLink, detailLink } = await reportService.generateReport(selectedEmployees, startDateTime, endDateTime);
       setReports([...reports,
-        { link: summaryLink, created_at: new Date().toISOString(), report_type: 'employee_resume', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) },
-        { link: detailLink, created_at: new Date().toISOString(), report_type: 'employee_zone_movements', parameters: JSON.stringify({ employeeId: selectedEmployees, startDate, endDate }) }
+        { link: summaryLink, created_at: new Date().toISOString(), report_type: 'employee_resume', parameters: JSON.stringify({ employeeId: selectedEmployees, startDateTime, endDateTime }) },
+        { link: detailLink, created_at: new Date().toISOString(), report_type: 'employee_zone_movements', parameters: JSON.stringify({ employeeId: selectedEmployees, startDateTime, endDateTime }) }
       ]);
     } catch (error) {
       console.error('Ошибка при формировании отчета:', error);
@@ -73,8 +82,8 @@ const ReportGenerator = () => {
 
   const handleGenerateEnterpriseSummary = async () => {
     try {
-      const { link } = await reportService.generateEnterpriseSummary(startDate, endDate);
-      setReports([...reports, { link, created_at: new Date().toISOString(), report_type: 'enterprise', parameters: JSON.stringify({ startDate, endDate }) }]);
+      const { link } = await reportService.generateEnterpriseSummary(startDateTime, endDateTime);
+      setReports([...reports, { link, created_at: new Date().toISOString(), report_type: 'enterprise', parameters: JSON.stringify({ startDateTime, endDateTime }) }]);
     } catch (error) {
       console.error('Ошибка при формировании сводного отчета:', error);
     }
@@ -88,24 +97,20 @@ const ReportGenerator = () => {
     );
   };
 
-  const handleViewMovements = async (employeeId) => {
-    try {
-      const response = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
-      setMovements(response.data);
-      setShowDiagram(true);
-    } catch (error) {
-      console.error('Ошибка при получении перемещений сотрудника:', error);
-    }
+  const handleViewSpaghetti = (employeeId) => {
+    setCurrentEmployeeId(employeeId);
   };
-
-  const handleViewHeatmap = async (employeeId) => {
-    try {
-      const response = await employeeService.getHeatmapData(employeeId, startDate, endDate);
-      setMovements(response.data);
-      setShowHeatmap(true);
-    } catch (error) {
-      console.error('Ошибка при получении данных для тепловой карты:', error);
+  
+  useEffect(() => {
+    if (currentEmployeeId !== null) {
+      console.log(currentEmployeeId);
+      setShowDiagram(true);
     }
+  }, [currentEmployeeId]);
+
+  const handleViewHeatmap = (employeeId) => {
+    setCurrentEmployeeId(employeeId);
+    setShowHeatmap(true);
   };
 
   const getEmployeeNameById = (id) => {
@@ -117,9 +122,9 @@ const ReportGenerator = () => {
     const params = JSON.parse(parameters);
     if (params.employeeId) {
       const employeeNames = params.employeeId.map(id => getEmployeeNameById(parseInt(id)));
-      return `Сотрудники: ${employeeNames.join(', ')}; Период: ${params.startDate} - ${params.endDate}`;
+      return `Сотрудники: ${employeeNames.join(', ')}; Период: ${params.startDateTime} - ${params.endDateTime}`;
     }
-    return `Период: ${params.startDate} - ${params.endDate}`;
+    return `Период: ${params.startDateTime} - ${params.endDateTime}`;
   };
 
   return (
@@ -132,22 +137,22 @@ const ReportGenerator = () => {
           <CCardBody>
             <CForm>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="startDate" className="col-sm-2 col-form-label">Начальная дата</CFormLabel>
+                <CFormLabel htmlFor="startDateTime" className="col-sm-2 col-form-label">Начальная дата и время</CFormLabel>
                 <CCol sm={10}>
-                  <CFormInput type="date" id="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                  <CFormInput type="datetime-local" id="startDateTime" value={startDateTime} onChange={(e) => setStartDateTime(e.target.value)} />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CFormLabel htmlFor="endDate" className="col-sm-2 col-form-label">Конечная дата</CFormLabel>
+                <CFormLabel htmlFor="endDateTime" className="col-sm-2 col-form-label">Конечная дата и время</CFormLabel>
                 <CCol sm={10}>
-                  <CFormInput type="date" id="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                  <CFormInput type="datetime-local" id="endDateTime" value={endDateTime} onChange={(e) => setEndDateTime(e.target.value)} />
                 </CCol>
               </CRow>
               <CRow>
                 <CCol xs={12}>
                   <CTable hover>
                     <CTableHead>
-                    <CTableRow>
+                      <CTableRow>
                         <CTableHeaderCell>Выбрать</CTableHeaderCell>
                         <CTableHeaderCell>Фамилия И.О.</CTableHeaderCell>
                         <CTableHeaderCell>Отдел</CTableHeaderCell>
@@ -168,7 +173,7 @@ const ReportGenerator = () => {
                           <CTableDataCell>{employee.department}</CTableDataCell>
                           <CTableDataCell>{employee.position}</CTableDataCell>
                           <CTableDataCell>
-                            <CButton color="primary" shape="rounded-pill" size="sm" onClick={() => handleViewMovements(employee.id)}>
+                            <CButton color="primary" shape="rounded-pill" size="sm" onClick={() => handleViewSpaghetti(employee.id)}>
                               <CIcon icon={cilWalk} className="me-2" />
                               Спагетти
                             </CButton>
@@ -204,45 +209,54 @@ const ReportGenerator = () => {
               <CTableHead>
                 <CTableRow>
                   <CTableHeaderCell>ID</CTableHeaderCell>
-                  <CTableHeaderCell>Тип отчета</CTableHeaderCell>
-                  <CTableHeaderCell>Параметры</CTableHeaderCell>
-                  <CTableHeaderCell>Ссылки</CTableHeaderCell>
-                  <CTableHeaderCell>Дата создания</CTableHeaderCell>
-                </CTableRow>
-              </CTableHead>
-              <CTableBody>
-                {reports.map((report, index) => (
-                  <CTableRow key={index}>
-                    <CTableDataCell>{index + 1}</CTableDataCell>
-                    <CTableDataCell>{report.report_type === 'employee_resume' ? 'Резюме сотрудника' : report.report_type === 'employee_zone_movements' ? 'Перемещения сотрудника' : 'Сводный отчет'}</CTableDataCell>
-                    <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
-                    <CTableDataCell>
-                      <a href={report.link} target="_blank" rel="noopener noreferrer">Скачать</a>
-                    </CTableDataCell>
-                    <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
-                  </CTableRow>
-                ))}
-              </CTableBody>
-            </CTable>
-          </CCardBody>
-        </CCard>
-      </CCol>
-      {showDiagram && (
-        <SpaghettiDiagramModal
-          visible={showDiagram}
-          onClose={() => setShowDiagram(false)}
-          movements={movements}
-        />
-      )}
-      {showHeatmap && (
-        <HeatmapModal
-          visible={showHeatmap}
-          onClose={() => setShowHeatmap(false)}
-          heatmapData={movements}
-        />
-      )}
-    </CRow>
-  );
+
+  <CTableHeaderCell>Тип отчета</CTableHeaderCell>
+  <CTableHeaderCell>Параметры</CTableHeaderCell>
+  <CTableHeaderCell>Ссылки</CTableHeaderCell>
+  <CTableHeaderCell>Дата создания</CTableHeaderCell>
+</CTableRow>
+</CTableHead>
+<CTableBody>
+  {reports.map((report, index) => (
+    <CTableRow key={index}>
+      <CTableDataCell>{index + 1}</CTableDataCell>
+      <CTableDataCell>
+        {report.report_type === 'employee_resume' ? 'Резюме сотрудника' :
+         report.report_type === 'employee_zone_movements' ? 'Перемещения сотрудника' :
+         'Сводный отчет'}
+      </CTableDataCell>
+      <CTableDataCell>{parseParameters(report.parameters)}</CTableDataCell>
+      <CTableDataCell>
+        <a href={report.link} target="_blank" rel="noopener noreferrer">Скачать</a>
+      </CTableDataCell>
+      <CTableDataCell>{new Date(report.created_at).toLocaleString()}</CTableDataCell>
+    </CTableRow>
+  ))}
+</CTableBody>
+</CTable>
+</CCardBody>
+</CCard>
+</CCol>
+{showDiagram && (
+  <SpaghettiDiagramModal
+    visible={showDiagram}
+    onClose={() => setShowDiagram(false)}
+    employeeId={currentEmployeeId}
+    startDateTime={startDateTime}
+    endDateTime={endDateTime}
+  />
+)}
+{showHeatmap && (
+  <HeatmapModal
+    visible={showHeatmap}
+    onClose={() => setShowHeatmap(false)}
+    employeeId={currentEmployeeId}
+    startDateTime={startDateTime}
+    endDateTime={endDateTime}
+  />
+)}
+</CRow>
+);
 };
 
 export default ReportGenerator;

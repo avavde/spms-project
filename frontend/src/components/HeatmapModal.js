@@ -1,11 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, ImageOverlay, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet.heat';
-import 'leaflet/dist/leaflet.css';
-import plan from 'src/assets/brand/plan.jpg';
-import zonesService from 'src/services/zonesService';
-import employeeService from 'src/services/employeeService';
+import React, { useEffect, useRef, useState } from 'react';
+import * as d3 from 'd3';
+import PropTypes from 'prop-types';
 import {
   CModal,
   CModalHeader,
@@ -14,11 +9,11 @@ import {
   CModalFooter,
   CButton
 } from '@coreui/react';
+import L from 'leaflet';
+import 'leaflet.heat';
+import zonesService from 'src/services/zonesService';
 
-const imageBounds = [[0, 0], [1000, 1000]];
-
-const HeatmapLayer = ({ movements }) => {
-  const map = useMap();
+const HeatmapLayer = ({ heatmapData, map }) => {
   const [zoneCoordinates, setZoneCoordinates] = useState({});
 
   useEffect(() => {
@@ -39,12 +34,12 @@ const HeatmapLayer = ({ movements }) => {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(zoneCoordinates).length > 0) {
-      const heatData = movements.map(movement => {
-        const { zoneName, duration } = movement;
+    if (Object.keys(zoneCoordinates).length > 0 && heatmapData) {
+      const heatData = Object.keys(heatmapData).map(zoneName => {
+        const { totalDuration } = heatmapData[zoneName];
         const coordinates = zoneCoordinates[zoneName];
-        return coordinates ? [...coordinates, duration] : null;
-      }).filter(d => d !== null);
+        return [...coordinates, totalDuration];
+      });
 
       const heat = L.heatLayer(heatData, { radius: 25, blur: 15 }).addTo(map);
 
@@ -52,38 +47,26 @@ const HeatmapLayer = ({ movements }) => {
         map.removeLayer(heat);
       };
     }
-  }, [movements, map, zoneCoordinates]);
+  }, [heatmapData, map, zoneCoordinates]);
 
   return null;
 };
 
-const HeatmapModal = ({ visible, onClose, employeeId, startDate, endDate }) => {
-  const [movements, setMovements] = useState([]);
+HeatmapLayer.propTypes = {
+  heatmapData: PropTypes.object.isRequired,
+  map: PropTypes.object.isRequired
+};
 
-  useEffect(() => {
-    const fetchMovements = async () => {
-      try {
-        const data = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
-        setMovements(data);
-      } catch (error) {
-        console.error('Ошибка при получении перемещений сотрудника:', error);
-      }
-    };
-
-    if (visible) {
-      fetchMovements();
-    }
-  }, [employeeId, startDate, endDate, visible]);
-
+const HeatmapModal = ({ visible, onClose, heatmapData }) => {
   return (
     <CModal visible={visible} onClose={onClose} size="lg">
       <CModalHeader>
-        <CModalTitle>Тепловая карта перемещений</CModalTitle>
+        <CModalTitle>Тепловая карта сотрудника</CModalTitle>
       </CModalHeader>
       <CModalBody>
-        <MapContainer center={[500, 500]} zoom={2} style={{ height: '500px', width: '100%' }} crs={L.CRS.Simple}>
+        <MapContainer center={[500, 500]} zoom={2} style={{ height: '100vh', width: '100%' }} crs={L.CRS.Simple}>
           <ImageOverlay url={plan} bounds={imageBounds} opacity={1} />
-          <HeatmapLayer movements={movements} />
+          <HeatmapLayer heatmapData={heatmapData} />
         </MapContainer>
       </CModalBody>
       <CModalFooter>
@@ -91,6 +74,12 @@ const HeatmapModal = ({ visible, onClose, employeeId, startDate, endDate }) => {
       </CModalFooter>
     </CModal>
   );
+};
+
+HeatmapModal.propTypes = {
+  visible: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  heatmapData: PropTypes.object.isRequired
 };
 
 export default HeatmapModal;

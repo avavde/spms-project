@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   CModal,
@@ -9,107 +8,66 @@ import {
   CModalFooter,
   CButton
 } from '@coreui/react';
-import zonesService from 'src/services/zonesService';
 
-const SpaghettiDiagramModal = ({ visible, onClose, movements }) => {
-  const svgRef = useRef(null);
-  const [zoneCoordinates, setZoneCoordinates] = useState({});
+import employeeService from 'src/services/employeeService';
+import { MapContainer, ImageOverlay } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDateTime, endDateTime }) => {
+  const [diagramData, setDiagramData] = useState({});
 
   useEffect(() => {
-    const fetchZones = async () => {
-      try {
-        const zones = await zonesService.getAllZones();
-        const positions = {};
-        zones.forEach(zone => {
-          positions[zone.name] = zone.map_coordinates;
-        });
-        setZoneCoordinates(positions);
-      } catch (error) {
-        console.error('Ошибка при получении зон:', error);
+    const fetchDiagramData = async () => {
+      if (employeeId && startDateTime && endDateTime) {
+        try {
+          const data = await employeeService.getSpaghettiDiagramData(employeeId, startDateTime, endDateTime);
+          setDiagramData(data);
+        } catch (error) {
+          console.error('Ошибка при получении данных для спагетти-диаграммы:', error);
+        }
       }
     };
 
-    fetchZones();
-  }, []);
+    fetchDiagramData();
+  }, [employeeId, startDateTime, endDateTime]);
 
   useEffect(() => {
-    if (visible && svgRef.current) {
-      // Очистка предыдущего графика
-      d3.select(svgRef.current).selectAll('*').remove();
+    if (Object.keys(diagramData).length > 0) {
+      const map = L.map('map', {
+        crs: L.CRS.Simple,
+        center: [500, 500],
+        zoom: 0,
+        minZoom: -4,
+        maxZoom: 4,
+      });
 
-      const svg = d3.select(svgRef.current);
-      const width = svgRef.current.clientWidth;
-      const height = svgRef.current.clientHeight;
+      const bounds = [[0, 0], [1000, 1000]];
+      L.imageOverlay('src/assets/brand/plan.jpg', bounds).addTo(map);
 
-      const radius = Math.min(width, height) / 2 - 50;
-      const centerX = width / 2;
-      const centerY = height / 2;
+      Object.keys(diagramData).forEach((zoneName) => {
+        const { coordinates, totalDuration } = diagramData[zoneName];
+        const circle = L.circle(coordinates, {
+          radius: totalDuration / 10,
+          color: 'red',
+          fillOpacity: 0.5,
+        });
+        circle.addTo(map);
+      });
 
-      // Получение уникальных зон
-      const uniqueZones = Array.from(new Set(movements.map(d => d.zoneName)));
-
-      // Распределение зон по кругу
-      const angleScale = d3.scalePoint()
-        .domain(uniqueZones)
-        .range([0, 2 * Math.PI]);
-
-      const zonePositions = uniqueZones.map(zone => ({
-        zone,
-        x: centerX + radius * Math.cos(angleScale(zone) - Math.PI / 2),
-        y: centerY + radius * Math.sin(angleScale(zone) - Math.PI / 2)
-      }));
-
-      // Добавление кругов для зон
-      svg.selectAll('.zone')
-        .data(zonePositions)
-        .enter().append('circle')
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
-        .attr('r', 20)
-        .attr('fill', 'lightblue');
-
-      // Добавление подписей для зон
-      svg.selectAll('.zone-label')
-        .data(zonePositions)
-        .enter().append('text')
-        .attr('x', d => d.x)
-        .attr('y', d => d.y - 30)
-        .attr('text-anchor', 'middle')
-        .attr('fill', 'black')
-        .text(d => d.zone);
-
-      // Создание дуг для перемещений
-      const line = d3.line()
-        .x(d => d.x)
-        .y(d => d.y)
-        .curve(d3.curveBundle.beta(1));
-
-      const links = [];
-      for (let i = 0; i < movements.length - 1; i++) {
-        if (movements[i].eventType === 'exit' && movements[i + 1].eventType === 'enter') {
-          const fromZone = zonePositions.find(z => z.zone === movements[i].zoneName);
-          const toZone = zonePositions.find(z => z.zone === movements[i + 1].zoneName);
-          links.push([fromZone, toZone]);
-        }
-      }
-
-      svg.selectAll('.link')
-        .data(links)
-        .enter().append('path')
-        .attr('d', d => line(d))
-        .attr('fill', 'none')
-        .attr('stroke', 'black')
-        .attr('stroke-width', 1);
+      return () => {
+        map.remove();
+      };
     }
-  }, [visible, movements, zoneCoordinates]);
+  }, [diagramData]);
 
   return (
     <CModal visible={visible} onClose={onClose} size="lg">
       <CModalHeader>
-        <CModalTitle>Перемещения сотрудника</CModalTitle>
+        <CModalTitle>Спагетти-диаграмма</CModalTitle>
       </CModalHeader>
       <CModalBody>
-        <svg ref={svgRef} width="100%" height="500"></svg>
+        <div id="map" style={{ height: '500px', width: '100%' }}></div>
       </CModalBody>
       <CModalFooter>
         <CButton color="secondary" onClick={onClose}>Закрыть</CButton>
@@ -121,13 +79,9 @@ const SpaghettiDiagramModal = ({ visible, onClose, movements }) => {
 SpaghettiDiagramModal.propTypes = {
   visible: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  movements: PropTypes.arrayOf(PropTypes.shape({
-    timestamp: PropTypes.string.isRequired,
-    zoneName: PropTypes.string.isRequired,
-    zoneType: PropTypes.string.isRequired,
-    eventType: PropTypes.string.isRequired,
-    duration: PropTypes.number
-  })).isRequired
+  employeeId: PropTypes.number.isRequired,
+  startDateTime: PropTypes.string.isRequired,
+  endDateTime: PropTypes.string.isRequired,
 };
 
 export default SpaghettiDiagramModal;

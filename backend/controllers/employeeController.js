@@ -59,6 +59,7 @@ exports.getSpaghettiDiagramData = async (req, res) => {
 
   const startDateTime = startDate ? new Date(startDate) : new Date(new Date().setHours(0, 0, 0, 0));
   const endDateTime = endDate ? new Date(endDate) : new Date(new Date().setHours(23, 59, 59, 999));
+  console.log(startDate, endDate);
 
   try {
     const employee = await Employee.findByPk(id);
