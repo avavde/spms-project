@@ -33,7 +33,7 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
   const [zoneDurations, setZoneDurations] = useState({});
   const [routeFrequencies, setRouteFrequencies] = useState({});
   const [movementTimes, setMovementTimes] = useState({});
-  const [totalMovementTime, setTotalMovementTime] = useState(0);
+  
 
   useEffect(() => {
     const fetchDiagramData = async () => {
