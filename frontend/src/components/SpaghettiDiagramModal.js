@@ -34,9 +34,10 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
   const [routeFrequencies, setRouteFrequencies] = useState({});
   const [movementTimes, setMovementTimes] = useState({});
   const [totalMovementTime, setTotalMovementTime] = useState(0);
+  console.log(totalMovementTime);
 
   useEffect(() => {
-    const fetchDiagramData = async () => {
+    const fetchDiagramData = async () => {      
       if (employeeId && startDate && endDate) {
         try {
           const data = await employeeService.getEmployeeMovements(employeeId, startDate, endDate);
@@ -75,6 +76,7 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
       lineLayerRef.current.clearLayers();
 
       const calculateDurationsAndFrequencies = (data, maxIndex) => {
+        
         const zoneDurations = {};
         const routeFrequencies = {};
         const movementTimes = {};
@@ -174,6 +176,7 @@ const SpaghettiDiagramModal = ({ visible, onClose, employeeId, startDate, endDat
           const zoneCenter = calculateCenter(coordinates);
 
           if (index > 0) {
+            
             const prevZone = diagramData[index - 1];
             if (prevZone.coordinates !== undefined) {
               const prevZoneCenter = calculateCenter(prevZone.coordinates);
