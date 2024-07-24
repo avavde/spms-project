@@ -41,6 +41,7 @@ exports.getEmployeeMovements = async (req, res) => {
       zoneType: event.Zone ? event.Zone.type : 'Zone not found',
       eventType: event.event_type,
       duration: event.duration,
+      coordinates: event.Zone ? event.Zone.coordinates : [0, 0], // Получение координат из таблицы zones
     }));
 
     res.json(movements);
@@ -49,7 +50,6 @@ exports.getEmployeeMovements = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 // Подготовка данных для спагетти-диаграммы
 // Подготовка данных для спагетти-диаграммы
 exports.getSpaghettiDiagramData = async (req, res) => {
