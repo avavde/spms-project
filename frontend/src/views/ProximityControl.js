@@ -1,7 +1,10 @@
 // src/views/ProximityControl.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
+  CToast,
+  CToastBody,
   CToaster,
+  CToastHeader,
   CContainer,
   CRow,
   CCol,
@@ -11,7 +14,8 @@ import MapProximity from 'src/components/MapProximity';
 const ProximityControl = () => {
   const [tags, setTags] = useState([]);
   const [dangerZones, setDangerZones] = useState([]);
-  const [toasts, setToasts] = useState([]);
+  const [toast, addToast] = useState(0);
+  const toaster = useRef();
 
   const wsUrl = 'ws://194.164.52.193:3000';
 
@@ -43,18 +47,13 @@ const ProximityControl = () => {
         setDangerZones(data.zones);
       } else if (data.type === 'stop') {
         console.log('Received stop message:', data.message);
-
-        // Создаем новый тост и заменяем текущий массив тостов
-        setToasts([
-          {
-            position: 'top-end',
-            autohide: false,
-            closeButton: true,
-            color: 'danger',
-            header: 'Опасность',
-            body: data.message,
-          },
-        ]);
+        const newToast = (
+          <CToast autohide={false} color="danger">
+            <CToastHeader closeButton>Опасность</CToastHeader>
+            <CToastBody>{data.message}</CToastBody>
+          </CToast>
+        );
+        addToast(newToast);
       }
     };
 
@@ -80,7 +79,7 @@ const ProximityControl = () => {
       </CRow>
       <CRow>
         <CCol>
-          <CToaster toasts={toasts} placement="top-end" />
+          <CToaster ref={toaster} push={toast} placement="top-end" limit={1} />
         </CCol>
       </CRow>
     </CContainer>
