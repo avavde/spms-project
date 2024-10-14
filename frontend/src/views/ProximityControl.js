@@ -1,10 +1,7 @@
 // src/views/ProximityControl.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  CToast,
-  CToastBody,
   CToaster,
-  CToastHeader,
   CContainer,
   CRow,
   CCol,
@@ -15,7 +12,6 @@ const ProximityControl = () => {
   const [tags, setTags] = useState([]);
   const [dangerZones, setDangerZones] = useState([]);
   const [toasts, setToasts] = useState([]);
-  const toaster = useRef();
 
   const wsUrl = 'ws://194.164.52.193:3000';
 
@@ -47,13 +43,18 @@ const ProximityControl = () => {
         setDangerZones(data.zones);
       } else if (data.type === 'stop') {
         console.log('Received stop message:', data.message);
-        const newToast = (
-          <CToast autohide={false} color="danger">
-            <CToastHeader closeButton>Опасность</CToastHeader>
-            <CToastBody>{data.message}</CToastBody>
-          </CToast>
-        );
-        setToasts([newToast]);
+
+        // Создаем новый тост и заменяем текущий массив тостов
+        setToasts([
+          {
+            position: 'top-end',
+            autohide: false,
+            closeButton: true,
+            color: 'danger',
+            header: 'Опасность',
+            body: data.message,
+          },
+        ]);
       }
     };
 
@@ -79,7 +80,7 @@ const ProximityControl = () => {
       </CRow>
       <CRow>
         <CCol>
-          <CToaster ref={toaster} toasts={toasts} placement="top-end" />
+          <CToaster toasts={toasts} placement="top-end" />
         </CCol>
       </CRow>
     </CContainer>
