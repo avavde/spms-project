@@ -1,7 +1,7 @@
 // src/views/ProximityControl.js
 import React, { useState, useEffect } from 'react';
 import {
-  CToaster,
+  CAlert,
   CContainer,
   CRow,
   CCol,
@@ -11,7 +11,7 @@ import MapProximity from 'src/components/MapProximity';
 const ProximityControl = () => {
   const [tags, setTags] = useState([]);
   const [dangerZones, setDangerZones] = useState([]);
-  const [toasts, setToasts] = useState([]);
+  const [alertMessage, setAlertMessage] = useState(null);
 
   const wsUrl = 'ws://194.164.52.193:3000';
 
@@ -43,15 +43,8 @@ const ProximityControl = () => {
         setDangerZones(data.zones);
       } else if (data.type === 'stop') {
         console.log('Received stop message:', data.message);
-        const newToast = {
-          autohide: false,
-          closeButton: true,
-          color: 'danger',
-          header: 'Опасность',
-          body: data.message,
-        };
-        // Заменяем текущий массив уведомлений новым уведомлением
-        setToasts([newToast]);
+        // Устанавливаем новое сообщение оповещения
+        setAlertMessage(data.message);
       }
     };
 
@@ -68,6 +61,16 @@ const ProximityControl = () => {
     };
   }, []);
 
+  // Автоматически скрываем оповещение после 5 секунд
+  useEffect(() => {
+    if (alertMessage) {
+      const timer = setTimeout(() => {
+        setAlertMessage(null);
+      }, 5000); // 5000 миллисекунд = 5 секунд
+      return () => clearTimeout(timer);
+    }
+  }, [alertMessage]);
+
   return (
     <CContainer>
       <CRow>
@@ -75,11 +78,20 @@ const ProximityControl = () => {
           <MapProximity tags={tags} dangerZones={dangerZones} />
         </CCol>
       </CRow>
-      <CRow>
-        <CCol>
-          <CToaster toasts={toasts} placement="top-end" />
-        </CCol>
-      </CRow>
+      {alertMessage && (
+        <CRow>
+          <CCol>
+            <CAlert
+              color="danger"
+              closeButton
+              onDismiss={() => setAlertMessage(null)}
+            >
+              <h4 className="alert-heading">Опасность</h4>
+              <p>{alertMessage}</p>
+            </CAlert>
+          </CCol>
+        </CRow>
+      )}
     </CContainer>
   );
 };
